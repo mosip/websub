@@ -19,7 +19,6 @@ CREATE TABLE websub.subscription(
 	secret character varying(256),
 	lease_seconds bigint,
 	created_at bigint,
-	reason_code character varying(36),
 	is_active boolean NOT NULL,
 	cr_by character varying(256) NOT NULL,
 	cr_dtimes timestamp NOT NULL,
@@ -42,8 +41,6 @@ COMMENT ON COLUMN websub.subscription.secret IS 'Secret Key: Secret key assigned
 COMMENT ON COLUMN websub.subscription.lease_seconds IS 'Lease Seconds: Lease seconds used by subscribers';
 -- ddl-end --
 COMMENT ON COLUMN websub.subscription.created_at IS 'Created At: Subscription created date time.';
--- ddl-end --
-COMMENT ON COLUMN websub.subscription.reason_code IS 'Reason Code : Reason code provided by the manual verifier on reason for approve or reject the registration request as part of the verification process';
 -- ddl-end --
 COMMENT ON COLUMN websub.subscription.is_active IS 'IS_Active : Flag to mark whether the record is Active or In-active';
 -- ddl-end --
