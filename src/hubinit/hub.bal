@@ -1,6 +1,7 @@
 import ballerina/io;
 import ballerina/http;
 import ballerina/websub;
+import ballerina/runtime;
 import ballerinax/java.jdbc;
 import mosip/repository;
 import ballerina/config;
@@ -31,6 +32,7 @@ public function main() {
         io:println("Hub start error:" + <string>result.detail()?.message);
         return;
     }
-    
-
+    while(true){
+    runtime:sleep(1);  
+    }
 }
