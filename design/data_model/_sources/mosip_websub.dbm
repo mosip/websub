@@ -113,7 +113,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<comment><![CDATA[Lease Seconds: Lease seconds used by subscribers]]></comment>
 	</column>
 	<column name="created_at">
-		<type name="timestamp" length="6"/>
+		<type name="integer" length="6"/>
 		<comment><![CDATA[Created At: Subscription created date time.]]></comment>
 	</column>
 	<column name="reason_code">

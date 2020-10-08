@@ -18,7 +18,7 @@ CREATE TABLE websub.subscription(
 	callback character varying(256) NOT NULL,
 	secret character varying(256),
 	lease_seconds bigint,
-	created_at timestamp,
+	created_at integer,
 	reason_code character varying(36),
 	is_active boolean NOT NULL,
 	cr_by character varying(256) NOT NULL,
