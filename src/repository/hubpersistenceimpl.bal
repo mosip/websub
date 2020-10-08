@@ -1,6 +1,7 @@
-import ballerina/io;
 import ballerina/log;
 import ballerinax/java.jdbc;
+import ballerina/time;
+import ballerina/stringutils;
 
 public type HubPersistenceImpl object {
 
@@ -18,16 +19,25 @@ public type HubPersistenceImpl object {
     # + subscriptionDetails - The details of the subscription to add or update
     # + return - An `error` if an error occurred while adding the subscription or else `()` otherwise
     public function addSubscription(SubscriptionDetails subscriptionDetails) returns error? {
+        var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
+        string callback= stringutils:split(subscriptionDetails.callback, "[\\?|\\#]")[0];
         jdbc:Parameter p1 = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionDetails.topic};
-        jdbc:Parameter p2 = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionDetails.callback};
+        jdbc:Parameter p2 = {sqlType: jdbc:TYPE_VARCHAR, value: callback};
         jdbc:Parameter p3 = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionDetails.secret};
         jdbc:Parameter p4 = {sqlType: jdbc:TYPE_BIGINT, value: subscriptionDetails.leaseSeconds};
         jdbc:Parameter p5 = {sqlType: jdbc:TYPE_BIGINT, value: subscriptionDetails.createdAt};
+        jdbc:Parameter p6 = {sqlType: jdbc:TYPE_BOOLEAN, value: true};
+        jdbc:Parameter p7 = {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
+        jdbc:Parameter p8 = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
+        jdbc:Parameter p9 = {sqlType: jdbc:TYPE_VARCHAR, value: ""};
+        jdbc:Parameter p10 = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
+        jdbc:Parameter p11 = {sqlType: jdbc:TYPE_BOOLEAN, value: false};
+        jdbc:Parameter p12 = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
 
-        var returned = self.jdbcClient->update(DELETE_FROM_SUBSCRIPTIONS, p1, p2);
+        var returned = self.jdbcClient->update(DELETE_FROM_SUBSCRIPTIONS, p7,p8,p1,p2);
         self.handleUpdate(returned, "delete subs if exist");
         returned = self.jdbcClient->update(INSERT_INTO_SUBSCRIPTIONS_TABLE, p1, p2,
-            p3, p4, p5);
+            p3, p4, p5,p6,p7,p8,p9,p10,p11,p12);
         self.handleUpdate(returned, "insert new subs");
     }
 
@@ -39,9 +49,13 @@ public type HubPersistenceImpl object {
     # + subscriptionDetails - The details of the subscription to remove
     # + return - An `error` if an error occurred while removing the subscription or else `()` otherwise
     public function removeSubscription(SubscriptionDetails subscriptionDetails) returns error? {
+        string callback= stringutils:split(subscriptionDetails.callback, "[\\?|\\#]")[0];
+        var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
         jdbc:Parameter p1 = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionDetails.topic};
-        jdbc:Parameter p2 = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionDetails.callback};
-        var returned = self.jdbcClient->update(DELETE_FROM_SUBSCRIPTIONS, p1, p2);
+        jdbc:Parameter p2 = {sqlType: jdbc:TYPE_VARCHAR, value: callback};
+        jdbc:Parameter p3= {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
+        jdbc:Parameter p4 = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
+        var returned = self.jdbcClient->update(DELETE_FROM_SUBSCRIPTIONS, p3,p4,p1,p2);
         self.handleUpdate(returned, "Removed subscription");
     }
 
@@ -53,8 +67,15 @@ public type HubPersistenceImpl object {
     # + topic - The topic to add
     # + return - An `error` if an error occurred while adding the topic or else `()` otherwise
     public function addTopic(string topic) returns error? {
+        var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
         jdbc:Parameter p1 = {sqlType: jdbc:TYPE_VARCHAR, value: topic};
-        var returned = self.jdbcClient->update(INSERT_INTO_TOPICS, p1);
+        jdbc:Parameter p2 = {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
+        jdbc:Parameter p3 = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
+        jdbc:Parameter p4 = {sqlType: jdbc:TYPE_VARCHAR, value: ""};
+        jdbc:Parameter p5 = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
+        jdbc:Parameter p6 = {sqlType: jdbc:TYPE_BOOLEAN, value: false};
+        jdbc:Parameter p7 = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
+        var returned = self.jdbcClient->update(INSERT_INTO_TOPICS, p1,p2,p3,p4,p5,p6,p7);
         self.handleUpdate(returned, "Add topic");
     }
 
@@ -66,8 +87,12 @@ public type HubPersistenceImpl object {
     # + topic - The topic to remove
     # + return - An `error` if an error occurred while removing the topic or else `()` otherwise
     public function removeTopic(string topic) returns error? {
-        jdbc:Parameter p1 = {sqlType: jdbc:TYPE_VARCHAR, value: topic};
-        var returned = self.jdbcClient->update(DELETE_FROM_TOPICS, p1);
+        var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
+        jdbc:Parameter p1 = {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
+        jdbc:Parameter p2 = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
+        jdbc:Parameter p3 = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
+        jdbc:Parameter p4 = {sqlType: jdbc:TYPE_VARCHAR, value: topic};
+        var returned = self.jdbcClient->update(DELETE_FROM_TOPICS, p1,p2,p3,p4);
         self.handleUpdate(returned, "Removed topic");
     }
 
@@ -130,9 +155,9 @@ public type HubPersistenceImpl object {
 
     function handleUpdate(jdbc:UpdateResult|jdbc:Error returned, string message) {
         if (returned is jdbc:UpdateResult) {
-            io:println(message, " status: ", returned.updatedRowCount);
+            log:printDebug(message + " status: " + returned.updatedRowCount.toString());
         } else {
-            io:println(message, " failed: ", <string>returned.detail()?.message);
+            log:printError(message + " failed: " + <string>returned.detail()?.message);
         }
     }
 };
