@@ -20,9 +20,9 @@ ENV hub_datasource_password_env=${hub_datasource_password}
 
 
 
-ADD ./target/*.jar /target/
-RUN find /target -name '*.jar' -executable -type f "-print0" | xargs "-0" cp -t / \
-    && rm -rf /target \
+ADD ./target/bin/*.jar /target/bin/
+RUN find /target/bin -name '*.jar' -executable -type f "-print0" | xargs "-0" cp -t / \
+    && rm -rf /target/bin \
     && mv *.jar hub.jar 
 
 EXPOSE 9091
