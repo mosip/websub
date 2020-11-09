@@ -26,4 +26,4 @@ EXPOSE 9091
 
 
 
-CMD ["ballerina","run",".\hub.jar","--mosip.hub.datasource-url=${hub_datasource_url_env}","--mosip.hub.datasource-username=${hub_datasource_username_env}"," --mosip.hub.datasource-password=${hub_datasource_password_env}","--mosip.hub.port=9191"]
+CMD ballerina run ./hub.jar --mosip.hub.datasource-url="${hub_datasource_url_env}" --mosip.hub.datasource-username="${hub_datasource_username_env}" --mosip.hub.datasource-password="${hub_datasource_password_env}" --mosip.hub.port=9191 ;\

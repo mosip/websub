@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+CAUTION: Do not modify this file unless you know what you are doing.
+         Unexpected results may occur if the code is changed deliberately.
+-->
+<dbmodel pgmodeler-ver="0.9.2-alpha" last-position="0,0" last-zoom="0.65"
+	 default-schema="public" default-owner="postgres">
+<role name="sysadmin"
+      superuser="true"
+      createdb="true"
+      replication="true"
+      createrole="true"
+      inherit="true"
+      login="true"
+      encrypted="true"
+      password="********">
+</role>
+
+<role name="dbadmin"
+      createdb="true"
+      replication="true"
+      createrole="true"
+      inherit="true"
+      login="true"
+      encrypted="true"
+      password="********">
+</role>
+
+<role name="appadmin"
+      inherit="true"
+      login="true"
+      encrypted="true"
+      password="********">
+</role>
+
+<role name="regprcuser"
+      inherit="true"
+      login="true"
+      encrypted="true"
+      password="********">
+</role>
+
+<database name="mosip_regprc" encoding="UTF8" lc-collate="en_US.UTF-8" lc-ctype="en_US.UTF-8" is-template="false" allow-conns="true">
+	<role name="sysadmin"/>
+	<tablespace name="pg_default"/>
+	<comment><![CDATA[The data related to Registration process flows and transaction will be maintained in this database. This database also maintains data that is needed to perform deduplication.]]></comment>
+</database>
+
+<schema name="public" rect-visible="true" fill-color="#e1e1e1" sql-disabled="true">
+</schema>
+
+<schema name="websub" rect-visible="true" fill-color="#83af1f">
+	<role name="sysadmin"/>
+</schema>
+
+<table name="topic" alias="topic">
+	<schema name="websub"/>
+	<role name="sysadmin"/>
+	<comment><![CDATA[Topic: Stores list of topics used in websub modules, this topics are used by producers and subscribers for message transfer.]]></comment>
+	<position x="80" y="60"/>
+	<column name="topic" not-null="true">
+		<type name="character varying" length="256"/>
+		<comment><![CDATA[Topic: Name of the topic created for message transfer]]></comment>
+	</column>
+	<column name="cr_by" not-null="true">
+		<type name="character varying" length="256"/>
+		<comment><![CDATA[Created By : ID or name of the user who create / insert record.]]></comment>
+	</column>
+	<column name="cr_dtimes" not-null="true">
+		<type name="timestamp" length="0"/>
+		<comment><![CDATA[Created DateTimestamp : Date and Timestamp when the record is created/inserted]]></comment>
+	</column>
+	<column name="upd_by">
+		<type name="character varying" length="256"/>
+		<comment><![CDATA[Updated By : ID or name of the user who update the record with new values]]></comment>
+	</column>
+	<column name="upd_dtimes">
+		<type name="timestamp" length="0"/>
+		<comment><![CDATA[Updated DateTimestamp : Date and Timestamp when any of the fields in the record is updated with new values.]]></comment>
+	</column>
+	<column name="is_deleted">
+		<type name="boolean" length="0"/>
+		<comment><![CDATA[IS_Deleted : Flag to mark whether the record is Soft deleted.]]></comment>
+	</column>
+	<column name="del_dtimes">
+		<type name="timestamp" length="0"/>
+		<comment><![CDATA[Deleted DateTimestamp : Date and Timestamp when the record is soft deleted with is_deleted=TRUE]]></comment>
+	</column>
+	<constraint name="pk_topic" type="pk-constr" table="websub.topic">
+		<columns names="topic" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="subscription" alias="sub">
+	<schema name="websub"/>
+	<role name="sysadmin"/>
+	<comment><![CDATA[Subscription: Stores list of subscriptions in the websub module, These subscription used to consume the message in websub module]]></comment>
+	<position x="520" y="80"/>
+	<column name="topic" not-null="true">
+		<type name="character varying" length="256"/>
+		<comment><![CDATA[Topic: Topic for which subscription is done]]></comment>
+	</column>
+	<column name="callback" not-null="true">
+		<type name="character varying" length="256"/>
+		<comment><![CDATA[Call Back URL: Call back url used by the subscribers]]></comment>
+	</column>
+	<column name="secret">
+		<type name="character varying" length="256"/>
+		<comment><![CDATA[Secret Key: Secret key assigned for subscribers]]></comment>
+	</column>
+	<column name="lease_seconds">
+		<type name="bigint" length="256"/>
+		<comment><![CDATA[Lease Seconds: Lease seconds used by subscribers]]></comment>
+	</column>
+	<column name="created_at">
+		<type name="bigint" length="6"/>
+		<comment><![CDATA[Created At: Subscription created date time.]]></comment>
+	</column>
+	<column name="is_active" not-null="true">
+		<type name="boolean" length="0"/>
+		<comment><![CDATA[IS_Active : Flag to mark whether the record is Active or In-active]]></comment>
+	</column>
+	<column name="cr_by" not-null="true">
+		<type name="character varying" length="256"/>
+		<comment><![CDATA[Created By : ID or name of the user who create / insert record.]]></comment>
+	</column>
+	<column name="cr_dtimes" not-null="true">
+		<type name="timestamp" length="0"/>
+		<comment><![CDATA[Created DateTimestamp : Date and Timestamp when the record is created/inserted]]></comment>
+	</column>
+	<column name="upd_by">
+		<type name="character varying" length="256"/>
+		<comment><![CDATA[Updated By : ID or name of the user who update the record with new values]]></comment>
+	</column>
+	<column name="upd_dtimes">
+		<type name="timestamp" length="0"/>
+		<comment><![CDATA[Updated DateTimestamp : Date and Timestamp when any of the fields in the record is updated with new values.]]></comment>
+	</column>
+	<column name="is_deleted">
+		<type name="boolean" length="0"/>
+		<comment><![CDATA[IS_Deleted : Flag to mark whether the record is Soft deleted.]]></comment>
+	</column>
+	<column name="del_dtimes">
+		<type name="timestamp" length="0"/>
+		<comment><![CDATA[Deleted DateTimestamp : Date and Timestamp when the record is soft deleted with is_deleted=TRUE]]></comment>
+	</column>
+	<constraint name="pk_sub_id" type="pk-constr" table="websub.subscription">
+		<columns names="topic,callback" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<permission>
+	<object name="mosip_regprc" type="database"/>
+	<privileges connect="true" temporary="true"/>
+</permission>
+<permission>
+	<object name="mosip_regprc" type="database"/>
+	<roles names="sysadmin"/>
+	<privileges create="true" connect="true" temporary="true"/>
+</permission>
+<permission>
+	<object name="mosip_regprc" type="database"/>
+	<roles names="appadmin"/>
+	<privileges create="true" connect="true" temporary="true"/>
+</permission>
+<permission>
+	<object name="mosip_regprc" type="database"/>
+	<roles names="regprcuser"/>
+	<privileges connect="true"/>
+</permission>
+<permission>
+	<object name="websub" type="schema"/>
+	<roles names="sysadmin"/>
+	<privileges create="true" usage="true"/>
+</permission>
+<permission>
+	<object name="websub" type="schema"/>
+	<roles names="regprcuser"/>
+	<privileges usage="true"/>
+</permission>
+<permission>
+	<object name="websub.topic" type="table"/>
+	<roles names="sysadmin"/>
+	<privileges select="true" delete="true" insert="true" update="true" truncate="true" references="true" trigger="true"/>
+</permission>
+<permission>
+	<object name="websub.topic" type="table"/>
+	<roles names="regprcuser"/>
+	<privileges select="true" delete="true" insert="true" update="true" references="true"/>
+</permission>
+<permission>
+	<object name="websub.subscription" type="table"/>
+	<roles names="sysadmin"/>
+	<privileges select="true" delete="true" insert="true" update="true" truncate="true" references="true" trigger="true"/>
+</permission>
+<permission>
+	<object name="websub.subscription" type="table"/>
+	<roles names="regprcuser"/>
+	<privileges select="true" delete="true" insert="true" update="true" references="true"/>
+</permission>
+</dbmodel>
