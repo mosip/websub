@@ -34,7 +34,7 @@ public type HubPersistenceImpl object {
         jdbc:Parameter p11 = {sqlType: jdbc:TYPE_BOOLEAN, value: false};
         jdbc:Parameter p12 = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
 
-        var returned = self.jdbcClient->update(DELETE_FROM_SUBSCRIPTIONS, p7,p8,p1,p2);
+        var returned = self.jdbcClient->update(HARD_DELETE_FROM_SUBSCRIPTIONS, p1,p2);
         self.handleUpdate(returned, "delete subs if exist");
         returned = self.jdbcClient->update(INSERT_INTO_SUBSCRIPTIONS_TABLE, p1, p2,
             p3, p4, p5,p6,p7,p8,p9,p10,p11,p12);
@@ -55,7 +55,7 @@ public type HubPersistenceImpl object {
         jdbc:Parameter p2 = {sqlType: jdbc:TYPE_VARCHAR, value: callback};
         jdbc:Parameter p3= {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
         jdbc:Parameter p4 = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
-        var returned = self.jdbcClient->update(DELETE_FROM_SUBSCRIPTIONS, p3,p4,p1,p2);
+        var returned = self.jdbcClient->update(HARD_DELETE_FROM_SUBSCRIPTIONS, p1,p2);
         self.handleUpdate(returned, "Removed subscription");
     }
 
