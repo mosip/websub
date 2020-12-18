@@ -1,19 +1,19 @@
 org_name = "mosip"
-version = "1.2.0"
+version = "1.1.4"
 lockfile_version = "1.0.0"
 ballerina_version = "1.2.11"
 
-[[imports."mosip/repository:1.2.0"]]
+[[imports."mosip/repository:1.1.4"]]
 org_name = "ballerinax"
 name = "java.jdbc"
 version = "0.0.0"
 
-[[imports."mosip/hubinit:1.2.0"]]
+[[imports."mosip/hubinit:1.1.4"]]
 org_name = "ballerinax"
 name = "java.jdbc"
 version = "0.0.0"
 
-[[imports."mosip/hubinit:1.2.0"]]
+[[imports."mosip/hubinit:1.1.4"]]
 org_name = "mosip"
 name = "repository"
-version = "1.2.0"
+version = "1.1.4"
