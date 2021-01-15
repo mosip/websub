@@ -2,6 +2,9 @@ import ballerina/log;
 import ballerinax/java.jdbc;
 import ballerina/time;
 import ballerina/stringutils;
+import mosip/utils;
+import ballerina/java;
+
 
 public type HubPersistenceImpl object {
 
@@ -21,23 +24,25 @@ public type HubPersistenceImpl object {
     public function addSubscription(SubscriptionDetails subscriptionDetails) returns error? {
         var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
         string callback= stringutils:split(subscriptionDetails.callback, "[\\?|\\#]")[0];
-        jdbc:Parameter p1 = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionDetails.topic};
-        jdbc:Parameter p2 = {sqlType: jdbc:TYPE_VARCHAR, value: callback};
-        jdbc:Parameter p3 = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionDetails.secret};
-        jdbc:Parameter p4 = {sqlType: jdbc:TYPE_BIGINT, value: subscriptionDetails.leaseSeconds};
-        jdbc:Parameter p5 = {sqlType: jdbc:TYPE_BIGINT, value: subscriptionDetails.createdAt};
-        jdbc:Parameter p6 = {sqlType: jdbc:TYPE_BOOLEAN, value: true};
-        jdbc:Parameter p7 = {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
-        jdbc:Parameter p8 = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
-        jdbc:Parameter p9 = {sqlType: jdbc:TYPE_VARCHAR, value: ""};
-        jdbc:Parameter p10 = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
-        jdbc:Parameter p11 = {sqlType: jdbc:TYPE_BOOLEAN, value: false};
-        jdbc:Parameter p12 = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
+        var uuid=utils:createRandomUUID();
+        jdbc:Parameter id = {sqlType: jdbc:TYPE_VARCHAR, value: java:toString(uuid)};
+        jdbc:Parameter topic = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionDetails.topic};
+        jdbc:Parameter callbackParameter = {sqlType: jdbc:TYPE_VARCHAR, value: callback};
+        jdbc:Parameter secret = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionDetails.secret};
+        jdbc:Parameter leaseSeconds = {sqlType: jdbc:TYPE_BIGINT, value: subscriptionDetails.leaseSeconds};
+        jdbc:Parameter createdAt = {sqlType: jdbc:TYPE_BIGINT, value: subscriptionDetails.createdAt};
+        jdbc:Parameter isActive = {sqlType: jdbc:TYPE_BOOLEAN, value: true};
+        jdbc:Parameter createdBy = {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
+        jdbc:Parameter createdDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
+        jdbc:Parameter updatedBy = {sqlType: jdbc:TYPE_VARCHAR, value: ""};
+        jdbc:Parameter updatedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
+        jdbc:Parameter isDeleted = {sqlType: jdbc:TYPE_BOOLEAN, value: false};
+        jdbc:Parameter deletedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
 
-        var returned = self.jdbcClient->update(HARD_DELETE_FROM_SUBSCRIPTIONS, p1,p2);
+        var returned = self.jdbcClient->update(SOFT_DELETE_FROM_SUBSCRIPTIONS,createdBy,createdDTimes, topic,callbackParameter);
         self.handleUpdate(returned, "delete subs if exist");
-        returned = self.jdbcClient->update(INSERT_INTO_SUBSCRIPTIONS_TABLE, p1, p2,
-            p3, p4, p5,p6,p7,p8,p9,p10,p11,p12);
+        returned = self.jdbcClient->update(INSERT_INTO_SUBSCRIPTIONS_TABLE, id, topic,
+            callbackParameter, secret, leaseSeconds,createdAt,createdBy,createdDTimes,updatedBy,updatedDTimes,isDeleted,deletedDTimes);
         self.handleUpdate(returned, "insert new subs");
     }
 
@@ -51,11 +56,12 @@ public type HubPersistenceImpl object {
     public function removeSubscription(SubscriptionDetails subscriptionDetails) returns error? {
         string callback= stringutils:split(subscriptionDetails.callback, "[\\?|\\#]")[0];
         var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
-        jdbc:Parameter p1 = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionDetails.topic};
-        jdbc:Parameter p2 = {sqlType: jdbc:TYPE_VARCHAR, value: callback};
-        jdbc:Parameter p3= {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
-        jdbc:Parameter p4 = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
-        var returned = self.jdbcClient->update(HARD_DELETE_FROM_SUBSCRIPTIONS, p1,p2);
+        jdbc:Parameter topic = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionDetails.topic};
+        jdbc:Parameter callbackParameter = {sqlType: jdbc:TYPE_VARCHAR, value: callback};
+        jdbc:Parameter updatedBy= {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
+        jdbc:Parameter updatedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
+        var returned = self.jdbcClient->update(SOFT_DELETE_FROM_SUBSCRIPTIONS,updatedBy,
+        updatedDTimes, topic,callbackParameter);
         self.handleUpdate(returned, "Removed subscription");
     }
 
@@ -68,14 +74,14 @@ public type HubPersistenceImpl object {
     # + return - An `error` if an error occurred while adding the topic or else `()` otherwise
     public function addTopic(string topic) returns error? {
         var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
-        jdbc:Parameter p1 = {sqlType: jdbc:TYPE_VARCHAR, value: topic};
-        jdbc:Parameter p2 = {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
-        jdbc:Parameter p3 = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
-        jdbc:Parameter p4 = {sqlType: jdbc:TYPE_VARCHAR, value: ""};
-        jdbc:Parameter p5 = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
-        jdbc:Parameter p6 = {sqlType: jdbc:TYPE_BOOLEAN, value: false};
-        jdbc:Parameter p7 = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
-        var returned = self.jdbcClient->update(INSERT_INTO_TOPICS, p1,p2,p3,p4,p5,p6,p7);
+        jdbc:Parameter topicParameter = {sqlType: jdbc:TYPE_VARCHAR, value: topic};
+        jdbc:Parameter createdBy = {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
+        jdbc:Parameter createdDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
+        jdbc:Parameter updatedBy = {sqlType: jdbc:TYPE_VARCHAR, value: ""};
+        jdbc:Parameter updatedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
+        jdbc:Parameter isDeleted = {sqlType: jdbc:TYPE_BOOLEAN, value: false};
+        jdbc:Parameter deletedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
+        var returned = self.jdbcClient->update(INSERT_INTO_TOPICS, topicParameter,createdBy,createdDTimes,updatedBy,updatedDTimes,isDeleted,deletedDTimes);
         self.handleUpdate(returned, "Add topic");
     }
 
