@@ -6,7 +6,7 @@ import ballerina/config;
 @http:ServiceConfig {
     basePath: "/websub/hub"
 }
-service websubmessage on hubListener {
+service failedcontentpull on hubListener {
 
     resource function failedmessage(http:Caller caller,
         http:Request req) returns error? {
