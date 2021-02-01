@@ -81,6 +81,32 @@ public type MessagePersistenceImpl object {
         return messageDetails;
     }
 
+    public function findMessageByID(string ID) returns @tainted MessageDetails{
+    
+     MessageDetails messageDetails = {};
+     
+        jdbc:Parameter IDParamater = {sqlType: jdbc:TYPE_VARCHAR, value: ID};
+    
+        
+     var dbResult = self.jdbcClient->select(SELECT_FROM_MESSAGE_BY_ID,MessageDetails, ID);
+
+         if (dbResult is table<record {}>) {
+            while (dbResult.hasNext()) {
+                var messageDetail = trap <MessageDetails>dbResult.getNext();
+                if (messageDetail is MessageDetails) {
+                    messageDetails = messageDetail;
+                } else {
+                    string errCause = <string>messageDetail.detail()?.message;
+                    log:printError("Error retreiving failed delivery from subID from the database: " + errCause);
+                }
+            }
+        } else {
+            string errCause = <string>dbResult.detail()?.message;
+            log:printError("Error retreiving data from the database: " + errCause);
+        }
+        return messageDetails; 
+    }
+
     function handleUpdate(jdbc:UpdateResult|jdbc:Error returned, string message) {
         if (returned is jdbc:UpdateResult) {
             log:printDebug(message + " status: " + returned.updatedRowCount.toString());

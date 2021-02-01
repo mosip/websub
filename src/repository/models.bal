@@ -42,3 +42,8 @@ public type FailedDeliveryDetails record {|
     string reason = "";
     string failureError = "";
 |};
+
+public type FailedContentPullRespModel record {|
+    string message = "";
+    string timestamp = "";
+|};

@@ -7,6 +7,8 @@ import ballerina/time;
 import ballerina/websub;
 import mosip/repository;
 import mosip/utils;
+import ballerina/lang.'array;
+
 
 
 
@@ -102,6 +104,40 @@ public type HubServiceImpl object {
             };
             var result = self.deliveryReportPersistence.addFailedDelivery(failedDeliveryDetails);
         }
+    }
+
+
+    public function getFailedContent(string subscriberSignature,string topic , string callback ,string timestamp ,int messagecount) returns @untainted repository:FailedContentPullRespModel[]|error{
+               repository:SubscriptionExtendedDetails subscriptionExtendedDetails = self.subsOperations.getSubscription(topic,callback);
+               string hmacSubsSignature=utils:hmacSha256(topic+callback+timestamp,subscriptionExtendedDetails.secret);
+               if(hmacSubsSignature!=subscriberSignature){
+                   return error("SIGNATUREMATCHERROR", message = "hmac didnot match");
+               }
+               string[] msgIDs=self.deliveryReportPersistence.getFailedDeliveryBySubID(subscriptionExtendedDetails.id,timestamp,messagecount);
+               foreach string msgID in msgIDs {
+                 self.deliveryReportPersistence.updateLastFetchTimestamp(msgID,subscriptionExtendedDetails.id,timestamp);
+                }
+               repository:FailedContentPullRespModel[] failedContentPullRespModels=[];
+               int index=0;
+               foreach string msgID in msgIDs {
+                repository:MessageDetails messageDetail = self.messagePersistenceImpl.findMessageByID(msgID);
+                string messageDecodedString="";
+                byte[]|error messageDecodedBytes = 'array:fromBase64(messageDetail.message);
+                if(messageDecodedBytes is byte[]){
+                string|error msgDecodedString = 'string:fromBytes(messageDecodedBytes);
+                if(msgDecodedString is string ){
+                    messageDecodedString = msgDecodedString;
+                }
+                }
+                failedContentPullRespModels[index]={
+                    message: messageDecodedString,
+                    timestamp: messageDetail.publishedDTimes
+                };
+                index=index+1;
+               }
+               return failedContentPullRespModels;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+       
     }
 
     public function getMsg(string topic, string message) returns @tainted repository:MessageDetails? {

@@ -56,6 +56,42 @@ public type DeliveryReportPersistence object {
         self.handleUpdate(returned, "remove failed query new delivery report");
     }
 
+    public function getFailedDeliveryBySubID(string subID,string timestamp,int count) returns @tainted string[] {
+        string[] msgIDs=[];
+        int msgIDIndex = 0;
+        jdbc:Parameter subsIDParameter = {sqlType: jdbc:TYPE_VARCHAR, value: subID};
+        jdbc:Parameter timestampParameter= {sqlType: jdbc:TYPE_TIMESTAMP, value: timestamp};
+        jdbc:Parameter resultCount= {sqlType: jdbc:TYPE_INTEGER, value: count};
+        var dbResult = self.jdbcClient->select(SELECT_FROM_FAILED_DELIVERY_TABLE_BY_SUBID_AND_TIMESTAMP,FailedDeliveryDetails,subsIDParameter,timestampParameter,resultCount);
+        if (dbResult is table<record {}>) {
+            while (dbResult.hasNext()) {
+                var failedDeliveryDetails = trap <FailedDeliveryDetails>dbResult.getNext();
+                if (failedDeliveryDetails is FailedDeliveryDetails) {
+                    msgIDs[msgIDIndex] = failedDeliveryDetails.msgID;
+                    msgIDIndex += 1;
+                } else {
+                    string errCause = <string>failedDeliveryDetails.detail()?.message;
+                    log:printError("Error retreiving failed delivery from subID from the database: " + errCause);
+                }
+            }
+        } else {
+            string errCause = <string>dbResult.detail()?.message;
+            log:printError("Error retreiving data from the database: " + errCause);
+        }
+        return msgIDs;
+    }
+
+    public function updateLastFetchTimestamp(string msgID,string subID,string lastFetchDTimes){
+        var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
+        jdbc:Parameter msgIDParameter = {sqlType: jdbc:TYPE_VARCHAR, value: msgID};
+        jdbc:Parameter subIDParameter = {sqlType: jdbc:TYPE_VARCHAR, value: subID};
+        jdbc:Parameter updatedByParameter= {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
+        jdbc:Parameter updatedDTimesParameter = {sqlType: jdbc:TYPE_TIMESTAMP, value: lastFetchDTimes};
+        jdbc:Parameter lastFetchDTimesParameter = {sqlType: jdbc:TYPE_TIMESTAMP, value: lastFetchDTimes};
+        var returned = self.jdbcClient->update(UPDATE_LAST_FETCH_TIMESTAMP_INTO_FAILED_DELIVERY_TABLE,lastFetchDTimesParameter,updatedByParameter,updatedDTimesParameter, msgIDParameter,subIDParameter);
+        self.handleUpdate(returned, "failed update last fetch timestamp");
+    }
+
     function handleUpdate(jdbc:UpdateResult|jdbc:Error returned, string message) {
         if (returned is jdbc:UpdateResult) {
             log:printDebug(message + " status: " + returned.updatedRowCount.toString());

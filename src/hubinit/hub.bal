@@ -1,11 +1,11 @@
 import ballerina/config;
 import ballerina/http;
-import ballerina/io;
 import ballerina/runtime;
 import ballerina/websub;
 import ballerinax/java.jdbc;
 import mosip/repository;
 import mosip/filters as fil;
+import ballerina/log;
 
 import mosip/services;
 
@@ -37,13 +37,8 @@ public function tapOnDeliveryFailureImpl(string callback, string topic, websub:W
 }
 
 public function main() {
-
-
-
     websub:HubPersistenceStore hubpimpl = new repository:HubPersistenceImpl(jdbcClient);
-
-
-    io:println("Starting up the Ballerina Hub Service");
+    log:printInfo("Starting up the Ballerina Hub Service");
 
     websub:Hub webSubHub;
     var result = websub:startHub(hubListener, "/websub", "/hub",
@@ -57,8 +52,7 @@ public function main() {
                 count: config:getAsInt("mosip.hub.retry_count"),
                 intervalInMillis: config:getAsInt("mosip.hub.retry_interval"),
                 backOffFactor: config:getAsFloat("mosip.hub.retry_backoff_factor"),
-                maxWaitIntervalInMillis: config:getAsInt("mosip.hub.retry_max_wait_interval"),
-                statusCodes: [404, 408, 502, 503, 504]
+                maxWaitIntervalInMillis: config:getAsInt("mosip.hub.retry_max_wait_interval")
             }
         },
         tapOnDelivery: tapOnDeliveryImpl,
@@ -71,7 +65,7 @@ public function main() {
     } else if (result is websub:HubStartedUpError) {
         webSubHub = result.startedUpHub;
     } else {
-        io:println("Hub start error:" + <string>result.detail()?.message);
+        log:printError("Hub start error:" + <string>result.detail()?.message);
         return;
     }
     while (true) {
