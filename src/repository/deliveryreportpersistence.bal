@@ -50,19 +50,19 @@ public type DeliveryReportPersistence object {
         var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
         jdbc:Parameter msgID = {sqlType: jdbc:TYPE_VARCHAR, value: failedDeliveryDetails.msgID};
         jdbc:Parameter subsID = {sqlType: jdbc:TYPE_VARCHAR, value: failedDeliveryDetails.subsID};
-        jdbc:Parameter updatedBy= {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
+        jdbc:Parameter updatedBy = {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
         jdbc:Parameter updatedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
-        var returned = self.jdbcClient->update(DELETE_FROM_FAILED_DELIVERY_TABLE,updatedBy,updatedDTimes, msgID, subsID);
+        var returned = self.jdbcClient->update(DELETE_FROM_FAILED_DELIVERY_TABLE, updatedBy, updatedDTimes, msgID, subsID);
         self.handleUpdate(returned, "remove failed query new delivery report");
     }
 
-    public function getFailedDeliveryBySubID(string subID,string timestamp,int count) returns @tainted string[] {
-        string[] msgIDs=[];
+    public function getFailedDeliveryBySubID(string subID, string timestamp, int count) returns @tainted string[] {
+        string[] msgIDs = [];
         int msgIDIndex = 0;
         jdbc:Parameter subsIDParameter = {sqlType: jdbc:TYPE_VARCHAR, value: subID};
-        jdbc:Parameter timestampParameter= {sqlType: jdbc:TYPE_TIMESTAMP, value: timestamp};
-        jdbc:Parameter resultCount= {sqlType: jdbc:TYPE_INTEGER, value: count};
-        var dbResult = self.jdbcClient->select(SELECT_FROM_FAILED_DELIVERY_TABLE_BY_SUBID_AND_TIMESTAMP,FailedDeliveryDetails,subsIDParameter,timestampParameter,resultCount);
+        jdbc:Parameter timestampParameter = {sqlType: jdbc:TYPE_TIMESTAMP, value: timestamp};
+        jdbc:Parameter resultCount = {sqlType: jdbc:TYPE_INTEGER, value: count};
+        var dbResult = self.jdbcClient->select(SELECT_FROM_FAILED_DELIVERY_TABLE_BY_SUBID_AND_TIMESTAMP, FailedDeliveryDetails, subsIDParameter, timestampParameter, resultCount);
         if (dbResult is table<record {}>) {
             while (dbResult.hasNext()) {
                 var failedDeliveryDetails = trap <FailedDeliveryDetails>dbResult.getNext();
@@ -81,15 +81,23 @@ public type DeliveryReportPersistence object {
         return msgIDs;
     }
 
-    public function updateLastFetchTimestamp(string msgID,string subID,string lastFetchDTimes){
+    public function updateLastFetchTimestamp(string[] msgIDs, string subID, string lastFetchDTimes) {
         var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
-        jdbc:Parameter msgIDParameter = {sqlType: jdbc:TYPE_VARCHAR, value: msgID};
-        jdbc:Parameter subIDParameter = {sqlType: jdbc:TYPE_VARCHAR, value: subID};
-        jdbc:Parameter updatedByParameter= {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
-        jdbc:Parameter updatedDTimesParameter = {sqlType: jdbc:TYPE_TIMESTAMP, value: lastFetchDTimes};
-        jdbc:Parameter lastFetchDTimesParameter = {sqlType: jdbc:TYPE_TIMESTAMP, value: lastFetchDTimes};
-        var returned = self.jdbcClient->update(UPDATE_LAST_FETCH_TIMESTAMP_INTO_FAILED_DELIVERY_TABLE,lastFetchDTimesParameter,updatedByParameter,updatedDTimesParameter, msgIDParameter,subIDParameter);
-        self.handleUpdate(returned, "failed update last fetch timestamp");
+        jdbc:Parameter[][] parameters = [];
+        int index = 0;
+        foreach string msgID in msgIDs {
+            parameters[index] = [{sqlType: jdbc:TYPE_TIMESTAMP, value: lastFetchDTimes}, {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN}, {sqlType: jdbc:TYPE_TIMESTAMP, value: lastFetchDTimes}, {sqlType: jdbc:TYPE_VARCHAR, value: msgID}, {sqlType: jdbc:TYPE_VARCHAR, value: subID}];
+            index = index + 1;
+        }
+
+
+
+        jdbc:BatchUpdateResult retBatch = self.jdbcClient->batchUpdate(UPDATE_LAST_FETCH_TIMESTAMP_INTO_FAILED_DELIVERY_TABLE, true, ...parameters);
+        error? e = retBatch.returnedError;
+        if (e is error) {
+            log:printError("Batch update operation failed: "+ <string>e.detail()?.message);
+        }
+
     }
 
     function handleUpdate(jdbc:UpdateResult|jdbc:Error returned, string message) {

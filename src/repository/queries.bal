@@ -21,5 +21,4 @@ const string INSERT_INTO_FAILED_DELIVERY_TABLE = "INSERT INTO websub.message_del
 const string UPDATE_LAST_FETCH_TIMESTAMP_INTO_FAILED_DELIVERY_TABLE = "UPDATE websub.message_delivery_failed SET last_fetch_dtimes =?,upd_by=?,upd_dtimes=? WHERE msg_id=? AND subscription_id=? AND is_deleted = 'FALSE'";
 const string DELETE_FROM_FAILED_DELIVERY_TABLE = "UPDATE websub.message_delivery_failed SET is_deleted = 'TRUE',upd_by=?,upd_dtimes=? WHERE msg_id=? AND subscription_id=? AND is_deleted = 'TRUE'";
 const string SELECT_FROM_FAILED_DELIVERY_TABLE = "SELECT  msg_id,subscription_id,delivery_failed_dtimes,delivery_failure_reason,delivery_failure_error FROM websub.message_delivery_failed WHERE msg_id=? AND subscription_id=? AND is_deleted = 'FALSE'";
-const string SELECT_FROM_FAILED_DELIVERY_TABLE_BY_SUBID_AND_TIMESTAMP = "SELECT  msg_id,subscription_id,delivery_failed_dtimes,delivery_failure_reason,delivery_failure_error FROM websub.message_delivery_failed WHERE subscription_id=? AND delivery_failed_dtimes>=? AND is_deleted = 'FALSE' LIMIT ?";
- 
+const string SELECT_FROM_FAILED_DELIVERY_TABLE_BY_SUBID_AND_TIMESTAMP = "SELECT  msg_id,subscription_id,delivery_failed_dtimes,delivery_failure_reason,delivery_failure_error FROM websub.message_delivery_failed WHERE subscription_id=? AND delivery_failed_dtimes>=? AND is_deleted = 'FALSE' LIMIT ? FOR UPDATE";

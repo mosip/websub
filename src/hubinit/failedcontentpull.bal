@@ -4,7 +4,7 @@ import ballerina/lang.'int;
 import ballerina/config;
 
 @http:ServiceConfig {
-    basePath: "/websub/hub"
+    basePath: "/sync"
 }
 service failedcontentpull on hubListener {
 

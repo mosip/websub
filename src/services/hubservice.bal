@@ -114,9 +114,7 @@ public type HubServiceImpl object {
                    return error("SIGNATUREMATCHERROR", message = "hmac didnot match");
                }
                string[] msgIDs=self.deliveryReportPersistence.getFailedDeliveryBySubID(subscriptionExtendedDetails.id,timestamp,messagecount);
-               foreach string msgID in msgIDs {
-                 self.deliveryReportPersistence.updateLastFetchTimestamp(msgID,subscriptionExtendedDetails.id,timestamp);
-                }
+                self.deliveryReportPersistence.updateLastFetchTimestamp(msgIDs,subscriptionExtendedDetails.id,timestamp);
                repository:FailedContentPullRespModel[] failedContentPullRespModels=[];
                int index=0;
                foreach string msgID in msgIDs {
