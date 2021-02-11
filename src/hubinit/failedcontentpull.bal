@@ -4,35 +4,44 @@ import ballerina/lang.'int;
 import ballerina/config;
 
 @http:ServiceConfig {
-    basePath: "/sync"
+    basePath: "/failedcontent"
 }
-service failedcontentpull on hubListener {
+service failedcontent on hubListener {
 
     resource function failedmessage(http:Caller caller,
         http:Request req) returns error? {
         string subscriberSignatureValue = "";
 
 
-        if (req.hasHeader("X-Subscriber-Signature")) {
-            subscriberSignatureValue = req.getHeader("X-Subscriber-Signature");
+        if (req.hasHeader(SUBSCRIBER_SIGNATURE_HEADER)) {
+            subscriberSignatureValue = req.getHeader(SUBSCRIBER_SIGNATURE_HEADER);
         }
-        string? topic=req.getQueryParamValue("topic");
-        string? callback=req.getQueryParamValue("callback");
-        string? timestamp=req.getQueryParamValue("timestamp");
-        string? messageCount=req.getQueryParamValue("messageCount");
+        string? topic=req.getQueryParamValue(TOPIC);
+        string? callback=req.getQueryParamValue(CALLBACK);
+        string? timestamp=req.getQueryParamValue(TIMESTAMP);
+        string? messageCount=req.getQueryParamValue(MESSAGECOUNT);
         int|error messageCountValue= 'int:fromString(<string>messageCount);
         string topicParameter="";
         string callbackParameter="";
         string timestampParameter="";
         int messageCountParameter=config:getAsInt("mosip.hub.message_count_default",10);
-        if(topic is string){
+        if(topic is string && topic!= ""){
          topicParameter=<string>topic;
+        }else{
+            check caller->badRequest(TOPIC_EMPTY_ERROR_MESSAGE);
+             return ();
         }
-        if(callback is string){
+        if(callback is string && callback!= ""){
          callbackParameter=<string>callback;
+        }else{
+            check caller->badRequest(CALLBACK_EMPTY_ERROR_MESSAGE);
+             return ();
         }
-        if(timestamp is string){
+        if(timestamp is string && timestamp!= ""){
          timestampParameter=<string>timestamp;
+         }else{
+            check caller->badRequest(TIMESTAMP_EMPTY_ERROR_MESSAGE);
+             return ();
         }
         if(messageCountValue is int){
          messageCountParameter= messageCountValue;
@@ -48,4 +57,5 @@ service failedcontentpull on hubListener {
         }
         
     }
+
 }

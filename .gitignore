@@ -1,1 +1,3 @@
-target
+target/
+*.lock
+ballerina-internal.log
