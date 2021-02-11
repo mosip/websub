@@ -3,8 +3,9 @@ import mosip/repository;
 import ballerina/lang.'int;
 import ballerina/config;
 
+
 @http:ServiceConfig {
-    basePath: "/failedcontent"
+    basePath: "/sync"
 }
 service failedcontent on hubListener {
 
