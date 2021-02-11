@@ -1,19 +1,49 @@
 org_name = "mosip"
-version = "1.2.0"
+version = "1.1.4"
 lockfile_version = "1.0.0"
-ballerina_version = "1.2.11"
+ballerina_version = "1.2.13"
 
-[[imports."mosip/repository:1.2.0"]]
+[[imports."mosip/filters:1.1.4"]]
+org_name = "mosip"
+name = "services"
+version = "1.1.4"
+
+[[imports."mosip/hubinit:1.1.4"]]
 org_name = "ballerinax"
 name = "java.jdbc"
 version = "0.0.0"
 
-[[imports."mosip/hubinit:1.2.0"]]
-org_name = "ballerinax"
-name = "java.jdbc"
-version = "0.0.0"
-
-[[imports."mosip/hubinit:1.2.0"]]
+[[imports."mosip/hubinit:1.1.4"]]
 org_name = "mosip"
 name = "repository"
-version = "1.2.0"
+version = "1.1.4"
+
+[[imports."mosip/hubinit:1.1.4"]]
+org_name = "mosip"
+name = "filters"
+version = "1.1.4"
+
+[[imports."mosip/hubinit:1.1.4"]]
+org_name = "mosip"
+name = "services"
+version = "1.1.4"
+
+[[imports."mosip/repository:1.1.4"]]
+org_name = "ballerinax"
+name = "java.jdbc"
+version = "0.0.0"
+
+[[imports."mosip/repository:1.1.4"]]
+org_name = "mosip"
+name = "utils"
+version = "1.1.4"
+
+[[imports."mosip/services:1.1.4"]]
+org_name = "mosip"
+name = "repository"
+version = "1.1.4"
+
+[[imports."mosip/services:1.1.4"]]
+org_name = "mosip"
+name = "utils"
+version = "1.1.4"
