@@ -2,12 +2,12 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/java;
 import ballerina/lang.'string;
+import ballerina/lang.'array;
 import ballerina/log;
 import ballerina/time;
 import ballerina/websub;
 import mosip/repository;
 import mosip/utils;
-import ballerina/lang.'array;
 
 
 
@@ -75,7 +75,7 @@ public type HubServiceImpl object {
     }
 
     public function onFailedDelivery(string callback, string topic, websub:WebSubContent content, http:Response|error response, websub:FailureReason reason) {
-     
+
         string|xml|json|byte[]|io:ReadableByteChannel payloadBytes = content.payload;
         string|error message = "";
         if (payloadBytes is byte[]) {
@@ -86,12 +86,12 @@ public type HubServiceImpl object {
         if (message is string) {
             messageDetails = self.getMsg(topic, message);
         }
-        string payloadError="";
-        if(response is http:Response){
-          json|http:ClientError? payloadErrorJSON =response.getJsonPayload();
-           if(payloadErrorJSON is json){
-               payloadError=payloadErrorJSON.toJsonString();
-             }
+        string payloadError = "";
+        if (response is http:Response) {
+            json|http:ClientError? payloadErrorJSON = response.getJsonPayload();
+            if (payloadErrorJSON is json) {
+                payloadError = payloadErrorJSON.toJsonString();
+            }
         }
         if (messageDetails is repository:MessageDetails) {
             repository:SubscriptionExtendedDetails subscriptionExtendedDetails = self.subsOperations.getSubscription(topic, callback);
@@ -107,35 +107,37 @@ public type HubServiceImpl object {
     }
 
 
-    public function getFailedContent(string subscriberSignature,string topic , string callback ,string timestamp ,int messagecount) returns @untainted repository:FailedContentPullRespModel[]|error{
-               repository:SubscriptionExtendedDetails subscriptionExtendedDetails = self.subsOperations.getSubscription(topic,callback);
-               string hmacSubsSignature=utils:hmacSha256(topic+callback+timestamp,subscriptionExtendedDetails.secret);
-               if(hmacSubsSignature!=subscriberSignature){
-                   return error("SIGNATUREMATCHERROR", message = "hmac didnot match");
-               }
-               string[] msgIDs=self.deliveryReportPersistence.getFailedDeliveryBySubID(subscriptionExtendedDetails.id,timestamp,messagecount);
-                self.deliveryReportPersistence.updateLastFetchTimestamp(msgIDs,subscriptionExtendedDetails.id,timestamp);
-               repository:FailedContentPullRespModel[] failedContentPullRespModels=[];
-               int index=0;
-               foreach string msgID in msgIDs {
-                repository:MessageDetails messageDetail = self.messagePersistenceImpl.findMessageByID(msgID);
-                string messageDecodedString="";
-                byte[]|error messageDecodedBytes = 'array:fromBase64(messageDetail.message);
-                if(messageDecodedBytes is byte[]){
+    public function getFailedContent(string subscriberSignature, string topic, string callback, string timestamp, int messagecount) returns @untainted repository:FailedContentPullRespModel|error {
+        repository:SubscriptionExtendedDetails subscriptionExtendedDetails = self.subsOperations.getSubscription(topic, callback);
+        string hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp, subscriptionExtendedDetails.secret);
+        if (hmacSubsSignature != subscriberSignature) {
+            return error("SIGNATUREMATCHERROR", message = "hmac didnot match");
+        }
+        string[] msgIDs = self.deliveryReportPersistence.getFailedDeliveryBySubID(subscriptionExtendedDetails.id, timestamp, messagecount);
+        repository:FailedContentModel[] failedContentModels = [];
+        int index = 0;
+        foreach string msgID in msgIDs {
+            repository:MessageDetails messageDetail = self.messagePersistenceImpl.findMessageByID(msgID);
+            string messageDecodedString = "";
+            byte[]|error messageDecodedBytes = 'array:fromBase64(messageDetail.message);
+            if (messageDecodedBytes is byte[]) {
                 string|error msgDecodedString = 'string:fromBytes(messageDecodedBytes);
-                if(msgDecodedString is string ){
+                if (msgDecodedString is string) {
                     messageDecodedString = msgDecodedString;
                 }
-                }
-                failedContentPullRespModels[index]={
-                    message: messageDecodedString,
-                    timestamp: messageDetail.publishedDTimes
-                };
-                index=index+1;
-               }
-               return failedContentPullRespModels;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
-       
+            }
+            failedContentModels[index] = {
+                message: messageDecodedString,
+                timestamp: messageDetail.publishedDTimes
+            };
+            index = index + 1;
+        }
+        repository:FailedContentPullRespModel failedContentPullRespModel = {
+            failedcontents: failedContentModels
+        };
+        return failedContentPullRespModel;
+
+
     }
 
     public function getMsg(string topic, string message) returns @tainted repository:MessageDetails? {

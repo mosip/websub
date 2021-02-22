@@ -26,6 +26,7 @@ service failedcontent on hubListener {
         string callbackParameter="";
         string timestampParameter="";
         int messageCountParameter=config:getAsInt("mosip.hub.message_count_default",10);
+        int maxCountParameter=config:getAsInt("mosip.hub.message_count_max",1000);
         if(topic is string && topic!= ""){
          topicParameter=<string>topic;
         }else{
@@ -45,10 +46,14 @@ service failedcontent on hubListener {
              return ();
         }
         if(messageCountValue is int){
+            if (messageCountValue>maxCountParameter) {
+                check caller->badRequest(MESSAGE_COUNT_MAX_ERROR_MESSAGE.toString().concat(messageCountValue.toString()));
+             return ();
+            }
          messageCountParameter= messageCountValue;
         }
-        repository:FailedContentPullRespModel[]|error fp=hubServiceImpl.getFailedContent(subscriberSignatureValue,topicParameter , callbackParameter ,timestampParameter ,messageCountParameter);
-        if(fp is repository:FailedContentPullRespModel[]){
+        repository:FailedContentPullRespModel|error fp=hubServiceImpl.getFailedContent(subscriberSignatureValue,topicParameter , callbackParameter ,timestampParameter ,messageCountParameter);
+        if(fp is repository:FailedContentPullRespModel){
         json|error j = json.constructFrom(fp);      
         if(j is json){
         check caller->respond(j);

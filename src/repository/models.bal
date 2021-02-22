@@ -43,7 +43,15 @@ public type FailedDeliveryDetails record {|
     string failureError = "";
 |};
 
+public type FailedDeliveryMsgIDs record {|
+    string msgID = "";
+|};
+
 public type FailedContentPullRespModel record {|
+    FailedContentModel[] failedcontents = [];
+|};
+
+public type FailedContentModel record {|
     string message = "";
     string timestamp = "";
 |};

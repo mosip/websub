@@ -59,18 +59,21 @@ public type DeliveryReportPersistence object {
     public function getFailedDeliveryBySubID(string subID, string timestamp, int count) returns @tainted string[] {
         string[] msgIDs = [];
         int msgIDIndex = 0;
+        var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
         jdbc:Parameter subsIDParameter = {sqlType: jdbc:TYPE_VARCHAR, value: subID};
         jdbc:Parameter timestampParameter = {sqlType: jdbc:TYPE_TIMESTAMP, value: timestamp};
         jdbc:Parameter resultCount = {sqlType: jdbc:TYPE_INTEGER, value: count};
-        var dbResult = self.jdbcClient->select(SELECT_FROM_FAILED_DELIVERY_TABLE_BY_SUBID_AND_TIMESTAMP, FailedDeliveryDetails, subsIDParameter, timestampParameter, resultCount);
+        jdbc:Parameter updatedBy = {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
+        jdbc:Parameter updatedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
+        var dbResult = self.jdbcClient->select(SELECT_AND_UPDATE_FROM_FAILED_DELIVERY_TABLE_BY_SUBID_AND_TIMESTAMP, FailedDeliveryMsgIDs, subsIDParameter, timestampParameter, resultCount,updatedDTimes,updatedBy,updatedDTimes);
         if (dbResult is table<record {}>) {
             while (dbResult.hasNext()) {
-                var failedDeliveryDetails = trap <FailedDeliveryDetails>dbResult.getNext();
-                if (failedDeliveryDetails is FailedDeliveryDetails) {
-                    msgIDs[msgIDIndex] = failedDeliveryDetails.msgID;
+                var  msgID = trap<FailedDeliveryMsgIDs>dbResult.getNext();
+                if (msgID is FailedDeliveryMsgIDs) {
+                    msgIDs[msgIDIndex] = msgID.msgID;
                     msgIDIndex += 1;
                 } else {
-                    string errCause = <string>failedDeliveryDetails.detail()?.message;
+                    string errCause = <string>msgID.detail()?.message;
                     log:printError("Error retreiving failed delivery from subID from the database: " + errCause);
                 }
             }
