@@ -1,4 +1,7 @@
+import ballerina/lang.'string;
+import ballerina/lang.'array;
 import ballerina/log;
+
 import ballerina/time;
 import ballerinax/java.jdbc;
 
@@ -31,11 +34,11 @@ public type MessagePersistenceImpl object {
         self.handleUpdate(returned, "insert new message");
     }
 
-    public function findMessageByHash(string hash) returns @tainted MessageDetails[]{
-     MessageDetails[] messageDetails = [];
+    public function findMessageByHash(string hash) returns @tainted MessageDetails[] {
+        MessageDetails[] messageDetails = [];
         int messageIndex = 0;
-     jdbc:Parameter hashParameter = {sqlType: jdbc:TYPE_VARCHAR, value: hash};
-     var dbResult = self.jdbcClient->select(SELECT_FROM_MESSAGE_BY_HASH,MessageDetails, hashParameter);
+        jdbc:Parameter hashParameter = {sqlType: jdbc:TYPE_VARCHAR, value: hash};
+        var dbResult = self.jdbcClient->select(SELECT_FROM_MESSAGE_BY_HASH, MessageDetails, hashParameter);
 
         if (dbResult is table<record {}>) {
             while (dbResult.hasNext()) {
@@ -56,19 +59,19 @@ public type MessagePersistenceImpl object {
     }
 
 
-    public function findMessageByTopicAndMessage(string topic,string message) returns @tainted MessageDetails{
-     MessageDetails messageDetails = {};
-     
+    public function findMessageByTopicAndMessage(string topic, string message) returns @tainted MessageDetails {
+        MessageDetails messageDetails = {};
+
         jdbc:Parameter topicParameter = {sqlType: jdbc:TYPE_VARCHAR, value: topic};
         jdbc:Parameter messageParameter = {sqlType: jdbc:TYPE_VARCHAR, value: message};
-        
-     var dbResult = self.jdbcClient->select(SELECT_FROM_MESSAGE_BY_TOPIC_MESSAGE,MessageDetails, topic,message);
+
+        var dbResult = self.jdbcClient->select(SELECT_FROM_MESSAGE_BY_TOPIC_MESSAGE, MessageDetails, topic, message);
 
         if (dbResult is table<record {}>) {
             while (dbResult.hasNext()) {
                 var messageDetail = trap <MessageDetails>dbResult.getNext();
                 if (messageDetail is MessageDetails) {
-                    messageDetails= messageDetail;
+                    messageDetails = messageDetail;
                 } else {
                     string errCause = <string>messageDetail.detail()?.message;
                     log:printError("Error retreiving topic registration details from the database: " + errCause);
@@ -81,20 +84,41 @@ public type MessagePersistenceImpl object {
         return messageDetails;
     }
 
-    public function findMessageByID(string ID) returns @tainted MessageDetails{
-    
-     MessageDetails messageDetails = {};
-     
-        jdbc:Parameter IDParamater = {sqlType: jdbc:TYPE_VARCHAR, value: ID};
-    
-        
-     var dbResult = self.jdbcClient->select(SELECT_FROM_MESSAGE_BY_ID,MessageDetails, ID);
+    public function findMessageByIDs(string[] msgIDs) returns @tainted FailedContentModel[] {
 
-         if (dbResult is table<record {}>) {
+        FailedContentModel[] failedContentModels = [];
+        int index = 0;
+        string IDs = "";
+        foreach string msgID in msgIDs {
+            if (index == msgIDs.length() - 1) {
+                    IDs=IDs.concat(msgID);
+            } else {
+                    IDs=IDs.concat(msgID,",");
+            }
+            index = index + 1;
+        }
+        jdbc:Parameter IDParamater = {sqlType: jdbc:TYPE_VARCHAR, value: IDs};
+
+        index = 0;
+        var dbResult = self.jdbcClient->select(SELECT_FROM_MESSAGE_BY_ID, MessageDetails, IDs);
+
+        if (dbResult is table<record {}>) {
             while (dbResult.hasNext()) {
                 var messageDetail = trap <MessageDetails>dbResult.getNext();
                 if (messageDetail is MessageDetails) {
-                    messageDetails = messageDetail;
+                    string messageDecodedString = "";
+                    byte[]|error messageDecodedBytes = 'array:fromBase64(messageDetail.message);
+                    if (messageDecodedBytes is byte[]) {
+                        string|error msgDecodedString = 'string:fromBytes(messageDecodedBytes);
+                        if (msgDecodedString is string) {
+                            messageDecodedString = msgDecodedString;
+                        }
+                    }
+                    failedContentModels[index] = {
+                        message: messageDecodedString,
+                        timestamp: messageDetail.publishedDTimes
+                    };
+                    index = index + 1;
                 } else {
                     string errCause = <string>messageDetail.detail()?.message;
                     log:printError("Error retreiving failed delivery from subID from the database: " + errCause);
@@ -104,7 +128,7 @@ public type MessagePersistenceImpl object {
             string errCause = <string>dbResult.detail()?.message;
             log:printError("Error retreiving data from the database: " + errCause);
         }
-        return messageDetails; 
+        return failedContentModels;
     }
 
     function handleUpdate(jdbc:UpdateResult|jdbc:Error returned, string message) {
@@ -117,5 +141,4 @@ public type MessagePersistenceImpl object {
 
 
 
-    
 };

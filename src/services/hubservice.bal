@@ -2,7 +2,6 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/java;
 import ballerina/lang.'string;
-import ballerina/lang.'array;
 import ballerina/log;
 import ballerina/time;
 import ballerina/websub;
@@ -114,24 +113,7 @@ public type HubServiceImpl object {
             return error("SIGNATUREMATCHERROR", message = "hmac didnot match");
         }
         string[] msgIDs = self.deliveryReportPersistence.getFailedDeliveryBySubID(subscriptionExtendedDetails.id, timestamp, messagecount);
-        repository:FailedContentModel[] failedContentModels = [];
-        int index = 0;
-        foreach string msgID in msgIDs {
-            repository:MessageDetails messageDetail = self.messagePersistenceImpl.findMessageByID(msgID);
-            string messageDecodedString = "";
-            byte[]|error messageDecodedBytes = 'array:fromBase64(messageDetail.message);
-            if (messageDecodedBytes is byte[]) {
-                string|error msgDecodedString = 'string:fromBytes(messageDecodedBytes);
-                if (msgDecodedString is string) {
-                    messageDecodedString = msgDecodedString;
-                }
-            }
-            failedContentModels[index] = {
-                message: messageDecodedString,
-                timestamp: messageDetail.publishedDTimes
-            };
-            index = index + 1;
-        }
+        repository:FailedContentModel[] failedContentModels = self.messagePersistenceImpl.findMessageByIDs(msgIDs);
         repository:FailedContentPullRespModel failedContentPullRespModel = {
             failedcontents: failedContentModels
         };
