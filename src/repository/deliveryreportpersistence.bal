@@ -50,10 +50,57 @@ public type DeliveryReportPersistence object {
         var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
         jdbc:Parameter msgID = {sqlType: jdbc:TYPE_VARCHAR, value: failedDeliveryDetails.msgID};
         jdbc:Parameter subsID = {sqlType: jdbc:TYPE_VARCHAR, value: failedDeliveryDetails.subsID};
-        jdbc:Parameter updatedBy= {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
+        jdbc:Parameter updatedBy = {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
         jdbc:Parameter updatedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
-        var returned = self.jdbcClient->update(DELETE_FROM_FAILED_DELIVERY_TABLE,updatedBy,updatedDTimes, msgID, subsID);
+        var returned = self.jdbcClient->update(DELETE_FROM_FAILED_DELIVERY_TABLE, updatedBy, updatedDTimes, msgID, subsID);
         self.handleUpdate(returned, "remove failed query new delivery report");
+    }
+
+    public function getFailedDeliveryBySubID(string subID, string timestamp, int count) returns @tainted string[] {
+        string[] msgIDs = [];
+        int msgIDIndex = 0;
+        var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
+        jdbc:Parameter subsIDParameter = {sqlType: jdbc:TYPE_VARCHAR, value: subID};
+        jdbc:Parameter timestampParameter = {sqlType: jdbc:TYPE_TIMESTAMP, value: timestamp};
+        jdbc:Parameter resultCount = {sqlType: jdbc:TYPE_INTEGER, value: count};
+        jdbc:Parameter updatedBy = {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
+        jdbc:Parameter updatedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
+        var dbResult = self.jdbcClient->select(SELECT_AND_UPDATE_FROM_FAILED_DELIVERY_TABLE_BY_SUBID_AND_TIMESTAMP, FailedDeliveryMsgIDs, subsIDParameter, timestampParameter, resultCount,updatedDTimes,updatedBy,updatedDTimes);
+        if (dbResult is table<record {}>) {
+            while (dbResult.hasNext()) {
+                var  msgID = trap<FailedDeliveryMsgIDs>dbResult.getNext();
+                if (msgID is FailedDeliveryMsgIDs) {
+                    msgIDs[msgIDIndex] = msgID.msgID;
+                    msgIDIndex += 1;
+                } else {
+                    string errCause = <string>msgID.detail()?.message;
+                    log:printError("Error retreiving failed delivery from subID from the database: " + errCause);
+                }
+            }
+        } else {
+            string errCause = <string>dbResult.detail()?.message;
+            log:printError("Error retreiving data from the database: " + errCause);
+        }
+        return msgIDs;
+    }
+
+    public function updateLastFetchTimestamp(string[] msgIDs, string subID, string lastFetchDTimes) {
+        var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
+        jdbc:Parameter[][] parameters = [];
+        int index = 0;
+        foreach string msgID in msgIDs {
+            parameters[index] = [{sqlType: jdbc:TYPE_TIMESTAMP, value: lastFetchDTimes}, {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN}, {sqlType: jdbc:TYPE_TIMESTAMP, value: lastFetchDTimes}, {sqlType: jdbc:TYPE_VARCHAR, value: msgID}, {sqlType: jdbc:TYPE_VARCHAR, value: subID}];
+            index = index + 1;
+        }
+
+
+
+        jdbc:BatchUpdateResult retBatch = self.jdbcClient->batchUpdate(UPDATE_LAST_FETCH_TIMESTAMP_INTO_FAILED_DELIVERY_TABLE, true, ...parameters);
+        error? e = retBatch.returnedError;
+        if (e is error) {
+            log:printError("Batch update operation failed: "+ <string>e.detail()?.message);
+        }
+
     }
 
     function handleUpdate(jdbc:UpdateResult|jdbc:Error returned, string message) {

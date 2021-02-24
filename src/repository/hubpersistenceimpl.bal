@@ -1,9 +1,9 @@
-import ballerina/log;
-import ballerinax/java.jdbc;
-import ballerina/time;
-import ballerina/stringutils;
-import mosip/utils;
 import ballerina/java;
+import ballerina/log;
+import ballerina/stringutils;
+import ballerina/time;
+import ballerinax/java.jdbc;
+import mosip/utils;
 
 
 public type HubPersistenceImpl object {
@@ -23,8 +23,8 @@ public type HubPersistenceImpl object {
     # + return - An `error` if an error occurred while adding the subscription or else `()` otherwise
     public function addSubscription(SubscriptionDetails subscriptionDetails) returns error? {
         var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
-        string callback= stringutils:split(subscriptionDetails.callback, "[\\?|\\#]")[0];
-        var uuid=utils:createRandomUUID();
+        string callback = stringutils:split(subscriptionDetails.callback, "[\\?|\\#]")[0];
+        var uuid = utils:createRandomUUID();
         jdbc:Parameter id = {sqlType: jdbc:TYPE_VARCHAR, value: java:toString(uuid)};
         jdbc:Parameter topic = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionDetails.topic};
         jdbc:Parameter callbackParameter = {sqlType: jdbc:TYPE_VARCHAR, value: callback};
@@ -38,12 +38,30 @@ public type HubPersistenceImpl object {
         jdbc:Parameter updatedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
         jdbc:Parameter isDeleted = {sqlType: jdbc:TYPE_BOOLEAN, value: false};
         jdbc:Parameter deletedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
+        var dbResult = self.jdbcClient->select(SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK, SubscriptionExtendedDetails, topic,
+            callbackParameter);
+        
+        if (dbResult is table<record {}>) {
+            if (dbResult.hasNext()) {
+                SubscriptionExtendedDetails subscriptionResult = {};
+                var subscriptionExtendedDetails = trap <SubscriptionExtendedDetails>dbResult.getNext();
+                if (subscriptionExtendedDetails is SubscriptionExtendedDetails) {
+                    subscriptionResult=subscriptionExtendedDetails;
+                }
+                var returned = self.jdbcClient->update(UPDATE_SUBSCRIPTIONS, topic,
+                    callbackParameter, secret, leaseSeconds, createdAt, createdBy, createdDTimes, subscriptionResult.id);
+                self.handleUpdate(returned, "updating existing sub subs");
+                
+            } else {
+                var returned = self.jdbcClient->update(INSERT_INTO_SUBSCRIPTIONS_TABLE, id, topic,
+                    callbackParameter, secret, leaseSeconds, createdAt, createdBy, createdDTimes, updatedBy, updatedDTimes, isDeleted, deletedDTimes);
+                self.handleUpdate(returned, "insert new subs");
+            }
+        } else {
+            string errCause = <string>dbResult.detail()?.message;
+            log:printError("Error retreiving data from the database: " + errCause);
+        }
 
-        var returned = self.jdbcClient->update(SOFT_DELETE_FROM_SUBSCRIPTIONS,createdBy,createdDTimes, topic,callbackParameter);
-        self.handleUpdate(returned, "delete subs if exist");
-        returned = self.jdbcClient->update(INSERT_INTO_SUBSCRIPTIONS_TABLE, id, topic,
-            callbackParameter, secret, leaseSeconds,createdAt,createdBy,createdDTimes,updatedBy,updatedDTimes,isDeleted,deletedDTimes);
-        self.handleUpdate(returned, "insert new subs");
     }
 
     # Removes subscription details.
@@ -54,14 +72,14 @@ public type HubPersistenceImpl object {
     # + subscriptionDetails - The details of the subscription to remove
     # + return - An `error` if an error occurred while removing the subscription or else `()` otherwise
     public function removeSubscription(SubscriptionDetails subscriptionDetails) returns error? {
-        string callback= stringutils:split(subscriptionDetails.callback, "[\\?|\\#]")[0];
+        string callback = stringutils:split(subscriptionDetails.callback, "[\\?|\\#]")[0];
         var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
         jdbc:Parameter topic = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionDetails.topic};
         jdbc:Parameter callbackParameter = {sqlType: jdbc:TYPE_VARCHAR, value: callback};
-        jdbc:Parameter updatedBy= {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
+        jdbc:Parameter updatedBy = {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
         jdbc:Parameter updatedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
-        var returned = self.jdbcClient->update(SOFT_DELETE_FROM_SUBSCRIPTIONS,updatedBy,
-        updatedDTimes, topic,callbackParameter);
+        var returned = self.jdbcClient->update(SOFT_DELETE_FROM_SUBSCRIPTIONS, updatedBy,
+            updatedDTimes, topic, callbackParameter);
         self.handleUpdate(returned, "Removed subscription");
     }
 
@@ -81,7 +99,7 @@ public type HubPersistenceImpl object {
         jdbc:Parameter updatedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
         jdbc:Parameter isDeleted = {sqlType: jdbc:TYPE_BOOLEAN, value: false};
         jdbc:Parameter deletedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
-        var returned = self.jdbcClient->update(INSERT_INTO_TOPICS, topicParameter,createdBy,createdDTimes,updatedBy,updatedDTimes,isDeleted,deletedDTimes);
+        var returned = self.jdbcClient->update(INSERT_INTO_TOPICS, topicParameter, createdBy, createdDTimes, updatedBy, updatedDTimes, isDeleted, deletedDTimes);
         self.handleUpdate(returned, "Add topic");
     }
 
@@ -98,7 +116,7 @@ public type HubPersistenceImpl object {
         jdbc:Parameter p2 = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
         jdbc:Parameter p3 = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
         jdbc:Parameter p4 = {sqlType: jdbc:TYPE_VARCHAR, value: topic};
-        var returned = self.jdbcClient->update(DELETE_FROM_TOPICS, p1,p2,p3,p4);
+        var returned = self.jdbcClient->update(DELETE_FROM_TOPICS, p1, p2, p3, p4);
         self.handleUpdate(returned, "Removed topic");
     }
 
@@ -109,7 +127,7 @@ public type HubPersistenceImpl object {
     #
     # + return - An array of subscriber details or else an `error` if an error occurred while retrieving
     #            the subscriptions
-    public function retrieveAllSubscribers() returns  @tainted SubscriptionDetails[]|error {
+    public function retrieveAllSubscribers() returns @tainted SubscriptionDetails[]|error {
         SubscriptionDetails[] subscriptions = [];
         int subscriptionIndex = 0;
         var dbResult = self.jdbcClient->select(SELECT_FROM_SUBSCRIPTIONS, SubscriptionDetails);
@@ -137,7 +155,7 @@ public type HubPersistenceImpl object {
     # ```
     #
     # + return - An array of topics or else `error` if an error occurred while retrieving the topics
-    public function retrieveTopics() returns  @tainted string[]|error {
+    public function retrieveTopics() returns @tainted string[]|error {
         string[] topics = [];
         int topicIndex = 0;
         var dbResult = self.jdbcClient->select(SELECT_ALL_FROM_TOPICS, TopicRegistration);

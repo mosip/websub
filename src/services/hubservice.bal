@@ -10,6 +10,7 @@ import mosip/utils;
 
 
 
+
 public type HubServiceImpl object {
 
 
@@ -73,7 +74,7 @@ public type HubServiceImpl object {
     }
 
     public function onFailedDelivery(string callback, string topic, websub:WebSubContent content, http:Response|error response, websub:FailureReason reason) {
-     
+
         string|xml|json|byte[]|io:ReadableByteChannel payloadBytes = content.payload;
         string|error message = "";
         if (payloadBytes is byte[]) {
@@ -84,12 +85,12 @@ public type HubServiceImpl object {
         if (message is string) {
             messageDetails = self.getMsg(topic, message);
         }
-        string payloadError="";
-        if(response is http:Response){
-          json|http:ClientError? payloadErrorJSON =response.getJsonPayload();
-           if(payloadErrorJSON is json){
-               payloadError=payloadErrorJSON.toJsonString();
-             }
+        string payloadError = "";
+        if (response is http:Response) {
+            json|http:ClientError? payloadErrorJSON = response.getJsonPayload();
+            if (payloadErrorJSON is json) {
+                payloadError = payloadErrorJSON.toJsonString();
+            }
         }
         if (messageDetails is repository:MessageDetails) {
             repository:SubscriptionExtendedDetails subscriptionExtendedDetails = self.subsOperations.getSubscription(topic, callback);
@@ -102,6 +103,23 @@ public type HubServiceImpl object {
             };
             var result = self.deliveryReportPersistence.addFailedDelivery(failedDeliveryDetails);
         }
+    }
+
+
+    public function getFailedContent(string subscriberSignature, string topic, string callback, string timestamp, int messagecount) returns @untainted repository:FailedContentPullRespModel|error {
+        repository:SubscriptionExtendedDetails subscriptionExtendedDetails = self.subsOperations.getSubscription(topic, callback);
+        string hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp, subscriptionExtendedDetails.secret);
+        if (hmacSubsSignature != subscriberSignature) {
+            return error("SIGNATUREMATCHERROR", message = "hmac didnot match");
+        }
+        string[] msgIDs = self.deliveryReportPersistence.getFailedDeliveryBySubID(subscriptionExtendedDetails.id, timestamp, messagecount);
+        repository:FailedContentModel[] failedContentModels = self.messagePersistenceImpl.findMessageByIDs(msgIDs);
+        repository:FailedContentPullRespModel failedContentPullRespModel = {
+            failedcontents: failedContentModels
+        };
+        return failedContentPullRespModel;
+
+
     }
 
     public function getMsg(string topic, string message) returns @tainted repository:MessageDetails? {
