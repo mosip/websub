@@ -138,4 +138,9 @@ public type HubServiceImpl object {
     }
 
 
+
+
+    public function getUnSendMessages() returns @tainted repository:RestartRepublishContentModel[] {
+    return self.messagePersistenceImpl.getUnsendMessges();
+    }
 };

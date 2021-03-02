@@ -141,4 +141,39 @@ public type MessagePersistenceImpl object {
 
 
 
+
+
+    public function getUnsendMessges() returns @tainted RestartRepublishContentModel[]{
+      RestartRepublishContentModel[] restartRepublishContentModels = [];
+        int index = 0;
+        var dbResult = self.jdbcClient->select(RESTART_REPUBLISH_MESSAGES, RestartRepublishContentModel);
+
+        if (dbResult is table<record {}>) {
+            while (dbResult.hasNext()) {
+                var restartRepublishContent = trap <RestartRepublishContentModel>dbResult.getNext();
+                if (restartRepublishContent is RestartRepublishContentModel) {
+                    string messageDecodedString = "";
+                    byte[]|error messageDecodedBytes = 'array:fromBase64(restartRepublishContent.message);
+                    if (messageDecodedBytes is byte[]) {
+                        string|error msgDecodedString = 'string:fromBytes(messageDecodedBytes);
+                        if (msgDecodedString is string) {
+                            messageDecodedString = msgDecodedString;
+                        }
+                    }
+                    restartRepublishContentModels[index] = {
+                        message: messageDecodedString,
+                        topic: restartRepublishContent.topic
+                    };
+                    index = index + 1;
+                } else {
+                    string errCause = <string>restartRepublishContent.detail()?.message;
+                    log:printError("Error retreiving unsend messaged from message store: " + errCause);
+                }
+            }
+        } else {
+            string errCause = <string>dbResult.detail()?.message;
+            log:printError("Error retreiving data from the database: " + errCause);
+        }
+        return restartRepublishContentModels;
+    }
 };

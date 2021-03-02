@@ -1,11 +1,11 @@
 import ballerina/config;
 import ballerina/http;
+import ballerina/log;
 import ballerina/runtime;
 import ballerina/websub;
 import ballerinax/java.jdbc;
-import mosip/repository;
 import mosip/filters as fil;
-import ballerina/log;
+import mosip/repository;
 
 import mosip/services;
 
@@ -26,7 +26,7 @@ services:HubServiceImpl hubServiceImpl = new services:HubServiceImpl(deliveryRep
 
 http:RequestFilter requestFilter = new fil:RequestFilter(hubServiceImpl);
 listener http:Listener hubListener = new http:Listener(config:getAsInt("mosip.hub.port"),
-                    config = {filters: [requestFilter]});
+    config = {filters: [requestFilter]});
 
 public function tapOnDeliveryImpl(string callback, string topic, websub:WebSubContent content) {
     hubServiceImpl.onSucessDelivery(callback, topic, content);
@@ -37,6 +37,8 @@ public function tapOnDeliveryFailureImpl(string callback, string topic, websub:W
 }
 
 public function main() {
+    repository:RestartRepublishContentModel[] unSendMessages = hubServiceImpl.getUnSendMessages();
+
     websub:HubPersistenceStore hubpimpl = new repository:HubPersistenceImpl(jdbcClient);
     log:printInfo("Starting up the Ballerina Hub Service");
 
@@ -62,6 +64,19 @@ public function main() {
     );
     if (result is websub:Hub) {
         webSubHub = result;
+        if (unSendMessages.length() > 0) {
+            foreach var unSendMessage in unSendMessages {
+                var publishResponse = webSubHub.publishUpdate(unSendMessage.topic, unSendMessage.message);
+                if (publishResponse is error) {
+                    log:printError("Error notifying hub: " +
+                        <string>publishResponse.detail()?.message);
+                } else {
+                    log:printInfo("Update notification successful!");
+                }
+                runtime:sleep(2000);
+            }
+        }
+
     } else if (result is websub:HubStartedUpError) {
         webSubHub = result.startedUpHub;
     } else {

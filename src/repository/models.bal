@@ -55,3 +55,8 @@ public type FailedContentModel record {|
     string message = "";
     string timestamp = "";
 |};
+
+public type RestartRepublishContentModel record {|
+    string message = "";
+    string topic = "";
+|};
