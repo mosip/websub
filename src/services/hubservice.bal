@@ -4,6 +4,7 @@ import ballerina/java;
 import ballerina/lang.'string;
 import ballerina/log;
 import ballerina/time;
+import ballerina/config;
 import ballerina/websub;
 import mosip/repository;
 import mosip/utils;
@@ -107,12 +108,19 @@ public type HubServiceImpl object {
 
 
     public function getFailedContent(string subscriberSignature, string topic, string callback, string timestamp, int messagecount) returns @untainted repository:FailedContentPullRespModel|error {
+        int count=messagecount;
         repository:SubscriptionExtendedDetails subscriptionExtendedDetails = self.subsOperations.getSubscription(topic, callback);
-        string hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp, subscriptionExtendedDetails.secret);
+        string hmacSubsSignature = "";
+        if(count == 0){
+        hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp, subscriptionExtendedDetails.secret);
+        count=config:getAsInt("mosip.hub.message_count_default", 10);
+        }else{
+        hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp + count.toString(), subscriptionExtendedDetails.secret);
+        }
         if (hmacSubsSignature != subscriberSignature) {
             return error("SIGNATUREMATCHERROR", message = "hmac didnot match");
         }
-        string[] msgIDs = self.deliveryReportPersistence.getFailedDeliveryBySubID(subscriptionExtendedDetails.id, timestamp, messagecount);
+        string[] msgIDs = self.deliveryReportPersistence.getFailedDeliveryBySubID(subscriptionExtendedDetails.id, timestamp, count);
         repository:FailedContentModel[] failedContentModels = self.messagePersistenceImpl.findMessageByIDs(msgIDs);
         repository:FailedContentPullRespModel failedContentPullRespModel = {
             failedcontents: failedContentModels
