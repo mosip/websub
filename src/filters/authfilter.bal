@@ -2,6 +2,7 @@ import ballerina/config;
 import ballerina/http;
 import ballerina/log;
 import ballerina/stringutils;
+import ballerina/encoding;
 
 
 
@@ -17,6 +18,17 @@ public type AuthFilter object {
     public function filterRequest(http:Caller caller, http:Request request,
         http:FilterContext context) returns boolean {
         if (config:getAsString("mosip.auth.filter_status", "disable") == "enable") {
+            string topic="";
+            map<string>|error formParams = request.getFormParams();
+            string? topicParam=request.getQueryParamValue("hub.topic");
+            if(formParams is map<string>){
+            string|error topicDecoded =  encoding:decodeUriComponent(formParams.get("hub.topic"), "UTF-8");
+            if(topicDecoded is string){
+                topic=topicDecoded;
+            }
+            }else if(topicParam is string){
+            topic=topicParam;
+            }
             http:Response errorsResponse = new;
             http:Cookie[] cookies = request.getCookies();
             if (cookies.length() < 0) {
@@ -47,10 +59,13 @@ public type AuthFilter object {
                                     map<json> res = <map<json>>resWrapper["response"];
                                     // for now we will be adding topics as roles because authservice doesnot returns scopes. Later we will add topic as a scope.
                                     string roles = res["role"].toString();
+                                    log:printInfo(roles);
                                     string[] rolesArray = stringutils:split(roles, ",");
                                     int i = 0;
                                     while (i < rolesArray.length()) {
-                                        if (rolesArray[i] == request.getQueryParamValue("hub.topic")) {
+                                        log:printInfo(rolesArray[i]);
+                                        log:printInfo(topic);
+                                        if (rolesArray[i] == topic) {
                                             return true;
                                         }
                                         i = i + 1;
