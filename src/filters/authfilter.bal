@@ -87,7 +87,7 @@ public type AuthFilter object {
                         }
                         else {
                             errorsResponse.statusCode = 500;
-                            errorsResponse.setPayload("Error calling auth server");
+                            errorsResponse.setPayload("Error in auth server");
                             var result = caller->respond(errorsResponse);
                             handleError(result);
                             return false;
