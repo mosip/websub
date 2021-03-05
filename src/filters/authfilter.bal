@@ -18,16 +18,23 @@ public type AuthFilter object {
     public function filterRequest(http:Caller caller, http:Request request,
         http:FilterContext context) returns boolean {
         if (config:getAsString("mosip.auth.filter_status", "disable") == "enable") {
-            string topic="";
+            string scope="";
             map<string>|error formParams = request.getFormParams();
-            string? topicParam=request.getQueryParamValue("hub.topic");
+            string? topicParam=request.getQueryParamValue("TOPIC");
             if(formParams is map<string>){
-            string|error topicDecoded =  encoding:decodeUriComponent(formParams.get("hub.topic"), "UTF-8");
+            string|error topicDecoded =  encoding:decodeUriComponent(formParams.get("TOPIC"), "UTF-8");
             if(topicDecoded is string){
-                topic=topicDecoded;
+                string? modeParam=formParams.get("MODE");
+                if(modeParam is string){
+                    if(modeParam == "REGISTER"){
+                       scope="PUBLISH_SCOPE_PREFIX"+topicDecoded; 
+                    }else{
+                        scope="SUBSCRIBE_SCOPE_PREFIX"+topicDecoded;
+                    }
+                }
             }
             }else if(topicParam is string){
-            topic=topicParam;
+            scope="PUBLISH_SCOPE_PREFIX"+topicParam;
             }
             http:Response errorsResponse = new;
             http:Cookie[] cookies = request.getCookies();
@@ -63,9 +70,7 @@ public type AuthFilter object {
                                     string[] rolesArray = stringutils:split(roles, ",");
                                     int i = 0;
                                     while (i < rolesArray.length()) {
-                                        log:printInfo(rolesArray[i]);
-                                        log:printInfo(topic);
-                                        if (rolesArray[i] == topic) {
+                                        if (rolesArray[i] == scope) {
                                             return true;
                                         }
                                         i = i + 1;

@@ -1,0 +1,9 @@
+const string REGISTER = "register";
+const string PUBLISH_SCOPE_PREFIX = "SUBSCRIBE_";
+const string SUBSCRIBE_SCOPE_PREFIX = "SUBSCRIBE_";
+const string MODE = "hub.mode";
+const string TOPIC = "hub.topic";
+const string CALLBACK = "callback";
+const string TIMESTAMP = "timestamp";
+const string MESSAGECOUNT = "messageCount";
+const string TIMESTAMP_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
