@@ -3,7 +3,6 @@ import ballerina/http;
 import ballerina/lang.'int;
 import mosip/repository;
 import ballerina/encoding;
-import ballerina/stringutils;
 import ballerina/lang.'string;
 
 @http:ServiceConfig {
@@ -56,7 +55,7 @@ service failedcontent on hubListener {
         } else {
             check caller->badRequest(MESSAGE_COUNT_PARSE_ERROR_MESSAGE);
         }
-        repository:FailedContentPullRespModel|error fp = hubServiceImpl.getFaileadContent(subscriberSignatureValue, topicParameter, callbackParameter, timestampParameter, messageCountParameter);
+        repository:FailedContentPullRespModel|error fp = hubServiceImpl.getFailedContent(subscriberSignatureValue, topicParameter, callbackParameter, timestampParameter, messageCountParameter);
         if (fp is repository:FailedContentPullRespModel) {
             json|error j = json.constructFrom(fp);
             if (j is json) {

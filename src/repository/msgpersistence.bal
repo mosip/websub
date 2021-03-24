@@ -2,6 +2,7 @@ import ballerina/lang.'string;
 import ballerina/lang.'array;
 import ballerina/log;
 
+
 import ballerina/time;
 import ballerinax/java.jdbc;
 
@@ -143,10 +144,11 @@ public type MessagePersistenceImpl object {
 
 
 
-    public function getUnsendMessges() returns @tainted RestartRepublishContentModel[]{
+    public function getUnsentMessages(string timestamp) returns @tainted RestartRepublishContentModel[]{     
+      jdbc:Parameter timestampParameter = {sqlType: jdbc:TYPE_TIMESTAMP, value: timestamp};
       RestartRepublishContentModel[] restartRepublishContentModels = [];
         int index = 0;
-        var dbResult = self.jdbcClient->select(RESTART_REPUBLISH_MESSAGES, RestartRepublishContentModel);
+        var dbResult = self.jdbcClient->select(RESTART_REPUBLISH_MESSAGES, RestartRepublishContentModel,timestampParameter,timestampParameter,timestampParameter);
 
         if (dbResult is table<record {}>) {
             while (dbResult.hasNext()) {

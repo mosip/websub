@@ -18,12 +18,11 @@ jdbc:Client jdbcClient = new ({
         dbOptions: {useSSL: false}
     }
     );
-
+   
 repository:DeliveryReportPersistence deliveryReportPersistence = new repository:DeliveryReportPersistence(jdbcClient);
 repository:MessagePersistenceImpl messagePersistenceImpl = new repository:MessagePersistenceImpl(jdbcClient);
 repository:SubsOperations subsOperations = new repository:SubsOperations(jdbcClient);
 services:HubServiceImpl hubServiceImpl = new services:HubServiceImpl(deliveryReportPersistence, messagePersistenceImpl, subsOperations);
-
 http:RequestFilter requestFilter = new fil:RequestFilter(hubServiceImpl);
 listener http:Listener hubListener = new http:Listener(config:getAsInt("mosip.hub.port"),
     config = {filters: [requestFilter]});
@@ -36,9 +35,9 @@ public function tapOnDeliveryFailureImpl(string callback, string topic, websub:W
     hubServiceImpl.onFailedDelivery(callback, topic, content, response, reason);
 }
 
-public function main() {
-    repository:RestartRepublishContentModel[] unSendMessages = hubServiceImpl.getUnSendMessages();
 
+public function main() {
+    repository:RestartRepublishContentModel[] unsentMessages = hubServiceImpl.getUnsentMessages(config:getAsString("mosip.hub.restart_republish_time_offset"));
     websub:HubPersistenceStore hubpimpl = new repository:HubPersistenceImpl(jdbcClient);
     log:printInfo("Starting up the Ballerina Hub Service");
 
@@ -64,9 +63,9 @@ public function main() {
     );
     if (result is websub:Hub) {
         webSubHub = result;
-        if (unSendMessages.length() > 0) {
-            foreach var unSendMessage in unSendMessages {
-                var publishResponse = webSubHub.publishUpdate(unSendMessage.topic, unSendMessage.message);
+        if (unsentMessages.length() > 0) {
+            foreach var unsentMessage in unsentMessages {
+                var publishResponse = webSubHub.publishUpdate(unsentMessage.topic, unsentMessage.message);
                 if (publishResponse is error) {
                     log:printError("Error notifying hub: " +
                         <string>publishResponse.detail()?.message);
