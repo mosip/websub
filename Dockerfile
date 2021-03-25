@@ -30,10 +30,13 @@ ENV hub_retry_backoff_factor_env=${hub_retry_backoff_factor}
 # environment variable to pass maximum time of the retry interval in milliseconds, at docker runtime
 ENV hub_retry_max_wait_interval_env=${hub_retry_max_wait_interval}
 
+# environment variable to pass maximum time of the retry interval in milliseconds, at docker runtime
+ENV hub_restart_republish_time_offset_env=${hub_restart_republish_time_offset}
+
 COPY ./target/bin/*.jar hub.jar
 
 EXPOSE 9091
 
 
 
-CMD ballerina run ./hub.jar --mosip.hub.datasource-url="${hub_datasource_url_env}" --mosip.hub.datasource-username="${hub_datasource_username_env}" --mosip.hub.datasource-password="${hub_datasource_password_env}" --mosip.hub.retry_count="${hub_retry_count_env}" --mosip.hub.retry_interval="${hub_retry_interval_env}" --mosip.hub.retry_backoff_factor="${hub_retry_backoff_factor_env}" --mosip.hub.retry_max_wait_interval="${hub_retry_max_wait_interval_env}" --mosip.hub.port=9191 ;\
+CMD ballerina run ./hub.jar --mosip.hub.datasource-url="${hub_datasource_url_env}" --mosip.hub.datasource-username="${hub_datasource_username_env}" --mosip.hub.datasource-password="${hub_datasource_password_env}" --mosip.hub.retry_count="${hub_retry_count_env}" --mosip.hub.retry_interval="${hub_retry_interval_env}" --mosip.hub.retry_backoff_factor="${hub_retry_backoff_factor_env}" --mosip.hub.retry_max_wait_interval="${hub_retry_max_wait_interval_env}" --mosip.hub.restart_republish_time_offset="${hub_restart_republish_time_offset_env}" --mosip.hub.port=9191 ;\
