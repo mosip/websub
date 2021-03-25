@@ -1,4 +1,4 @@
-FROM ballerina/ballerina:1.2.8
+FROM ballerina/ballerina:1.2.13
 
 # can be passed during Docker build as build time environment for spring profiles active 
 ARG hub_datasource_url
