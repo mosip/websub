@@ -2,7 +2,8 @@ import ballerina/config;
 import ballerina/http;
 import ballerina/lang.'int;
 import mosip/repository;
-
+import ballerina/encoding;
+import ballerina/lang.'string;
 
 @http:ServiceConfig {
     basePath: "/sync"
@@ -25,7 +26,7 @@ service failedcontent on hubListener {
         string topicParameter = "";
         string callbackParameter = "";
         string timestampParameter = "";
-        int messageCountParameter = config:getAsInt("mosip.hub.message_count_default", 10);
+        int messageCountParameter = 0;
         int maxCountParameter = config:getAsInt("mosip.hub.message_count_max", 1000);
         if (topic is string && topic != "") {
             topicParameter = <string>topic;
@@ -34,7 +35,7 @@ service failedcontent on hubListener {
             return ();
         }
         if (callback is string && callback != "") {
-            callbackParameter = <string>callback;
+          callbackParameter = check 'string:fromBytes(check encoding:decodeBase64Url(<string>callback));
         } else {
             check caller->badRequest(CALLBACK_EMPTY_ERROR_MESSAGE);
             return ();

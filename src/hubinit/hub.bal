@@ -1,11 +1,11 @@
 import ballerina/config;
 import ballerina/http;
+import ballerina/log;
 import ballerina/runtime;
 import ballerina/websub;
 import ballerinax/java.jdbc;
-import mosip/repository;
 import mosip/filters as fil;
-import ballerina/log;
+import mosip/repository;
 
 import mosip/services;
 
@@ -18,15 +18,14 @@ jdbc:Client jdbcClient = new ({
         dbOptions: {useSSL: false}
     }
     );
-
+   
 repository:DeliveryReportPersistence deliveryReportPersistence = new repository:DeliveryReportPersistence(jdbcClient);
 repository:MessagePersistenceImpl messagePersistenceImpl = new repository:MessagePersistenceImpl(jdbcClient);
 repository:SubsOperations subsOperations = new repository:SubsOperations(jdbcClient);
 services:HubServiceImpl hubServiceImpl = new services:HubServiceImpl(deliveryReportPersistence, messagePersistenceImpl, subsOperations);
-
 http:RequestFilter requestFilter = new fil:RequestFilter(hubServiceImpl);
 listener http:Listener hubListener = new http:Listener(config:getAsInt("mosip.hub.port"),
-                    config = {filters: [requestFilter]});
+    config = {filters: [requestFilter]});
 
 public function tapOnDeliveryImpl(string callback, string topic, websub:WebSubContent content) {
     hubServiceImpl.onSucessDelivery(callback, topic, content);
@@ -36,7 +35,9 @@ public function tapOnDeliveryFailureImpl(string callback, string topic, websub:W
     hubServiceImpl.onFailedDelivery(callback, topic, content, response, reason);
 }
 
+
 public function main() {
+    repository:RestartRepublishContentModel[] unsentMessages = hubServiceImpl.getUnsentMessages(config:getAsString("mosip.hub.restart_republish_time_offset"));
     websub:HubPersistenceStore hubpimpl = new repository:HubPersistenceImpl(jdbcClient);
     log:printInfo("Starting up the Ballerina Hub Service");
 
@@ -62,6 +63,19 @@ public function main() {
     );
     if (result is websub:Hub) {
         webSubHub = result;
+        if (unsentMessages.length() > 0) {
+            foreach var unsentMessage in unsentMessages {
+                var publishResponse = webSubHub.publishUpdate(unsentMessage.topic, unsentMessage.message);
+                if (publishResponse is error) {
+                    log:printError("Error notifying hub: " +
+                        <string>publishResponse.detail()?.message);
+                } else {
+                    log:printInfo("Update notification successful!");
+                }
+                runtime:sleep(2000);
+            }
+        }
+
     } else if (result is websub:HubStartedUpError) {
         webSubHub = result.startedUpHub;
     } else {
