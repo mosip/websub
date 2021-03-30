@@ -55,17 +55,21 @@ public type HubServiceImpl object {
     public function onSucessDelivery(string callback, string topic, websub:WebSubContent content) {
         string|xml|json|byte[]|io:ReadableByteChannel payloadBytes = content.payload;
         string|error message = "";
+       
         if (payloadBytes is byte[]) {
             message = 'string:fromBytes(payloadBytes);
-
         }
+         
         repository:MessageDetails? messageDetails = {};
+        boolean a=message is string;
+        log:printInfo(a.toString());
         if (message is string) {
             messageDetails = self.getMsg(topic, message);
         }
+        
         if (messageDetails is repository:MessageDetails) {
+            
             repository:SubscriptionExtendedDetails subscriptionExtendedDetails = self.subsOperations.getSubscription(topic, callback);
-            log:printInfo("service subid :"+subscriptionExtendedDetails.id);
             repository:SucessDeliveryDetails sucessDeliveryDetails = {
                 msgID: messageDetails.id,
                 subsID: subscriptionExtendedDetails.id,
@@ -134,7 +138,7 @@ public type HubServiceImpl object {
     public function getMsg(string topic, string message) returns @tainted repository:MessageDetails? {
         string base64EncodedMessage = message.toBytes().toBase64();
         string hash = utils:hashSha256(topic.concat(base64EncodedMessage));
-        repository:MessageDetails[] messageDetails = self.messagePersistenceImpl.findMessageByHash(hash);
+        repository:MessageDetails[] messageDetails = self.messagePersistenceImpl.findMessageByHash(hash);        
         if (messageDetails.length() > 1) {
             return self.messagePersistenceImpl.findMessageByTopicAndMessage(topic, base64EncodedMessage);
         } else {
@@ -145,7 +149,6 @@ public type HubServiceImpl object {
             }
         }
     }
-
 
 
 
