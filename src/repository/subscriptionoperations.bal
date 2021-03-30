@@ -14,8 +14,6 @@ public type SubsOperations object {
 
     public function getSubscription(string topic, string callback) returns @tainted SubscriptionExtendedDetails {
         string callbackParameter = stringutils:split(callback, "[\\?|\\#]")[0];
-        log:printInfo("sub operation callback:"+callbackParameter);
-         log:printInfo("sub operation topic:"+topic);
         var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
         jdbc:Parameter topicParameter = {sqlType: jdbc:TYPE_VARCHAR, value: topic};
         jdbc:Parameter callbackJDBCParameter = {sqlType: jdbc:TYPE_VARCHAR, value: callback};

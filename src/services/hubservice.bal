@@ -61,15 +61,16 @@ public type HubServiceImpl object {
         }
          
         repository:MessageDetails? messageDetails = {};
-        boolean a=message is string;
-        log:printInfo(a.toString());
+       
+       
         if (message is string) {
             messageDetails = self.getMsg(topic, message);
         }
         
         if (messageDetails is repository:MessageDetails) {
-            
+         
             repository:SubscriptionExtendedDetails subscriptionExtendedDetails = self.subsOperations.getSubscription(topic, callback);
+            log:printDebug("sub id for notification "+subscriptionExtendedDetails.id);
             repository:SucessDeliveryDetails sucessDeliveryDetails = {
                 msgID: messageDetails.id,
                 subsID: subscriptionExtendedDetails.id,
@@ -121,6 +122,7 @@ public type HubServiceImpl object {
         count=config:getAsInt("mosip.hub.message_count_default", 10);
         }else{
         hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp + count.toString(), subscriptionExtendedDetails.secret);
+        
         }
         if (hmacSubsSignature != subscriberSignature) {
             return error("SIGNATUREMATCHERROR", message = "hmac didnot match");
