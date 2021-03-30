@@ -28,10 +28,12 @@ listener http:Listener hubListener = new http:Listener(config:getAsInt("mosip.hu
     config = {filters: [requestFilter]});
 
 public function tapOnDeliveryImpl(string callback, string topic, websub:WebSubContent content) {
+    log:printInfo("success callback :"+callback+" topic : "+topic);
     hubServiceImpl.onSucessDelivery(callback, topic, content);
 }
 
 public function tapOnDeliveryFailureImpl(string callback, string topic, websub:WebSubContent content, http:Response|error response, websub:FailureReason reason) {
+     log:printInfo("failed callback :"+callback+" topic : "+topic);
     hubServiceImpl.onFailedDelivery(callback, topic, content, response, reason);
 }
 
