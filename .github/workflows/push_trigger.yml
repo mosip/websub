@@ -33,7 +33,6 @@ jobs:
           echo "GPG_TTY=$(tty)" >> $GITHUB_ENV
           echo "BRANCH_NAME=$(echo ${{ github.ref }} | sed -e 's,.*/\(.*\),\1,')" >> $GITHUB_ENV
 		  
-	  - uses: actions/checkout@v2
       - name: Ballerina Build
         uses: ballerina-platform/ballerina-action/@1.1.1
   
