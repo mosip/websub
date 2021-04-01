@@ -13,9 +13,10 @@
 
 -- object: websub.subscription | type: TABLE --
 -- DROP TABLE IF EXISTS websub.subscription CASCADE;
-CREATE TABLE websub.subscription(
-	topic character varying(256) NOT NULL,
-	callback character varying(256) NOT NULL,
+CREATE TABLE websub.subscription (
+	id character varying(36) NOT NULL,
+	topic character varying(256),
+	callback character varying(256),
 	secret character varying(256),
 	lease_seconds bigint,
 	created_at bigint,
@@ -26,7 +27,7 @@ CREATE TABLE websub.subscription(
 	upd_dtimes timestamp,
 	is_deleted boolean,
 	del_dtimes timestamp,
-	CONSTRAINT pk_sub_id PRIMARY KEY (topic,callback)
+	CONSTRAINT subscription_pk PRIMARY KEY (id)
 
 );
 -- ddl-end --
