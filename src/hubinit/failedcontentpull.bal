@@ -6,7 +6,7 @@ import ballerina/encoding;
 import ballerina/lang.'string;
 
 @http:ServiceConfig {
-    basePath: "/sync"
+    basePath: "/websub/sync"
 }
 service failedcontent on hubListener {
 
