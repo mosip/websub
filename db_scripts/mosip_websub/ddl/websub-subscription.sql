@@ -8,7 +8,7 @@
 -- 
 -- Modified Date        Modified By         Comments / Remarks
 -- ------------------------------------------------------------------------------------------
--- 
+-- Apr-2021	        Ram Bhatt           Primary Key changed to id from topic and callback
 -- ------------------------------------------------------------------------------------------
 
 -- object: websub.subscription | type: TABLE --
