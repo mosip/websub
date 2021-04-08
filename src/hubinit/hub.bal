@@ -53,7 +53,8 @@ public function main() {
                 count: config:getAsInt("mosip.hub.retry_count"),
                 intervalInMillis: config:getAsInt("mosip.hub.retry_interval"),
                 backOffFactor: config:getAsFloat("mosip.hub.retry_backoff_factor"),
-                maxWaitIntervalInMillis: config:getAsInt("mosip.hub.retry_max_wait_interval")
+                maxWaitIntervalInMillis: config:getAsInt("mosip.hub.retry_max_wait_interval"),
+                statusCodes: [404, 408, 502, 503, 504]
             }
         },
         tapOnDelivery: tapOnDeliveryImpl,
