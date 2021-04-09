@@ -19,6 +19,8 @@ ALTER TABLE websub.subscription DROP COLUMN id;
 
 ALTER TABLE websub.subscription ADD constraint pk_sub_id PRIMARY KEY (topic,callback);
 
+ALTER TABLE websub.subscription ADD COLUMN is_active boolean NOT NULL;
+
 ----------------------------------------------------------------------------------------------------
 
 
