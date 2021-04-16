@@ -18,7 +18,7 @@
 
 ALTER TABLE websub.subscription DROP constraint pk_sub_id;
 
-ALTER TABLE websub.subscription ADD COLUMN id character varying(36);
+ALTER TABLE websub.subscription ADD COLUMN id character varying(36) NOT NULL;
 
 ALTER TABLE websub.subscription ADD constraint subscription_pk PRIMARY KEY (id);
 
