@@ -19,13 +19,16 @@ public type RequestFilter object {
                         http:FilterContext context) returns boolean {
 
         if(request.getQueryParamValue("hub.mode")=="publish"){
-                       if(request.getContentType()=="application/json"){
+                       if(request.getContentType().indexOf("application/json",0) is int){
              json|http:ClientError? payload = request.getJsonPayload();
              if(payload is json){
                 log:printInfo("Message received at hub"); 
                  string msg=payload.toJsonString();
                  self.hubServiceImpl.onMessageReceived(request.getQueryParamValue("hub.topic").toString(),msg);
              }
+            }else{
+                var resp =  caller->badRequest(CONTENT_TYPE_ERROR.toString());
+                return false;
             }
         }
        
