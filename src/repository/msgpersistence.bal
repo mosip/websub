@@ -2,6 +2,7 @@ import ballerina/lang.'string;
 import ballerina/lang.'array;
 import ballerina/log;
 
+
 import ballerina/time;
 import ballerinax/java.jdbc;
 
@@ -141,4 +142,40 @@ public type MessagePersistenceImpl object {
 
 
 
+
+
+    public function getUnsentMessages(string timestamp) returns @tainted RestartRepublishContentModel[]{     
+      jdbc:Parameter timestampParameter = {sqlType: jdbc:TYPE_TIMESTAMP, value: timestamp};
+      RestartRepublishContentModel[] restartRepublishContentModels = [];
+        int index = 0;
+        var dbResult = self.jdbcClient->select(RESTART_REPUBLISH_MESSAGES, RestartRepublishContentModel,timestampParameter,timestampParameter,timestampParameter);
+
+        if (dbResult is table<record {}>) {
+            while (dbResult.hasNext()) {
+                var restartRepublishContent = trap <RestartRepublishContentModel>dbResult.getNext();
+                if (restartRepublishContent is RestartRepublishContentModel) {
+                    string messageDecodedString = "";
+                    byte[]|error messageDecodedBytes = 'array:fromBase64(restartRepublishContent.message);
+                    if (messageDecodedBytes is byte[]) {
+                        string|error msgDecodedString = 'string:fromBytes(messageDecodedBytes);
+                        if (msgDecodedString is string) {
+                            messageDecodedString = msgDecodedString;
+                        }
+                    }
+                    restartRepublishContentModels[index] = {
+                        message: messageDecodedString,
+                        topic: restartRepublishContent.topic
+                    };
+                    index = index + 1;
+                } else {
+                    string errCause = <string>restartRepublishContent.detail()?.message;
+                    log:printError("Error retreiving unsend messaged from message store: " + errCause);
+                }
+            }
+        } else {
+            string errCause = <string>dbResult.detail()?.message;
+            log:printError("Error retreiving data from the database: " + errCause);
+        }
+        return restartRepublishContentModels;
+    }
 };

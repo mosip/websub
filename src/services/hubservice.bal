@@ -4,6 +4,7 @@ import ballerina/java;
 import ballerina/lang.'string;
 import ballerina/log;
 import ballerina/time;
+import ballerina/config;
 import ballerina/websub;
 import mosip/repository;
 import mosip/utils;
@@ -54,16 +55,22 @@ public type HubServiceImpl object {
     public function onSucessDelivery(string callback, string topic, websub:WebSubContent content) {
         string|xml|json|byte[]|io:ReadableByteChannel payloadBytes = content.payload;
         string|error message = "";
+       
         if (payloadBytes is byte[]) {
             message = 'string:fromBytes(payloadBytes);
-
         }
+         
         repository:MessageDetails? messageDetails = {};
+       
+       
         if (message is string) {
             messageDetails = self.getMsg(topic, message);
         }
+        
         if (messageDetails is repository:MessageDetails) {
+         
             repository:SubscriptionExtendedDetails subscriptionExtendedDetails = self.subsOperations.getSubscription(topic, callback);
+            log:printDebug("sub id for notification "+subscriptionExtendedDetails.id);
             repository:SucessDeliveryDetails sucessDeliveryDetails = {
                 msgID: messageDetails.id,
                 subsID: subscriptionExtendedDetails.id,
@@ -107,12 +114,20 @@ public type HubServiceImpl object {
 
 
     public function getFailedContent(string subscriberSignature, string topic, string callback, string timestamp, int messagecount) returns @untainted repository:FailedContentPullRespModel|error {
+        int count=messagecount;
         repository:SubscriptionExtendedDetails subscriptionExtendedDetails = self.subsOperations.getSubscription(topic, callback);
-        string hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp, subscriptionExtendedDetails.secret);
+        string hmacSubsSignature = "";
+        if(count == 0){
+        hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp, subscriptionExtendedDetails.secret);
+        count=config:getAsInt("mosip.hub.message_count_default", 10);
+        }else{
+        hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp + count.toString(), subscriptionExtendedDetails.secret);
+        
+        }
         if (hmacSubsSignature != subscriberSignature) {
             return error("SIGNATUREMATCHERROR", message = "hmac didnot match");
         }
-        string[] msgIDs = self.deliveryReportPersistence.getFailedDeliveryBySubID(subscriptionExtendedDetails.id, timestamp, messagecount);
+        string[] msgIDs = self.deliveryReportPersistence.getFailedDeliveryBySubID(subscriptionExtendedDetails.id, timestamp, count);
         repository:FailedContentModel[] failedContentModels = self.messagePersistenceImpl.findMessageByIDs(msgIDs);
         repository:FailedContentPullRespModel failedContentPullRespModel = {
             failedcontents: failedContentModels
@@ -125,7 +140,7 @@ public type HubServiceImpl object {
     public function getMsg(string topic, string message) returns @tainted repository:MessageDetails? {
         string base64EncodedMessage = message.toBytes().toBase64();
         string hash = utils:hashSha256(topic.concat(base64EncodedMessage));
-        repository:MessageDetails[] messageDetails = self.messagePersistenceImpl.findMessageByHash(hash);
+        repository:MessageDetails[] messageDetails = self.messagePersistenceImpl.findMessageByHash(hash);        
         if (messageDetails.length() > 1) {
             return self.messagePersistenceImpl.findMessageByTopicAndMessage(topic, base64EncodedMessage);
         } else {
@@ -138,4 +153,8 @@ public type HubServiceImpl object {
     }
 
 
+
+    public function getUnsentMessages(string timestamp) returns @tainted repository:RestartRepublishContentModel[] {
+    return self.messagePersistenceImpl.getUnsentMessages(timestamp);
+    }
 };

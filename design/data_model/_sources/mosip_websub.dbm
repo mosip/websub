@@ -91,7 +91,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</constraint>
 </table>
 
-<table name="subscription" layer="0" alias="sub" collapse-mode="2" max-obj-count="15" z-value="0">
+<table name="subscription" layer="0" alias="sub" collapse-mode="2" max-obj-count="14" z-value="0">
 	<schema name="websub"/>
 	<role name="sysadmin"/>
 	<comment><![CDATA[Subscription: Stores list of subscriptions in the websub module, These subscription used to consume the message in websub module]]></comment>
@@ -119,10 +119,6 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="created_at">
 		<type name="bigint" length="6"/>
 		<comment><![CDATA[Created At: Subscription created date time.]]></comment>
-	</column>
-	<column name="is_active" not-null="true">
-		<type name="boolean" length="0"/>
-		<comment><![CDATA[IS_Active : Flag to mark whether the record is Active or In-active]]></comment>
 	</column>
 	<column name="cr_by" not-null="true">
 		<type name="character varying" length="256"/>
