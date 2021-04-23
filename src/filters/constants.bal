@@ -1,0 +1,1 @@
+const string CONTENT_TYPE_ERROR= "msg content type json only is supported";
