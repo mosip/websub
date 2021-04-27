@@ -24,8 +24,10 @@ repository:MessagePersistenceImpl messagePersistenceImpl = new repository:Messag
 repository:SubsOperations subsOperations = new repository:SubsOperations(jdbcClient);
 services:HubServiceImpl hubServiceImpl = new services:HubServiceImpl(deliveryReportPersistence, messagePersistenceImpl, subsOperations);
 http:RequestFilter requestFilter = new fil:RequestFilter(hubServiceImpl);
+http:RequestFilter authFilter = new fil:AuthFilter();
+//TODO: filter order
 listener http:Listener hubListener = new http:Listener(config:getAsInt("mosip.hub.port"),
-    config = {filters: [requestFilter]});
+    config = {filters: [requestFilter,authFilter]});
 
 public function tapOnDeliveryImpl(string callback, string topic, websub:WebSubContent content) {
     hubServiceImpl.onSucessDelivery(callback, topic, content);
