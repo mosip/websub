@@ -17,7 +17,7 @@ public type AuthFilter object {
 
     public function filterRequest(http:Caller caller, http:Request request,
         http:FilterContext context) returns boolean {
-        if (!config:getAsBoolean("mosip.auth.filter_enable", false)) {
+        if (config:getAsBoolean("mosip.auth.filter_disable", false)) {
             return true;
         }
         string role = "";
