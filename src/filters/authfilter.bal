@@ -78,61 +78,65 @@ public type AuthFilter object {
             return false;
         }
 
-        string? authToken = authCookie[0].value;
-        if (authToken is string) {
-            http:Request req = new;
-            req.addHeader("Cookie", "Authorization=".concat(authToken));
-            var response = self.clientEndpoint->get(config:getAsString("mosip.auth.validate_token_url"), req);
-
-            if (response is http:Response) {
-                int statusCode = response.statusCode;
-                if (statusCode != 200) {
-                    errorsResponse.statusCode = statusCode;
-                    errorsResponse.setPayload("Error in auth server " + response.toString());
-                    var result = caller->respond(errorsResponse);
-                    handleError(result);
-                    return false;
-                }
-
-                json|http:ClientError responseJson = response.getJsonPayload();
-                if (responseJson is json) {
-                    map<json> resWrapper = <map<json>>responseJson;
-                    if (!(resWrapper["errors"] is ())) {
-                        map<json> errors = <map<json>>resWrapper["errors"];
-                        errorsResponse.statusCode = 200;
-                        errorsResponse.setPayload("Internal errors in auth service");
-                        var result = caller->respond(errorsResponse);
-                        handleError(result);
-                        return false;
-                    }
-
-                    map<json> res = <map<json>>resWrapper["response"];
-                    string roles = res["role"].toString();
-                    string[] rolesArray = stringutils:split(roles, ",");
-
-                    if (role.indexOf(PUBLISH_ROLE_PREFIX, 0) is int) {
-                        return authorizePublisher(partnerID, role, rolesArray,caller);
-                    } else {
-                        return authorizeSubscriber(partnerID, role, rolesArray, res["userId"].toString(),caller);
-                    }
-
-                }
-            } else {
-                errorsResponse.statusCode = 500;
-                errorsResponse.setPayload("Error calling auth server " + response.toString());
-                var result = caller->respond(errorsResponse);
-                handleError(result);
-                return false;
-            }
-
-        } else {
+        string? authTokenTemp = authCookie[0].value;
+        if (!(authTokenTemp is string)) {
             errorsResponse.statusCode = 401;
             errorsResponse.setPayload("Authentication token parsing error");
             var result = caller->respond(errorsResponse);
             handleError(result);
             return false;
         }
-        return false;
+        string authToken = <string>authTokenTemp;
+        http:Request req = new;
+        req.addHeader("Cookie", "Authorization=".concat(authToken));
+        var responseTemp = self.clientEndpoint->get(config:getAsString("mosip.auth.validate_token_url"), req);
+        if (!(responseTemp is http:Response)) {
+            errorsResponse.statusCode = 500;
+            errorsResponse.setPayload("Error calling auth server " + responseTemp.toString());
+            var result = caller->respond(errorsResponse);
+            handleError(result);
+            return false;
+        }
+        http:Response response = <http:Response>responseTemp;
+
+        int statusCode = response.statusCode;
+        if (statusCode != 200) {
+            errorsResponse.statusCode = statusCode;
+            errorsResponse.setPayload("Error in auth server " + response.toString());
+            var result = caller->respond(errorsResponse);
+            handleError(result);
+            return false;
+        }
+
+        json|http:ClientError responseJsonTemp = response.getJsonPayload();
+        if (!(responseJsonTemp is json)) {
+            errorsResponse.statusCode = 500;
+            errorsResponse.setPayload(<@untained>("Error in auth server " + responseJsonTemp.reason()));
+            var result = caller->respond(errorsResponse);
+            handleError(result);
+            return false;
+        }
+        json responseJson = <json>responseJsonTemp;
+        map<json> resWrapper = <map<json>>responseJson;
+        if (!(resWrapper["errors"] is ())) {
+            map<json> errors = <map<json>>resWrapper["errors"];
+            errorsResponse.statusCode = 200;
+            errorsResponse.setPayload("Internal errors in auth service");
+            var result = caller->respond(errorsResponse);
+            handleError(result);
+            return false;
+        }
+
+        map<json> res = <map<json>>resWrapper["response"];
+        string roles = res["role"].toString();
+        string[] rolesArray = stringutils:split(roles, ",");
+
+        if (role.indexOf(PUBLISH_ROLE_PREFIX, 0) is int) {
+            return isPublisherAuthorized(partnerID, role, rolesArray, caller);
+        } else {
+            return isSubscriberAuthorized(partnerID, role, rolesArray, res["userId"].toString(), caller);
+        }
+
     }
 };
 
@@ -142,7 +146,7 @@ function handleError(error? result) {
     }
 }
 
-function authorizePublisher(string? partnerID, string role, string[] rolesArray,http:Caller caller) returns boolean {
+function isPublisherAuthorized(string? partnerID, string role, string[] rolesArray, http:Caller caller) returns boolean {
     string roleTemp = "";
     if (partnerID is string) {
         roleTemp = role.concat(All_INDIVIDUAL_SUFFIX);
@@ -165,7 +169,7 @@ function authorizePublisher(string? partnerID, string role, string[] rolesArray,
 
 }
 
-function authorizeSubscriber(string? partnerID, string role, string[] rolesArray, string authPartnerID,http:Caller caller) returns boolean {
+function isSubscriberAuthorized(string? partnerID, string role, string[] rolesArray, string authPartnerID, http:Caller caller) returns boolean {
     string roleTemp = "";
     if (partnerID is string) {
         roleTemp = role.concat(INDIVIDUAL_SUFFIX);
