@@ -92,7 +92,8 @@ public type AuthFilter object {
         var responseTemp = self.clientEndpoint->get(config:getAsString("mosip.auth.validate_token_url"), req);
         if (!(responseTemp is http:Response)) {
             errorsResponse.statusCode = 500;
-            errorsResponse.setPayload("Error calling auth server " + responseTemp.toString());
+            error err=<error> responseTemp;
+            errorsResponse.setPayload("Error calling auth server " + err.reason());
             var result = caller->respond(errorsResponse);
             handleError(result);
             return false;
@@ -102,7 +103,16 @@ public type AuthFilter object {
         int statusCode = response.statusCode;
         if (statusCode != 200) {
             errorsResponse.statusCode = statusCode;
-            errorsResponse.setPayload("Error in auth server " + response.toString());
+            json|http:ClientError responseJsonTemp = <map<json>>response.getJsonPayload();
+            if (responseJsonTemp is json) {
+                map<json> res = <map<json>>responseJsonTemp;
+                json[] errArray = <json[]>res["errors"];
+                map<json> err = <map<json>>errArray[0];
+                errorsResponse.setPayload(<@untained>("Error in auth service " + err["message"].toString()));
+            } else {
+                http:ClientError err= <http:ClientError>responseJsonTemp;
+                errorsResponse.setPayload(<@untained>("Error in auth service " + err.reason()));
+            }
             var result = caller->respond(errorsResponse);
             handleError(result);
             return false;
@@ -119,9 +129,10 @@ public type AuthFilter object {
         json responseJson = <json>responseJsonTemp;
         map<json> resWrapper = <map<json>>responseJson;
         if (!(resWrapper["errors"] is ())) {
-            map<json> errors = <map<json>>resWrapper["errors"];
+            json[] errArray = <json[]>resWrapper["errors"];
+            map<json> err = <map<json>>errArray[0];
             errorsResponse.statusCode = 200;
-            errorsResponse.setPayload("Internal errors in auth service");
+            errorsResponse.setPayload(<@untained> ("Internal errors in auth service "+ err["message"].toString()));
             var result = caller->respond(errorsResponse);
             handleError(result);
             return false;
