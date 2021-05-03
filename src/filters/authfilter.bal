@@ -92,7 +92,7 @@ public type AuthFilter object {
         var responseTemp = self.clientEndpoint->get(config:getAsString("mosip.auth.validate_token_url"), req);
         if (!(responseTemp is http:Response)) {
             errorsResponse.statusCode = 500;
-            error err=<error> responseTemp;
+            error err = <error>responseTemp;
             errorsResponse.setPayload("Error calling auth server " + err.reason());
             var result = caller->respond(errorsResponse);
             handleError(result);
@@ -110,7 +110,7 @@ public type AuthFilter object {
                 map<json> err = <map<json>>errArray[0];
                 errorsResponse.setPayload(<@untained>("Error in auth service " + err["message"].toString()));
             } else {
-                http:ClientError err= <http:ClientError>responseJsonTemp;
+                http:ClientError err = <http:ClientError>responseJsonTemp;
                 errorsResponse.setPayload(<@untained>("Error in auth service " + err.reason()));
             }
             var result = caller->respond(errorsResponse);
@@ -132,7 +132,7 @@ public type AuthFilter object {
             json[] errArray = <json[]>resWrapper["errors"];
             map<json> err = <map<json>>errArray[0];
             errorsResponse.statusCode = 200;
-            errorsResponse.setPayload(<@untained> ("Internal errors in auth service "+ err["message"].toString()));
+            errorsResponse.setPayload(<@untained>("Internal errors in auth service " + err["message"].toString()));
             var result = caller->respond(errorsResponse);
             handleError(result);
             return false;
