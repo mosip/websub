@@ -20,7 +20,7 @@ public type AuthFilter object {
         if (config:getAsBoolean("mosip.auth.filter_disable", false)) {
             return true;
         }
-        string role = "";
+        string rolePrefix = "";
         string? partnerID = ();
         map<string>|error formParams = request.getFormParams();
         if (request.getQueryParamValue(MODE) == "publish") {
@@ -29,9 +29,9 @@ public type AuthFilter object {
                 int? idEndIndex = topic.indexOf("/", 0);
                 if (idEndIndex is int) {
                     partnerID = topic.substring(0, idEndIndex);
-                    role = PUBLISH_ROLE_PREFIX + topic.substring(idEndIndex + 1, topic.length());
+                    rolePrefix = PUBLISH_ROLE_PREFIX + topic.substring(idEndIndex + 1, topic.length());
                 } else {
-                    role = PUBLISH_ROLE_PREFIX + topic;
+                    rolePrefix = PUBLISH_ROLE_PREFIX + topic;
                 }
 
             }
@@ -50,9 +50,9 @@ public type AuthFilter object {
                     int? idEndIndex = topicDecoded.indexOf("/", 0);
                     if (idEndIndex is int) {
                         partnerID = topicDecoded.substring(0, idEndIndex);
-                        role = prefix + topicDecoded.substring(idEndIndex + 1, topicDecoded.length());
+                        rolePrefix = prefix + topicDecoded.substring(idEndIndex + 1, topicDecoded.length());
                     } else {
-                        role = prefix + topicDecoded;
+                        rolePrefix = prefix + topicDecoded;
                     }
                 }
             }
@@ -142,10 +142,10 @@ public type AuthFilter object {
         string roles = res["role"].toString();
         string[] rolesArray = stringutils:split(roles, ",");
 
-        if (role.indexOf(PUBLISH_ROLE_PREFIX, 0) is int) {
-            return isPublisherAuthorized(partnerID, role, rolesArray, caller);
+        if (rolePrefix.indexOf(PUBLISH_ROLE_PREFIX, 0) is int) {
+            return isPublisherAuthorized(partnerID, rolePrefix, rolesArray, caller);
         } else {
-            return isSubscriberAuthorized(partnerID, role, rolesArray, res["userId"].toString(), caller);
+            return isSubscriberAuthorized(partnerID, rolePrefix, rolesArray, res["userId"].toString(), caller);
         }
 
     }
@@ -157,12 +157,12 @@ function handleError(error? result) {
     }
 }
 
-function isPublisherAuthorized(string? partnerID, string role, string[] rolesArray, http:Caller caller) returns boolean {
+function isPublisherAuthorized(string? partnerID, string rolePrefix, string[] rolesArray, http:Caller caller) returns boolean {
     string roleTemp = "";
     if (partnerID is string) {
-        roleTemp = role.concat(All_INDIVIDUAL_SUFFIX);
+        roleTemp = rolePrefix.concat(All_INDIVIDUAL_SUFFIX);
     } else {
-        roleTemp = role.concat(GENERAL_SUFFIX);
+        roleTemp = rolePrefix.concat(GENERAL_SUFFIX);
     }
     int i = 0;
     while (i < rolesArray.length()) {
@@ -180,10 +180,10 @@ function isPublisherAuthorized(string? partnerID, string role, string[] rolesArr
 
 }
 
-function isSubscriberAuthorized(string? partnerID, string role, string[] rolesArray, string authPartnerID, http:Caller caller) returns boolean {
+function isSubscriberAuthorized(string? partnerID, string rolePrefix, string[] rolesArray, string authPartnerID, http:Caller caller) returns boolean {
     string roleTemp = "";
     if (partnerID is string) {
-        roleTemp = role.concat(INDIVIDUAL_SUFFIX);
+        roleTemp = rolePrefix.concat(INDIVIDUAL_SUFFIX);
 
         int i = 0;
         while (i < rolesArray.length()) {
@@ -193,7 +193,7 @@ function isSubscriberAuthorized(string? partnerID, string role, string[] rolesAr
             i = i + 1;
         }
     } else {
-        roleTemp = role.concat(GENERAL_SUFFIX);
+        roleTemp = rolePrefix.concat(GENERAL_SUFFIX);
         int i = 0;
         while (i < rolesArray.length()) {
             if (rolesArray[i] == roleTemp) {
