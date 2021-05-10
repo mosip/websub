@@ -21,8 +21,10 @@ ENV hub_retry_backoff_factor_env =${hub_retry_backoff_factor}
 ENV hub_retry_max_wait_interval_env=${hub_retry_max_wait_interval}
 # environment variable to pass timestamp in iso format after last service crash, at docker runtime
 ENV hub_restart_republish_time_offset_env=${hub_restart_republish_time_offset}
+# environment variable to pass to enabel or disable auth
+ENV hub_auth_filter_disable_env=${hub_auth_filter_disable}
 COPY ./target/bin/*.jar hub.jar
 EXPOSE 9191
 RUN wget -q --show-progress https://dist.ballerina.io/downloads/1.2.13/ballerina-linux-installer-x64-1.2.13.deb
 RUN dpkg -i ballerina-linux-installer-x64-1.2.13.deb
-CMD ballerina run ./hub.jar --mosip.hub.datasource-url="${hub_datasource_url_env}" --mosip.hub.datasource-username="${hub_datasource_username_env}" --mosip.hub.datasource-password="${hub_datasource_password_env}" --mosip.hub.retry_count="${hub_retry_count_env}" --mosip.hub.retry_interval="${hub_retry_interval_env}" --mosip.hub.retry_backoff_factor="${hub_retry_backoff_factor_env}" --mosip.hub.retry_max_wait_interval="${hub_retry_max_wait_interval_env}" --mosip.hub.restart_republish_time_offset="${hub_restart_republish_time_offset_env}" --mosip.hub.port=9191 ;\
+CMD ballerina run ./hub.jar --mosip.hub.datasource-url="${hub_datasource_url_env}" --mosip.hub.datasource-username="${hub_datasource_username_env}" --mosip.hub.datasource-password="${hub_datasource_password_env}" --mosip.hub.retry_count="${hub_retry_count_env}" --mosip.hub.retry_interval="${hub_retry_interval_env}" --mosip.hub.retry_backoff_factor="${hub_retry_backoff_factor_env}" --mosip.hub.retry_max_wait_interval="${hub_retry_max_wait_interval_env}" --mosip.hub.restart_republish_time_offset="${hub_restart_republish_time_offset_env}" --mosip.auth.filter_disable="${hub_auth_filter_disable_env}" --mosip.hub.port=9191 ;\
