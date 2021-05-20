@@ -34,6 +34,9 @@ jobs:
           echo "BRANCH_NAME=$(echo ${{ github.ref }} | sed -e 's,.*/\(.*\),\1,')" >> $GITHUB_ENV
       - name: Ballerina Build
         uses: ballerina-platform/ballerina-action/@1.1.1
+        with:
+          args:
+            build
   
       - name: Build image
         run: |
