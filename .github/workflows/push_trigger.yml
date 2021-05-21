@@ -5,41 +5,38 @@ on:
     branches:
       - develop
       - 1.*
+  workflow_dispatch:
   
 jobs:
-
   build-websub-server:
     runs-on: ubuntu-latest
     env: 
       NAMESPACE: ${{ secrets. dev_namespace_docker_hub }}
-      SERVICE_NAME: websub-server
+      SERVICE_NAME: websub-service
   
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       - uses: AdoptOpenJDK/install-jdk@v1
-        with:
+        with: 
           version: '11'
-          target: 'JAVA_HOME'
           
       - name: Setup branch and env 
         run: |
          # Strip git ref prefix from version
          echo "BRANCH_NAME=$(echo ${{ github.ref }} | sed -e 's,.*/\(.*\),\1,')" >> $GITHUB_ENV
          echo "GPG_TTY=$(tty)" >> $GITHUB_ENV
-
-      - name: setup environment
+         echo $JAVA_HOME
+         
+      - name: Install ballerina
         run: |
-          # Strip git ref prefix from version
-          echo "GPG_TTY=$(tty)" >> $GITHUB_ENV
-          echo "BRANCH_NAME=$(echo ${{ github.ref }} | sed -e 's,.*/\(.*\),\1,')" >> $GITHUB_ENV
+         wget -q --show-progress https://dist.ballerina.io/downloads/1.2.13/ballerina-linux-installer-x64-1.2.13.deb
+         sudo dpkg -i ballerina-linux-installer-x64-1.2.13.deb
       - name: Ballerina Build
-        uses: ballerina-platform/ballerina-action/@master
-        with:
-          args:
-            build
-  
+        run: |
+         ballerina build --all
+         
       - name: Build image
         run: |
           docker build . --file Dockerfile --tag ${{ env.SERVICE_NAME }}
