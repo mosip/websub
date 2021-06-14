@@ -10,6 +10,9 @@ import ballerina/lang.'string;
 }
 service failedcontent on hubListener {
 
+     @http:ResourceConfig {
+        methods: ["GET"]
+    }
     resource function failedmessage(http:Caller caller,
         http:Request req) returns error? {
         string subscriberSignatureValue = "";
