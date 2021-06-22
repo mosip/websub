@@ -39,4 +39,34 @@ public type SubsOperations object {
         return subscriptionResult;
 
     }
+
+
+    public function getSubscriptions(string topic, string callback, string timestamp) returns @tainted SubscriptionExtendedDetails[] {
+        string callbackParameter = stringutils:split(callback, "[\\?|\\#]")[0];
+        var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
+        jdbc:Parameter topicParameter = {sqlType: jdbc:TYPE_VARCHAR, value: topic};
+        jdbc:Parameter callbackJDBCParameter = {sqlType: jdbc:TYPE_VARCHAR, value: callback};
+        jdbc:Parameter offsetTime = {sqlType: jdbc:TYPE_TIMESTAMP, value: timestamp};
+        var dbResult = self.jdbcClient->select(SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK_TIMESTAMP, SubscriptionExtendedDetails, topicParameter,
+            callbackJDBCParameter, offsetTime);
+        SubscriptionExtendedDetails[] subscriptionResults = [];
+        int subsIndex = 0;
+        if (dbResult is table<record {}>) {
+            while (dbResult.hasNext()) {
+                var subscriptionExtendedDetails = trap <SubscriptionExtendedDetails>dbResult.getNext();
+                if (subscriptionExtendedDetails is SubscriptionExtendedDetails) {
+                    subscriptionResults[subsIndex] = subscriptionExtendedDetails;
+                    subsIndex = subsIndex + 1;
+                } else {
+                    string errCause = <string>subscriptionExtendedDetails.detail()?.message;
+                    log:printError("Error retreiving topic registration details from the database: " + errCause);
+                }
+            }
+        } else {
+            string errCause = <string>dbResult.detail()?.message;
+            log:printError("Error retreiving data from the database: " + errCause);
+        }
+        return subscriptionResults;
+
+    }
 };

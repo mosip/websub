@@ -113,28 +113,28 @@ public type HubServiceImpl object {
     }
 
 
-    public function getFailedContent(string subscriberSignature, string topic, string callback, string timestamp, int messagecount) returns @untainted repository:FailedContentPullRespModel|error {
+    public function getFailedContent(string subscriberSignature, string topic, string callback, string timestamp, int messagecount, int pageIndex) returns @untainted repository:FailedContentPullRespModel|error {
         int count=messagecount;
-        repository:SubscriptionExtendedDetails subscriptionExtendedDetails = self.subsOperations.getSubscription(topic, callback);
+        repository:SubscriptionExtendedDetails[] subscriptionExtendedDetails = self.subsOperations.getSubscriptions(topic, callback,timestamp);
         string hmacSubsSignature = "";
         if(count == 0){
-        hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp, subscriptionExtendedDetails.secret);
+        hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp, subscriptionExtendedDetails[0].secret);
         count=config:getAsInt("mosip.hub.message_count_default", 10);
         }else{
-        hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp + count.toString(), subscriptionExtendedDetails.secret);
-        
+        hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp + count.toString(), subscriptionExtendedDetails[0].secret);        
         }
         if (hmacSubsSignature != subscriberSignature) {
             return error("SIGNATUREMATCHERROR", message = "hmac didnot match");
         }
-        string[] msgIDs = self.deliveryReportPersistence.getFailedDeliveryBySubID(subscriptionExtendedDetails.id, timestamp, count);
+        string[] msgIDs = self.deliveryReportPersistence.getFailedDeliveryBySubID(subscriptionExtendedDetails, timestamp, count,pageIndex);
+        foreach string m in msgIDs {
+            log:printInfo(m);
+        }
         repository:FailedContentModel[] failedContentModels = self.messagePersistenceImpl.findMessageByIDs(msgIDs);
         repository:FailedContentPullRespModel failedContentPullRespModel = {
             failedcontents: failedContentModels
         };
         return failedContentPullRespModel;
-
-
     }
 
     public function getMsg(string topic, string message) returns @tainted repository:MessageDetails? {

@@ -1,6 +1,7 @@
 import ballerina/log;
 import ballerina/time;
 import ballerinax/java.jdbc;
+import ballerina/io;
 
 
 public type DeliveryReportPersistence object {
@@ -56,16 +57,24 @@ public type DeliveryReportPersistence object {
         self.handleUpdate(returned, "remove failed query new delivery report");
     }
 
-    public function getFailedDeliveryBySubID(string subID, string timestamp, int count) returns @tainted string[] {
+    public function getFailedDeliveryBySubID(SubscriptionExtendedDetails[] subscriptionExtendedDetails, string timestamp, int count, int pageIndex) returns @tainted string[] {
         string[] msgIDs = [];
+        string[] subids=[];
         int msgIDIndex = 0;
+        string subIDsString = "";
+        foreach SubscriptionExtendedDetails subscriptionExtendedDetail in subscriptionExtendedDetails {
+        subIDsString = subIDsString.concat("'",subscriptionExtendedDetail.id,"'",",");
+        }
+        subIDsString = subIDsString.substring(0,subIDsString.length()-1);
         var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
-        jdbc:Parameter subsIDParameter = {sqlType: jdbc:TYPE_VARCHAR, value: subID};
+
         jdbc:Parameter timestampParameter = {sqlType: jdbc:TYPE_TIMESTAMP, value: timestamp};
+        jdbc:Parameter resultIndex = {sqlType: jdbc:TYPE_INTEGER, value: pageIndex};
         jdbc:Parameter resultCount = {sqlType: jdbc:TYPE_INTEGER, value: count};
         jdbc:Parameter updatedBy = {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
         jdbc:Parameter updatedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
-        var dbResult = self.jdbcClient->select(SELECT_AND_UPDATE_FROM_FAILED_DELIVERY_TABLE_BY_SUBID_AND_TIMESTAMP, FailedDeliveryMsgIDs, subsIDParameter, timestampParameter, resultCount,updatedDTimes,updatedBy,updatedDTimes);
+        
+        var dbResult = self.jdbcClient->select(io:sprintf(SELECT_AND_UPDATE_FROM_FAILED_DELIVERY_TABLE_BY_SUBID_AND_TIMESTAMP,subIDsString), FailedDeliveryMsgIDs, timestampParameter,resultIndex,resultCount,updatedDTimes,updatedBy,updatedDTimes);
         if (dbResult is table<record {}>) {
             while (dbResult.hasNext()) {
                 var  msgID = trap<FailedDeliveryMsgIDs>dbResult.getNext();

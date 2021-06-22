@@ -105,6 +105,7 @@ public type MessagePersistenceImpl object {
 
         if (dbResult is table<record {}>) {
             while (dbResult.hasNext()) {
+                log:printInfo("here");
                 var messageDetail = trap <MessageDetails>dbResult.getNext();
                 if (messageDetail is MessageDetails) {
                     string messageDecodedString = "";
