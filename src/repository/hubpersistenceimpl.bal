@@ -79,7 +79,7 @@ public type HubPersistenceImpl object {
         jdbc:Parameter updatedBy = {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
         jdbc:Parameter updatedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
         var returned = self.jdbcClient->update(SOFT_DELETE_FROM_SUBSCRIPTIONS, updatedBy,
-            updatedDTimes, topic, callbackParameter);
+            updatedDTimes,updatedDTimes, topic, callbackParameter);
         self.handleUpdate(returned, "Removed subscription");
     }
 

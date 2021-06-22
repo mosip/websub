@@ -2,3 +2,4 @@ target/
 *.lock
 ballerina-internal.log
 ballerina-internal.log.lck
+.vscode/
