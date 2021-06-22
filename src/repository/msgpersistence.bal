@@ -1,3 +1,4 @@
+import ballerina/io;
 import ballerina/lang.'string;
 import ballerina/lang.'array;
 import ballerina/log;
@@ -91,21 +92,14 @@ public type MessagePersistenceImpl object {
         int index = 0;
         string IDs = "";
         foreach string msgID in msgIDs {
-            if (index == msgIDs.length() - 1) {
-                    IDs=IDs.concat(msgID);
-            } else {
-                    IDs=IDs.concat(msgID,",");
-            }
-            index = index + 1;
+            IDs = IDs.concat("'", msgID, "'", ",");
         }
-        jdbc:Parameter IDParamater = {sqlType: jdbc:TYPE_VARCHAR, value: IDs};
-
+        IDs = IDs.substring(0, IDs.length() - 1);
         index = 0;
-        var dbResult = self.jdbcClient->select(SELECT_FROM_MESSAGE_BY_ID, MessageDetails, IDs);
+        var dbResult = self.jdbcClient->select(io:sprintf(SELECT_FROM_MESSAGE_BY_ID,IDs), MessageDetails);
 
         if (dbResult is table<record {}>) {
             while (dbResult.hasNext()) {
-                log:printInfo("here");
                 var messageDetail = trap <MessageDetails>dbResult.getNext();
                 if (messageDetail is MessageDetails) {
                     string messageDecodedString = "";
@@ -145,11 +139,11 @@ public type MessagePersistenceImpl object {
 
 
 
-    public function getUnsentMessages(string timestamp) returns @tainted RestartRepublishContentModel[]{     
-      jdbc:Parameter timestampParameter = {sqlType: jdbc:TYPE_TIMESTAMP, value: timestamp};
-      RestartRepublishContentModel[] restartRepublishContentModels = [];
+    public function getUnsentMessages(string timestamp) returns @tainted RestartRepublishContentModel[] {
+        jdbc:Parameter timestampParameter = {sqlType: jdbc:TYPE_TIMESTAMP, value: timestamp};
+        RestartRepublishContentModel[] restartRepublishContentModels = [];
         int index = 0;
-        var dbResult = self.jdbcClient->select(RESTART_REPUBLISH_MESSAGES, RestartRepublishContentModel,timestampParameter,timestampParameter,timestampParameter);
+        var dbResult = self.jdbcClient->select(RESTART_REPUBLISH_MESSAGES, RestartRepublishContentModel, timestampParameter, timestampParameter, timestampParameter);
 
         if (dbResult is table<record {}>) {
             while (dbResult.hasNext()) {

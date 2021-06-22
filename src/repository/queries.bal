@@ -13,7 +13,7 @@ const string SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK_TIMESTAMP = "SELECT id,
 const string INSERT_INTO_MESSAGE_TABLE = "INSERT INTO websub.message_store (id,message,topic,publisher,pub_dtimes,hub_instance_id,msg_topic_hash,cr_by,cr_dtimes,upd_by,upd_dtimes,is_deleted,del_dtimes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 const string SELECT_FROM_MESSAGE_BY_TOPIC_MESSAGE = "SELECT id,message,topic,publisher,pub_dtimes,hub_instance_id,msg_topic_hash FROM websub.message_store where topic=? and message=?";
 const string SELECT_FROM_MESSAGE_BY_HASH = "SELECT id,message,topic,publisher,pub_dtimes,hub_instance_id,msg_topic_hash FROM websub.message_store where msg_topic_hash=?";
-const string SELECT_FROM_MESSAGE_BY_ID = "SELECT id,message,topic,publisher,pub_dtimes,hub_instance_id,msg_topic_hash FROM websub.message_store where id IN (?)";
+const string SELECT_FROM_MESSAGE_BY_ID = "SELECT id,message,topic,publisher,pub_dtimes,hub_instance_id,msg_topic_hash FROM websub.message_store where id IN (%s)";
 
 
 const string INSERT_INTO_SUCCESS_DELIVERY_TABLE = "INSERT INTO websub.message_delivery_success (msg_id,subscription_id,delivery_success_dtimes,cr_by,cr_dtimes,upd_by,upd_dtimes,is_deleted,del_dtimes) VALUES (?,?,?,?,?,?,?,?,?)";
