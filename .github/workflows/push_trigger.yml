@@ -39,7 +39,6 @@ jobs:
           id: date
           run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
-
       - name: Build image
         run: |
           cd "./${{env.SERVICE_LOCATION}}"
