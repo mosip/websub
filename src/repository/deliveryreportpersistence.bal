@@ -57,7 +57,7 @@ public type DeliveryReportPersistence object {
         self.handleUpdate(returned, "remove failed query new delivery report");
     }
 
-    public function getFailedDeliveryBySubID(SubscriptionExtendedDetails[] subscriptionExtendedDetails, string timestamp, int count, int pageIndex) returns @tainted string[] {
+     public function getFailedDeliveryBySubID(SubscriptionExtendedDetails[] subscriptionExtendedDetails, string timestamp, int count, int pageIndex) returns @tainted string[] {
         string[] msgIDs = [];
         string[] subids=[];
         int msgIDIndex = 0;
