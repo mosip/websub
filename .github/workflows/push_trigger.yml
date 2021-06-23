@@ -5,6 +5,7 @@ on:
     branches:
       - develop
       - 1.*
+      - websub_scalling
   workflow_dispatch:
   
 jobs:
