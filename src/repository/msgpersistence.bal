@@ -2,8 +2,7 @@ import ballerina/io;
 import ballerina/lang.'string;
 import ballerina/lang.'array;
 import ballerina/log;
-
-
+import ballerina/io;
 import ballerina/time;
 import ballerinax/java.jdbc;
 
@@ -86,7 +85,7 @@ public type MessagePersistenceImpl object {
         return messageDetails;
     }
 
-    public function findMessageByIDs(string[] msgIDs) returns @tainted FailedContentModel[] {
+     public function findMessageByIDs(string[] msgIDs) returns @tainted FailedContentModel[] {
 
         FailedContentModel[] failedContentModels = [];
         int index = 0;
@@ -126,6 +125,7 @@ public type MessagePersistenceImpl object {
         }
         return failedContentModels;
     }
+
 
     function handleUpdate(jdbc:UpdateResult|jdbc:Error returned, string message) {
         if (returned is jdbc:UpdateResult) {

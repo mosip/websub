@@ -1,23 +1,32 @@
+//topics
 const string INSERT_INTO_TOPICS = "INSERT INTO websub.topic (topic,cr_by,cr_dtimes,upd_by,upd_dtimes,is_deleted,del_dtimes) VALUES (?,?,?,?,?,?,?)";
 const string DELETE_FROM_TOPICS = "UPDATE websub.topic SET is_deleted = 'TRUE',upd_by=?,upd_dtimes=?,del_dtimes=? WHERE topic=?";
 const string SELECT_ALL_FROM_TOPICS = "SELECT topic FROM websub.topic where NOT is_deleted";
 
+//subscription
 const string INSERT_INTO_SUBSCRIPTIONS_TABLE = "INSERT INTO websub.subscription (id,topic,callback,secret,lease_seconds,created_at,cr_by,cr_dtimes,upd_by,upd_dtimes,is_deleted,del_dtimes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 const string HARD_DELETE_FROM_SUBSCRIPTIONS = "DELETE FROM websub.subscription  WHERE topic=? AND callback=?";
-const string SOFT_DELETE_FROM_SUBSCRIPTIONS = "UPDATE websub.subscription SET is_deleted = 'TRUE',upd_by=?,upd_dtimes=?,del_dtimes=? WHERE topic=? AND callback=? AND is_deleted = 'FALSE'";
-const string UPDATE_SUBSCRIPTIONS = "UPDATE websub.subscription SET topic=?, callback=?, secret=?, lease_seconds=?, created_at=?,upd_by=?,upd_dtimes=? WHERE id=? AND is_deleted = 'FALSE'";
+const string SOFT_DELETE_FROM_SUBSCRIPTIONS = "UPDATE websub.subscription SET is_deleted = 'TRUE',upd_by=?,upd_dtimes=? WHERE topic=? AND callback=? AND is_deleted = 'FALSE'";
+const string UPDATE_SUBSCRIPTIONS = "UPDATE websub.subscription SET topic=?, callback=?, secret=?, lease_seconds=?, created_at=?,upd_by=?,upd_dtimes=? WHERE id=?";
 const string SELECT_FROM_SUBSCRIPTIONS = "SELECT topic, callback, secret, lease_seconds, created_at FROM websub.subscription where is_deleted = 'FALSE'";
-const string SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK = "SELECT id,topic, callback, secret, lease_seconds, created_at FROM websub.subscription where topic=? AND callback=? AND is_deleted = 'FALSE'";
-const string SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK_TIMESTAMP = "SELECT id,topic, callback, secret, lease_seconds, created_at FROM websub.subscription where topic=? AND callback=? AND del_dtimes>? ORDER BY cr_by ASC";
+const string  SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK = "SELECT id,topic, callback, secret, lease_seconds, created_at FROM websub.subscription where topic=? AND callback=?";
+const string SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK_EXTENDED = "SELECT id,topic, callback, secret, lease_seconds, created_at, cr_by, cr_dtimes, upd_by, upd_dtimes FROM websub.subscription where topic=? AND callback=?";
 
+//subscription history
+const string INSERT_INTO_SUBSCRIPTIONS_HISTORY_TABLE = "INSERT INTO websub.subscription_history (id,topic,callback,secret,lease_seconds,created_at,cr_by,cr_dtimes,upd_by,upd_dtimes,is_deleted,del_dtimes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+const string SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK_HISTORY = "SELECT id,topic, callback, secret, lease_seconds, created_at FROM websub.subscription_history where topic=? AND callback=? AND cr_dtimes<=? and del_dtimes>=?";
+const string SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK_HISTORY_FAILED = "SELECT id,topic, callback, secret, lease_seconds, created_at FROM websub.subscription where topic=? AND callback=? AND del_dtimes>? ORDER BY cr_by ASC";
+
+//messsages
 const string INSERT_INTO_MESSAGE_TABLE = "INSERT INTO websub.message_store (id,message,topic,publisher,pub_dtimes,hub_instance_id,msg_topic_hash,cr_by,cr_dtimes,upd_by,upd_dtimes,is_deleted,del_dtimes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 const string SELECT_FROM_MESSAGE_BY_TOPIC_MESSAGE = "SELECT id,message,topic,publisher,pub_dtimes,hub_instance_id,msg_topic_hash FROM websub.message_store where topic=? and message=?";
 const string SELECT_FROM_MESSAGE_BY_HASH = "SELECT id,message,topic,publisher,pub_dtimes,hub_instance_id,msg_topic_hash FROM websub.message_store where msg_topic_hash=?";
 const string SELECT_FROM_MESSAGE_BY_ID = "SELECT id,message,topic,publisher,pub_dtimes,hub_instance_id,msg_topic_hash FROM websub.message_store where id IN (%s)";
 
-
+//success delivery
 const string INSERT_INTO_SUCCESS_DELIVERY_TABLE = "INSERT INTO websub.message_delivery_success (msg_id,subscription_id,delivery_success_dtimes,cr_by,cr_dtimes,upd_by,upd_dtimes,is_deleted,del_dtimes) VALUES (?,?,?,?,?,?,?,?,?)";
 
+//failed delivery
 const string INSERT_INTO_FAILED_DELIVERY_TABLE = "INSERT INTO websub.message_delivery_failed (msg_id,subscription_id,delivery_failed_dtimes,delivery_failure_reason,delivery_failure_error,cr_by,cr_dtimes,upd_by,upd_dtimes,is_deleted,del_dtimes) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 const string UPDATE_LAST_FETCH_TIMESTAMP_INTO_FAILED_DELIVERY_TABLE = "UPDATE websub.message_delivery_failed SET last_fetch_dtimes =?,upd_by=?,upd_dtimes=? WHERE msg_id=? AND subscription_id=? AND is_deleted = 'FALSE'";
 const string DELETE_FROM_FAILED_DELIVERY_TABLE = "UPDATE websub.message_delivery_failed SET is_deleted = 'TRUE',upd_by=?,upd_dtimes=? WHERE msg_id=? AND subscription_id=? AND is_deleted = 'TRUE'";
