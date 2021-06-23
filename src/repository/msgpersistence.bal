@@ -1,4 +1,3 @@
-import ballerina/io;
 import ballerina/lang.'string;
 import ballerina/lang.'array;
 import ballerina/log;
