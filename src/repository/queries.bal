@@ -15,7 +15,7 @@ const string SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK_EXTENDED = "SELECT id,t
 //subscription history
 const string INSERT_INTO_SUBSCRIPTIONS_HISTORY_TABLE = "INSERT INTO websub.subscription_history (id,topic,callback,secret,lease_seconds,created_at,cr_by,cr_dtimes,upd_by,upd_dtimes,is_deleted,del_dtimes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 const string SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK_HISTORY = "SELECT id,topic, callback, secret, lease_seconds, created_at FROM websub.subscription_history where topic=? AND callback=? AND cr_dtimes<=? and del_dtimes>=?";
-const string SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK_HISTORY_FAILED = "SELECT id,topic, callback, secret, lease_seconds, created_at FROM websub.subscription where topic=? AND callback=? AND del_dtimes>? ORDER BY cr_by ASC";
+const string SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK_HISTORY_FAILED = "SELECT id,topic, callback, secret, lease_seconds, created_at FROM websub.subscription_history where topic=? AND callback=? AND del_dtimes>? ORDER BY cr_by ASC";
 
 //messsages
 const string INSERT_INTO_MESSAGE_TABLE = "INSERT INTO websub.message_store (id,message,topic,publisher,pub_dtimes,hub_instance_id,msg_topic_hash,cr_by,cr_dtimes,upd_by,upd_dtimes,is_deleted,del_dtimes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
