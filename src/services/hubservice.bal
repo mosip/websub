@@ -70,7 +70,7 @@ public type HubServiceImpl object {
         if (messageDetails is repository:MessageDetails) {
 
             repository:SubscriptionExtendedDetails subscriptionExtendedDetails = self.subsOperations.getSubscription(topic, callback);
-            log:printDebug("sub id for notification " + subscriptionExtendedDetails.id);
+            log:printInfo("sub id for notification " + subscriptionExtendedDetails.id);
             repository:SucessDeliveryDetails sucessDeliveryDetails = {
                 msgID: messageDetails.id,
                 subsID: subscriptionExtendedDetails.id,
@@ -101,6 +101,7 @@ public type HubServiceImpl object {
         }
         if (messageDetails is repository:MessageDetails) {
             repository:SubscriptionExtendedDetails subscriptionExtendedDetails = self.subsOperations.getSubscription(topic, callback);
+            log:printInfo("sub id for notification " + subscriptionExtendedDetails.id);
             repository:FailedDeliveryDetails failedDeliveryDetails = {
                 msgID: messageDetails.id,
                 subsID: subscriptionExtendedDetails.id,
