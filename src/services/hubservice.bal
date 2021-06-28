@@ -117,6 +117,10 @@ public type HubServiceImpl object {
     public function getFailedContent(string subscriberSignature, string topic, string callback, string timestamp, int messagecount, int pageIndex) returns @untainted repository:FailedContentPullRespModel|error {
         int count = messagecount;
         repository:SubscriptionExtendedDetails[] subscriptionExtendedDetails = self.subsOperations.getSubscriptions(topic, callback, timestamp);
+        if(subscriptionExtendedDetails.length()<=0){
+            error e = error("Atleast one subscription should be there", message = "No subscriber found alleast one subscription should be there");
+            return e;
+        }
         string hmacSubsSignature = "";
         if (count == 0) {
             hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp + pageIndex.toString(), subscriptionExtendedDetails[0].secret);
