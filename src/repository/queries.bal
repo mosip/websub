@@ -8,7 +8,7 @@ const string SOFT_DELETE_FROM_SUBSCRIPTIONS = "UPDATE websub.subscription SET is
 const string UPDATE_SUBSCRIPTIONS = "UPDATE websub.subscription SET topic=?, callback=?, secret=?, lease_seconds=?, created_at=?,upd_by=?,upd_dtimes=? WHERE id=? AND is_deleted = 'FALSE'";
 const string SELECT_FROM_SUBSCRIPTIONS = "SELECT topic, callback, secret, lease_seconds, created_at FROM websub.subscription where is_deleted = 'FALSE'";
 const string SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK = "SELECT id,topic, callback, secret, lease_seconds, created_at FROM websub.subscription where topic=? AND callback=? AND is_deleted = 'FALSE'";
-const string SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK_TIMESTAMP = "SELECT id,topic, callback, secret, lease_seconds, created_at FROM websub.subscription where topic=? AND callback=? AND del_dtimes>? ORDER BY cr_by ASC";
+const string SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK_TIMESTAMP = "SELECT id,topic, callback, secret, lease_seconds, created_at FROM websub.subscription where topic=? AND callback=? AND (del_dtimes>? or or del_dtimes is null) ORDER BY cr_by ASC";
 
 const string INSERT_INTO_MESSAGE_TABLE = "INSERT INTO websub.message_store (id,message,topic,publisher,pub_dtimes,hub_instance_id,msg_topic_hash,cr_by,cr_dtimes,upd_by,upd_dtimes,is_deleted,del_dtimes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 const string SELECT_FROM_MESSAGE_BY_TOPIC_MESSAGE = "SELECT id,message,topic,publisher,pub_dtimes,hub_instance_id,msg_topic_hash FROM websub.message_store where topic=? and message=?";
