@@ -92,18 +92,6 @@ public function main() {
             log:printError("Starting the task is failed.");
             return;
         }
-            if (unsentMessages.length() > 0) {
-                foreach var unsentMessage in unsentMessages {
-                    var publishResponse = webSubHub.publishUpdate(unsentMessage.topic, unsentMessage.message.toBytes());
-                    if (publishResponse is error) {
-                        log:printError("Error notifying hub: " +
-                            <string>publishResponse.detail()?.message);
-                    } else {
-                        log:printInfo("Update notification successful!");
-                    }
-                    runtime:sleep(2000);
-                }
-            }
         }
 
     } else if (result is websub:HubStartedUpError) {
