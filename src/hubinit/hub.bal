@@ -81,17 +81,15 @@ public function main() {
 
             task:Scheduler appointment = new ({appointmentDetails: appointmentData});
             RepublishJob republishJob = new RepublishJob();
-              var attachResult = appointment.attach(republishJob.getRepublishservice(), hubServiceImpl, webSubHub);
-             if (attachResult is error) {
-                log:printError("Error attaching the service.");
-                return;
+            var attachResult = appointment.attach(republishJob.getRepublishservice(), hubServiceImpl, webSubHub);
+            if (attachResult is error) {
+                log:printError("Error attaching the service.");     
             }
 
-        var startResult = appointment.start();
-        if (startResult is error) {
-            log:printError("Starting the task is failed.");
-            return;
-        }
+            var startResult = appointment.start();
+            if (startResult is error) {
+                log:printError("Starting the task is failed.");
+            }
         }
 
     } else if (result is websub:HubStartedUpError) {
