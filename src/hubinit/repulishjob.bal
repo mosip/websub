@@ -14,7 +14,6 @@ public type RepublishJob object {
 
         resource function onTrigger(services:HubServiceImpl hubServiceImpl, websub:Hub webSubHub) {
             repository:RestartRepublishContentModel[] unsentMessages = hubServiceImpl.getUnsentMessages(config:getAsString("mosip.hub.restart_republish_time_offset"));
-            log:printInfo(unsentMessages.length().toString());
             if (unsentMessages.length() > 0) {
                 foreach var unsentMessage in unsentMessages {
                     var publishResponse = webSubHub.publishUpdate(unsentMessage.topic, unsentMessage.message.toBytes());
