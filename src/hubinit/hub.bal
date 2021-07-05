@@ -68,15 +68,15 @@ public function main() {
     if (result is websub:Hub) {
 
         webSubHub = result;
-        if (config:getAsBoolean("mosip.hub.republish_enable", false)) {
+        if (config:getAsBoolean("mosip.hub.cron-task.unsent-messages-republish_enable", false)) {
             task:AppointmentData appointmentData = {
-                seconds: config:getAsString("mosip.hub.republish-job-seconds"),
-                minutes: config:getAsString("mosip.hub.republish-job-minutes"),
-                hours: config:getAsString("mosip.hub.republish-job-hours"),
-                daysOfMonth: config:getAsString("mosip.hub.republish-job-days-of-month"),
-                months: config:getAsString("mosip.hub.republish-job-months"),
-                daysOfWeek: config:getAsString("mosip.hub.republish-job-days-of-week"),
-                year: config:getAsString("mosip.hub.republish-job-year")
+                seconds: config:getAsString("mosip.hub.cron-task.unsent-messages-republish.seconds"),
+                minutes: config:getAsString("mosip.hub.cron-task.unsent-messages-republish.minutes"),
+                hours: config:getAsString("mosip.hub.cron-task.unsent-messages-republish.hours"),
+                daysOfMonth: config:getAsString("mosip.hub.cron-task.unsent-messages-republish.days-of-month"),
+                months: config:getAsString("mosip.hub.cron-task.unsent-messages-republish.months"),
+                daysOfWeek: config:getAsString("mosip.hub.cron-task.unsent-messages-republish.days-of-week"),
+                year: config:getAsString("mosip.hub.cron-task.unsent-messages-republish.year")
             };
 
             task:Scheduler appointment = new ({appointmentDetails: appointmentData});
@@ -88,7 +88,7 @@ public function main() {
 
             var startResult = appointment.start();
             if (startResult is error) {
-                log:printError("Starting the task is failed.");
+                log:printError("Starting the task is failed."); 
             }
         }
 
