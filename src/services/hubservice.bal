@@ -163,7 +163,8 @@ public type HubServiceImpl object {
 
 
 
-    public function getUnsentMessages(string timestamp) returns @tainted repository:RestartRepublishContentModel[] {
-        return self.messagePersistenceImpl.getUnsentMessages(timestamp);
+    public function getUnsentMessages(string timestamp,string unsentMessageTimestampInterval) returns @tainted repository:RestartRepublishContentModel[] {
+       
+        return self.messagePersistenceImpl.getUnsentMessages(timestamp,unsentMessageTimestampInterval);
     }
 };

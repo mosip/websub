@@ -4,6 +4,8 @@ import ballerina/runtime;
 import ballerina/websub;
 import mosip/repository;
 import mosip/services;
+import ballerina/time;
+
 
 public type RepublishJob object {
 
@@ -11,9 +13,14 @@ public type RepublishJob object {
     }
   
     service republishservice = service {
-
+    
         resource function onTrigger(services:HubServiceImpl hubServiceImpl, websub:Hub webSubHub) {
-            repository:RestartRepublishContentModel[] unsentMessages = hubServiceImpl.getUnsentMessages(config:getAsString("mosip.hub.restart_republish_time_offset"));
+            string timestamp = config:getAsString("mosip.hub.restart_republish_time_offset");
+            time:TimeZone zoneIdValue = { id: "Z" };
+            time:Time currentUTCTime = { time: time:currentTime().time, zone: zoneIdValue };
+            time:Time unsentMessageTimestampLimit = time:subtractDuration(currentUTCTime,0,0,0,0,config:getAsInt("mosip.hub.restart_republish_time_limit"),0,0);
+            string unsentMessageTimestampLimitString = time:format(unsentMessageTimestampLimit, repository:TIMESTAMP_PATTERN).toString();
+            repository:RestartRepublishContentModel[] unsentMessages = hubServiceImpl.getUnsentMessages(timestamp,unsentMessageTimestampLimitString);
             if (unsentMessages.length() > 0) {
                 foreach var unsentMessage in unsentMessages {
                     var publishResponse = webSubHub.publishUpdate(unsentMessage.topic, unsentMessage.message.toBytes());
@@ -26,6 +33,8 @@ public type RepublishJob object {
                     runtime:sleep(2000);
                 }
             }
+            config:setConfig("mosip.hub.restart_republish_time_offset",unsentMessageTimestampLimitString);
+            
         }
     };
 

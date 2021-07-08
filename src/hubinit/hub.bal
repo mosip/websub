@@ -40,7 +40,6 @@ public function tapOnDeliveryFailureImpl(string callback, string topic, websub:W
 
 
 public function main() {
-    repository:RestartRepublishContentModel[] unsentMessages = hubServiceImpl.getUnsentMessages(config:getAsString("mosip.hub.restart_republish_time_offset"));
     websub:HubPersistenceStore hubpimpl = new repository:HubPersistenceImpl(jdbcClient);
     log:printInfo("Starting up the Ballerina Hub Service");
 
@@ -68,7 +67,7 @@ public function main() {
     if (result is websub:Hub) {
 
         webSubHub = result;
-        if (config:getAsBoolean("mosip.hub.cron-task.unsent-messages-republish_enable", false)) {
+        if (config:getAsBoolean("mosip.hub.cron-task.unsent-messages-republish.enable", false)) {
             task:AppointmentData appointmentData = {
                 seconds: config:getAsString("mosip.hub.cron-task.unsent-messages-republish.seconds"),
                 minutes: config:getAsString("mosip.hub.cron-task.unsent-messages-republish.minutes"),
