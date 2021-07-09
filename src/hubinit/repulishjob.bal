@@ -33,7 +33,7 @@ public type RepublishJob object {
                     runtime:sleep(2000);
                 }
             }
-            config:setConfig("mosip.hub.restart_republish_time_offset",unsentMessageTimestampLimitString);
+            //config:setConfig("mosip.hub.restart_republish_time_offset",unsentMessageTimestampLimitString);
             
         }
     };
