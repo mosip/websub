@@ -34,8 +34,6 @@ public type HubPersistenceImpl object {
         jdbc:Parameter createdDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
         jdbc:Parameter updatedBy = {sqlType: jdbc:TYPE_VARCHAR, value: ""};
         jdbc:Parameter updatedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
-        jdbc:Parameter isDeleted = {sqlType: jdbc:TYPE_BOOLEAN, value: false};
-        jdbc:Parameter deletedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
         var dbResult = self.jdbcClient->select(SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK, SubscriptionExtendedDetails, topic,
             callbackParameter);
 
@@ -54,7 +52,7 @@ public type HubPersistenceImpl object {
                 var uuid = utils:createRandomUUID();
                 jdbc:Parameter id = {sqlType: jdbc:TYPE_VARCHAR, value: java:toString(uuid)};
                 var returned = self.jdbcClient->update(INSERT_INTO_SUBSCRIPTIONS_TABLE, id, topic,
-                    callbackParameter, secret, leaseSeconds, createdAt, createdBy, createdDTimes, updatedBy, updatedDTimes, isDeleted, deletedDTimes);
+                    callbackParameter, secret, leaseSeconds, createdAt, createdBy, createdDTimes, updatedBy, updatedDTimes);
                 self.handleUpdate(returned, "insert new subs");
             }
         } else {

@@ -4,11 +4,10 @@ const string DELETE_FROM_TOPICS = "UPDATE websub.topic SET is_deleted = 'TRUE',u
 const string SELECT_ALL_FROM_TOPICS = "SELECT topic FROM websub.topic where NOT is_deleted";
 
 //subscription
-const string INSERT_INTO_SUBSCRIPTIONS_TABLE = "INSERT INTO websub.subscription (id,topic,callback,secret,lease_seconds,created_at,cr_by,cr_dtimes,upd_by,upd_dtimes,is_deleted,del_dtimes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+const string INSERT_INTO_SUBSCRIPTIONS_TABLE = "INSERT INTO websub.subscription (id,topic,callback,secret,lease_seconds,created_at,cr_by,cr_dtimes,upd_by,upd_dtimes) VALUES (?,?,?,?,?,?,?,?,?,?)";
 const string HARD_DELETE_FROM_SUBSCRIPTIONS = "DELETE FROM websub.subscription  WHERE topic=? AND callback=?";
-const string SOFT_DELETE_FROM_SUBSCRIPTIONS = "UPDATE websub.subscription SET is_deleted = 'TRUE',upd_by=?,upd_dtimes=? WHERE topic=? AND callback=? AND is_deleted = 'FALSE'";
 const string UPDATE_SUBSCRIPTIONS = "UPDATE websub.subscription SET topic=?, callback=?, secret=?, lease_seconds=?, created_at=?,upd_by=?,upd_dtimes=? WHERE id=?";
-const string SELECT_FROM_SUBSCRIPTIONS = "SELECT topic, callback, secret, lease_seconds, created_at FROM websub.subscription where is_deleted = 'FALSE'";
+const string SELECT_FROM_SUBSCRIPTIONS = "SELECT topic, callback, secret, lease_seconds, created_at FROM websub.subscription";
 const string  SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK = "SELECT id,topic, callback, secret, lease_seconds, created_at FROM websub.subscription where topic=? AND callback=?";
 const string SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK_EXTENDED = "SELECT id,topic, callback, secret, lease_seconds, created_at, cr_by, cr_dtimes, upd_by, upd_dtimes FROM websub.subscription where topic=? AND callback=?";
 

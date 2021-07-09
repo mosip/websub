@@ -92,6 +92,10 @@ public type MessagePersistenceImpl object {
         foreach string msgID in msgIDs {
             IDs = IDs.concat("'", msgID, "'", ",");
         }
+        int length = IDs.length();
+        if(length<=0){
+            return failedContentModels;
+        }
         IDs = IDs.substring(0, IDs.length() - 1);
         index = 0;
         var dbResult = self.jdbcClient->select(io:sprintf(SELECT_FROM_MESSAGE_BY_ID,IDs), MessageDetails);
