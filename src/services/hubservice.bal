@@ -127,6 +127,10 @@ public type HubServiceImpl object {
         repository:SubscriptionExtendedDetails[] subscriptionExtendedDetails = self.subsOperations.getSubscriptionsFromHistory(topic, callback,timestamp);
         int length=subscriptionExtendedDetails.length();
         subscriptionExtendedDetails[length]=self.subsOperations.getSubscription(topic, callback);
+        if(subscriptionExtendedDetails.length()<=0){
+            error e = error("Atleast one subscription should be there", message = "No subscriber found alleast one subscription should be there");
+            return e;
+        }
         string hmacSubsSignature = "";
         if(count == 0){
         hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp+ pageIndex.toString(), subscriptionExtendedDetails[0].secret);
@@ -163,7 +167,8 @@ public type HubServiceImpl object {
 
 
 
-    public function getUnsentMessages(string timestamp) returns @tainted repository:RestartRepublishContentModel[] {
-        return self.messagePersistenceImpl.getUnsentMessages(timestamp);
+    public function getUnsentMessages(string timestamp,string unsentMessageTimestampInterval) returns @tainted repository:RestartRepublishContentModel[] {
+       
+        return self.messagePersistenceImpl.getUnsentMessages(timestamp,unsentMessageTimestampInterval);
     }
 };

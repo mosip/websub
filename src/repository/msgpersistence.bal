@@ -92,6 +92,10 @@ public type MessagePersistenceImpl object {
         foreach string msgID in msgIDs {
             IDs = IDs.concat("'", msgID, "'", ",");
         }
+        int length = IDs.length();
+        if(length<=0){
+            return failedContentModels;
+        }
         IDs = IDs.substring(0, IDs.length() - 1);
         index = 0;
         var dbResult = self.jdbcClient->select(io:sprintf(SELECT_FROM_MESSAGE_BY_ID,IDs), MessageDetails);
@@ -134,15 +138,12 @@ public type MessagePersistenceImpl object {
         }
     }
 
-
-
-
-
-    public function getUnsentMessages(string timestamp) returns @tainted RestartRepublishContentModel[] {
-        jdbc:Parameter timestampParameter = {sqlType: jdbc:TYPE_TIMESTAMP, value: timestamp};
+    public function getUnsentMessages(string offsetTimestamp,string unsentMessageTimestampLimit) returns @tainted RestartRepublishContentModel[] {
+        jdbc:Parameter offsetTimestampParameter = {sqlType: jdbc:TYPE_TIMESTAMP, value: offsetTimestamp};
+        jdbc:Parameter unsentMessageTimestampLimitParameter = {sqlType: jdbc:TYPE_TIMESTAMP, value: unsentMessageTimestampLimit+"Z"};
         RestartRepublishContentModel[] restartRepublishContentModels = [];
         int index = 0;
-        var dbResult = self.jdbcClient->select(RESTART_REPUBLISH_MESSAGES, RestartRepublishContentModel, timestampParameter, timestampParameter, timestampParameter);
+        var dbResult = self.jdbcClient->select(RESTART_REPUBLISH_MESSAGES, RestartRepublishContentModel, offsetTimestampParameter, unsentMessageTimestampLimitParameter, offsetTimestampParameter, offsetTimestampParameter);
 
         if (dbResult is table<record {}>) {
             while (dbResult.hasNext()) {
