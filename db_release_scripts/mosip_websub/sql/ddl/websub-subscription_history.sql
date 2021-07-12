@@ -1,36 +1,32 @@
 -- -------------------------------------------------------------------------------------------------
 -- Database Name: mosip_websub
--- Table Name 	: websub.subscription
--- Purpose    	: Subscription: Stores list of subscriptions in the websub module, These subscription used to consume the message in websub module
+-- Table Name 	: websub.subscription_history
+-- Purpose    	: Subscription: Stores history of subscriptions in the websub module, These subscription used to consume the message in websub module
 --           
 -- Create By   	: Sadanandegowda DM
 -- Created Date	: Oct-2020
 -- 
 -- Modified Date        Modified By         Comments / Remarks
 -- ------------------------------------------------------------------------------------------
--- Apr-2021	        Ram Bhatt           Primary Key changed to id from topic and callback
--- Apr-2021	        Ram Bhatt           Dropped is_active column
--- Jul-2021		Ram Bhatt	    Added unique constraint on topic and callback
+
 -- ------------------------------------------------------------------------------------------
 
--- object: websub.subscription | type: TABLE --
--- DROP TABLE IF EXISTS websub.subscription CASCADE;
-CREATE TABLE websub.subscription (
+-- object: websub.subscription_history | type: TABLE --
+-- DROP TABLE websub.subscription_history;
+CREATE TABLE websub.subscription_history (
 	id character varying(36) NOT NULL,
-	topic character varying(256),
-	callback character varying(256),
-	secret character varying(256),
-	lease_seconds bigint,
-	created_at bigint,
+	topic character varying(256) NOT NULL,
+	callback character varying(256) NOT NULL,
+	secret character varying(256) NULL,
+	lease_seconds integer NULL,
+	created_at integer NULL,
 	cr_by character varying(256) NOT NULL,
 	cr_dtimes timestamp NOT NULL,
-	upd_by character varying(256),
-	upd_dtimes timestamp,
-	is_deleted boolean,
-	del_dtimes timestamp,
-	CONSTRAINT subscription_pk PRIMARY KEY (id),
-	CONSTRAINT subscription_un UNIQUE (topic, callback)
-
+	upd_by character varying(256) NULL,
+	upd_dtimes timestamp NULL,
+	is_deleted bool NULL,
+	del_dtimes timestamp NULL,
+	CONSTRAINT pmk_sub_id PRIMARY KEY (id)
 );
 -- ddl-end --
 COMMENT ON TABLE websub.subscription IS 'Subscription: Stores list of subscriptions in the websub module, These subscription used to consume the message in websub module';
