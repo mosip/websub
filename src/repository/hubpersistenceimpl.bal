@@ -24,8 +24,6 @@ public type HubPersistenceImpl object {
     public function addSubscription(SubscriptionDetails subscriptionDetails) returns error? {
         var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
         string callback = stringutils:split(subscriptionDetails.callback, "[\\?|\\#]")[0];
-        var uuid = utils:createRandomUUID();
-        jdbc:Parameter id = {sqlType: jdbc:TYPE_VARCHAR, value: java:toString(uuid)};
         jdbc:Parameter topic = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionDetails.topic};
         jdbc:Parameter callbackParameter = {sqlType: jdbc:TYPE_VARCHAR, value: callback};
         jdbc:Parameter secret = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionDetails.secret};
@@ -36,25 +34,25 @@ public type HubPersistenceImpl object {
         jdbc:Parameter createdDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
         jdbc:Parameter updatedBy = {sqlType: jdbc:TYPE_VARCHAR, value: ""};
         jdbc:Parameter updatedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
-        jdbc:Parameter isDeleted = {sqlType: jdbc:TYPE_BOOLEAN, value: false};
-        jdbc:Parameter deletedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: ""};
         var dbResult = self.jdbcClient->select(SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK, SubscriptionExtendedDetails, topic,
             callbackParameter);
-        
+
         if (dbResult is table<record {}>) {
             if (dbResult.hasNext()) {
                 SubscriptionExtendedDetails subscriptionResult = {};
                 var subscriptionExtendedDetails = trap <SubscriptionExtendedDetails>dbResult.getNext();
                 if (subscriptionExtendedDetails is SubscriptionExtendedDetails) {
-                    subscriptionResult=subscriptionExtendedDetails;
+                    subscriptionResult = subscriptionExtendedDetails;
                 }
                 var returned = self.jdbcClient->update(UPDATE_SUBSCRIPTIONS, topic,
                     callbackParameter, secret, leaseSeconds, createdAt, createdBy, createdDTimes, subscriptionResult.id);
                 self.handleUpdate(returned, "updating existing sub subs");
-                
+
             } else {
+                var uuid = utils:createRandomUUID();
+                jdbc:Parameter id = {sqlType: jdbc:TYPE_VARCHAR, value: java:toString(uuid)};
                 var returned = self.jdbcClient->update(INSERT_INTO_SUBSCRIPTIONS_TABLE, id, topic,
-                    callbackParameter, secret, leaseSeconds, createdAt, createdBy, createdDTimes, updatedBy, updatedDTimes, isDeleted, deletedDTimes);
+                    callbackParameter, secret, leaseSeconds, createdAt, createdBy, createdDTimes, updatedBy, updatedDTimes);
                 self.handleUpdate(returned, "insert new subs");
             }
         } else {
@@ -76,11 +74,41 @@ public type HubPersistenceImpl object {
         var currentUTCTime = time:format(time:currentTime(), TIMESTAMP_PATTERN);
         jdbc:Parameter topic = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionDetails.topic};
         jdbc:Parameter callbackParameter = {sqlType: jdbc:TYPE_VARCHAR, value: callback};
-        jdbc:Parameter updatedBy = {sqlType: jdbc:TYPE_VARCHAR, value: HUB_ADMIN};
-        jdbc:Parameter updatedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
-        var returned = self.jdbcClient->update(SOFT_DELETE_FROM_SUBSCRIPTIONS, updatedBy,
-            updatedDTimes,updatedDTimes, topic, callbackParameter);
-        self.handleUpdate(returned, "Removed subscription");
+
+        var dbResult = self.jdbcClient->select(SELECT_FROM_SUBSCRIPTIONS_BY_TOPIC_CALLBACK_EXTENDED, SubscriptionDeletedDetails, topic,
+            callbackParameter);
+        SubscriptionDeletedDetails subscriptionResult = {};
+        //TODO handle else
+        if (dbResult is table<record {}>) {
+            if (dbResult.hasNext()) {
+                var subscriptionDeletedDetails = trap <SubscriptionDeletedDetails>dbResult.getNext();
+                if (subscriptionDeletedDetails is SubscriptionDeletedDetails) {
+                    subscriptionResult = subscriptionDeletedDetails;
+                }
+            }
+        }
+
+        jdbc:Parameter id = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionResult.id};
+        topic = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionResult.topic};
+        callbackParameter = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionResult.callback};
+        jdbc:Parameter secret = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionResult.secret};
+        jdbc:Parameter leaseSeconds = {sqlType: jdbc:TYPE_BIGINT, value: subscriptionResult.leaseSeconds};
+        jdbc:Parameter createdAt = {sqlType: jdbc:TYPE_BIGINT, value: subscriptionResult.createdAt};
+        jdbc:Parameter createdBy = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionResult.createdBy};
+        jdbc:Parameter createdDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: subscriptionResult.createdDTimes};
+        jdbc:Parameter updatedBy = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionResult.updatedBy};
+        jdbc:Parameter updatedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: subscriptionResult.updatedDTimes};
+        jdbc:Parameter isDeleted = {sqlType: jdbc:TYPE_BOOLEAN, value: true};
+        jdbc:Parameter deletedDTimes = {sqlType: jdbc:TYPE_TIMESTAMP, value: currentUTCTime.toString()};
+
+        var returned = self.jdbcClient->update(INSERT_INTO_SUBSCRIPTIONS_HISTORY_TABLE, id, topic, callbackParameter, secret, leaseSeconds, createdAt, createdBy, createdDTimes, updatedBy, updatedDTimes, isDeleted, deletedDTimes);
+        if (returned is jdbc:UpdateResult) {
+            log:printDebug("inserted row in history table" + " status: " + returned.updatedRowCount.toString());
+            var deleteResult = self.jdbcClient->update(HARD_DELETE_FROM_SUBSCRIPTIONS, topic, callbackParameter);
+            self.handleUpdate(deleteResult, "Removed subscription from main subscription table");
+        } else {
+            log:printError("insert row in history table" + " failed: " + <string>returned.detail()?.message);
+        }
     }
 
     # Function to add a topic.

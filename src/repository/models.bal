@@ -7,12 +7,25 @@ public type SubscriptionDetails record {|
 |};
 
 public type SubscriptionExtendedDetails record {|
-    string id ="";
+    string id = "";
     string topic = "";
     string callback = "";
     string secret = "";
     int leaseSeconds = 0;
     int createdAt = 0;
+|};
+
+public type SubscriptionDeletedDetails record {|
+    string id = "";
+    string topic = "";
+    string callback = "";
+    string secret = "";
+    int leaseSeconds = 0;
+    int createdAt = 0;
+    string createdBy = "";
+    string createdDTimes = "";
+    string updatedBy = "";
+    string? updatedDTimes = "";
 |};
 
 public type TopicRegistration record {|

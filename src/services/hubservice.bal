@@ -68,9 +68,13 @@ public type HubServiceImpl object {
         }
 
         if (messageDetails is repository:MessageDetails) {
-
+            
             repository:SubscriptionExtendedDetails subscriptionExtendedDetails = self.subsOperations.getSubscription(topic, callback);
-            log:printInfo("sub id for notification " + subscriptionExtendedDetails.id);
+            if(subscriptionExtendedDetails.id == ""){
+                subscriptionExtendedDetails = self.subsOperations.getSubscriptionFromHistory(topic, callback,messageDetails.publishedDTimes);
+                //TODO send error if id empty
+            }
+            log:printDebug("sub id for notification "+subscriptionExtendedDetails.id);
             repository:SucessDeliveryDetails sucessDeliveryDetails = {
                 msgID: messageDetails.id,
                 subsID: subscriptionExtendedDetails.id,
@@ -101,7 +105,10 @@ public type HubServiceImpl object {
         }
         if (messageDetails is repository:MessageDetails) {
             repository:SubscriptionExtendedDetails subscriptionExtendedDetails = self.subsOperations.getSubscription(topic, callback);
-            log:printDebug("sub id for notification " + subscriptionExtendedDetails.id);
+            if(subscriptionExtendedDetails.id == ""){
+                subscriptionExtendedDetails = self.subsOperations.getSubscriptionFromHistory(topic, callback,messageDetails.publishedDTimes);
+                //TODO log and send error if id empty
+            }
             repository:FailedDeliveryDetails failedDeliveryDetails = {
                 msgID: messageDetails.id,
                 subsID: subscriptionExtendedDetails.id,
@@ -115,23 +122,27 @@ public type HubServiceImpl object {
 
 
     public function getFailedContent(string subscriberSignature, string topic, string callback, string timestamp, int messagecount, int pageIndex) returns @untainted repository:FailedContentPullRespModel|error {
-        int count = messagecount;
-        repository:SubscriptionExtendedDetails[] subscriptionExtendedDetails = self.subsOperations.getSubscriptions(topic, callback, timestamp);
+        int count=messagecount;
+      
+        repository:SubscriptionExtendedDetails[] subscriptionExtendedDetails = self.subsOperations.getSubscriptionsFromHistory(topic, callback,timestamp);
+        int length=subscriptionExtendedDetails.length();
+        subscriptionExtendedDetails[length]=self.subsOperations.getSubscription(topic, callback);
         if(subscriptionExtendedDetails.length()<=0){
             error e = error("Atleast one subscription should be there", message = "No subscriber found alleast one subscription should be there");
             return e;
         }
         string hmacSubsSignature = "";
-        if (count == 0) {
-            hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp + pageIndex.toString(), subscriptionExtendedDetails[0].secret);
-            count = config:getAsInt("mosip.hub.message_count_default", 10);
-        } else {
-            hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp + pageIndex.toString() + count.toString(), subscriptionExtendedDetails[0].secret);
+        if(count == 0){
+        hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp+ pageIndex.toString(), subscriptionExtendedDetails[0].secret);
+        count=config:getAsInt("mosip.hub.message_count_default", 10);
+        }else{
+        hmacSubsSignature = utils:hmacSha256(topic + callback + timestamp + pageIndex.toString() + count.toString(), subscriptionExtendedDetails[0].secret);    
         }
         if (hmacSubsSignature != subscriberSignature) {
             return error("SIGNATUREMATCHERROR", message = "hmac didnot match");
         }
         string[] msgIDs = self.deliveryReportPersistence.getFailedDeliveryBySubID(subscriptionExtendedDetails, timestamp, count, pageIndex);
+       
         repository:FailedContentModel[] failedContentModels = self.messagePersistenceImpl.findMessageByIDs(msgIDs);
         repository:FailedContentPullRespModel failedContentPullRespModel = {
             failedcontents: failedContentModels
@@ -156,7 +167,8 @@ public type HubServiceImpl object {
 
 
 
-    public function getUnsentMessages(string timestamp) returns @tainted repository:RestartRepublishContentModel[] {
-        return self.messagePersistenceImpl.getUnsentMessages(timestamp);
+    public function getUnsentMessages(string timestamp,string unsentMessageTimestampInterval) returns @tainted repository:RestartRepublishContentModel[] {
+       
+        return self.messagePersistenceImpl.getUnsentMessages(timestamp,unsentMessageTimestampInterval);
     }
 };

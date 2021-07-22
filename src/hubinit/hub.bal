@@ -2,6 +2,7 @@ import ballerina/config;
 import ballerina/http;
 import ballerina/log;
 import ballerina/runtime;
+import ballerina/task;
 import ballerina/websub;
 import ballerinax/java.jdbc;
 import mosip/filters as fil;
@@ -18,7 +19,7 @@ jdbc:Client jdbcClient = new ({
         dbOptions: {useSSL: false}
     }
     );
-   
+
 repository:DeliveryReportPersistence deliveryReportPersistence = new repository:DeliveryReportPersistence(jdbcClient);
 repository:MessagePersistenceImpl messagePersistenceImpl = new repository:MessagePersistenceImpl(jdbcClient);
 repository:SubsOperations subsOperations = new repository:SubsOperations(jdbcClient);
@@ -27,7 +28,7 @@ http:RequestFilter requestFilter = new fil:RequestFilter(hubServiceImpl);
 http:RequestFilter authFilter = new fil:AuthFilter();
 
 listener http:Listener hubListener = new http:Listener(config:getAsInt("mosip.hub.port"),
-    config = {filters: [authFilter,requestFilter]});
+    config = {filters: [authFilter, requestFilter]});
 
 public function tapOnDeliveryImpl(string callback, string topic, websub:WebSubContent content) {
     hubServiceImpl.onSucessDelivery(callback, topic, content);
@@ -39,7 +40,6 @@ public function tapOnDeliveryFailureImpl(string callback, string topic, websub:W
 
 
 public function main() {
-    repository:RestartRepublishContentModel[] unsentMessages = hubServiceImpl.getUnsentMessages(config:getAsString("mosip.hub.restart_republish_time_offset"));
     websub:HubPersistenceStore hubpimpl = new repository:HubPersistenceImpl(jdbcClient);
     log:printInfo("Starting up the Ballerina Hub Service");
 
@@ -65,17 +65,29 @@ public function main() {
     }
     );
     if (result is websub:Hub) {
+
         webSubHub = result;
-        if (unsentMessages.length() > 0) {
-            foreach var unsentMessage in unsentMessages {
-                var publishResponse = webSubHub.publishUpdate(unsentMessage.topic, unsentMessage.message.toBytes());
-                if (publishResponse is error) {
-                    log:printError("Error notifying hub: " +
-                        <string>publishResponse.detail()?.message);
-                } else {
-                    log:printInfo("Update notification successful!");
-                }
-                runtime:sleep(2000);
+        if (config:getAsBoolean("mosip.hub.cron-task.unsent-messages-republish.enable", false)) {
+            task:AppointmentData appointmentData = {
+                seconds: config:getAsString("mosip.hub.cron-task.unsent-messages-republish.seconds"),
+                minutes: config:getAsString("mosip.hub.cron-task.unsent-messages-republish.minutes"),
+                hours: config:getAsString("mosip.hub.cron-task.unsent-messages-republish.hours"),
+                daysOfMonth: config:getAsString("mosip.hub.cron-task.unsent-messages-republish.days-of-month"),
+                months: config:getAsString("mosip.hub.cron-task.unsent-messages-republish.months"),
+                daysOfWeek: config:getAsString("mosip.hub.cron-task.unsent-messages-republish.days-of-week"),
+                year: config:getAsString("mosip.hub.cron-task.unsent-messages-republish.year")
+            };
+
+            task:Scheduler appointment = new ({appointmentDetails: appointmentData});
+            RepublishJob republishJob = new RepublishJob();
+            var attachResult = appointment.attach(republishJob.getRepublishservice(), hubServiceImpl, webSubHub);
+            if (attachResult is error) {
+                log:printError("Error attaching the service.");     
+            }
+
+            var startResult = appointment.start();
+            if (startResult is error) {
+                log:printError("Starting the task is failed."); 
             }
         }
 
