@@ -46,6 +46,7 @@ public function main() {
     websub:Hub webSubHub;
     var result = websub:startHub(hubListener, "/websub", "/hub",
         hubConfiguration = {
+        leaseSeconds: config:getAsInt("mosip.hub.lease_seconds",86400),    
         remotePublish: {
             enabled: true
         },
