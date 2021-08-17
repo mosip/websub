@@ -55,6 +55,7 @@ public type HubPersistenceImpl object {
                     callbackParameter, secret, leaseSeconds, createdAt, createdBy, createdDTimes, updatedBy, updatedDTimes);
                 self.handleUpdate(returned, "insert new subs");
             }
+            dbResult.close();
         } else {
             string errCause = <string>dbResult.detail()?.message;
             log:printError("Error retreiving data from the database: " + errCause);
@@ -86,6 +87,7 @@ public type HubPersistenceImpl object {
                     subscriptionResult = subscriptionDeletedDetails;
                 }
             }
+            dbResult.close();
         }
 
         jdbc:Parameter id = {sqlType: jdbc:TYPE_VARCHAR, value: subscriptionResult.id};
@@ -170,6 +172,7 @@ public type HubPersistenceImpl object {
                     log:printError("Error retreiving subscription details from the database: " + errCause);
                 }
             }
+            dbResult.close();
         } else {
             string errCause = <string>dbResult.detail()?.message;
             log:printError("Error retreiving data from the database: " + errCause);
@@ -198,6 +201,7 @@ public type HubPersistenceImpl object {
                     log:printError("Error retreiving topic registration details from the database: " + errCause);
                 }
             }
+            dbResult.close();
         } else {
             string errCause = <string>dbResult.detail()?.message;
             log:printError("Error retreiving data from the database: " + errCause);

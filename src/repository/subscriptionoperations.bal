@@ -28,6 +28,7 @@ public type SubsOperations object {
                     log:printError("Error retreiving topic registration details from the database: " + errCause);
                 }
             }
+            dbResult.close();
         } else {
             string errCause = <string>dbResult.detail()?.message;
             log:printError("Error retreiving data from the database: " + errCause);
@@ -55,6 +56,7 @@ public type SubsOperations object {
                     log:printError("Error retreiving topic registration details from the database: " + errCause);
                 }
             }
+            dbResult.close();
         } else {
             string errCause = <string>dbResult.detail()?.message;
             log:printError("Error retreiving data from the database: " + errCause);
@@ -84,6 +86,7 @@ public type SubsOperations object {
                     log:printError("Error retreiving topic registration details from the database: " + errCause);
                 }
             }
+            dbResult.close();
         } else {
             string errCause = <string>dbResult.detail()?.message;
             log:printError("Error retreiving data from the database: " + errCause);
