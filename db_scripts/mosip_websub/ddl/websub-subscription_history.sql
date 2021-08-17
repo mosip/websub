@@ -18,7 +18,7 @@ CREATE TABLE websub.subscription_history (
 	topic character varying(256) NOT NULL,
 	callback character varying(256) NOT NULL,
 	secret character varying(256) NULL,
-	lease_seconds integer NULL,
+	lease_seconds bigint,
 	created_at integer NULL,
 	cr_by character varying(256) NOT NULL,
 	cr_dtimes timestamp NOT NULL,
