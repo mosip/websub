@@ -86,6 +86,7 @@ public type DeliveryReportPersistence object {
                     log:printError("Error retreiving failed delivery from subID from the database: " + errCause);
                 }
             }
+            dbResult.close();
         } else {
             string errCause = <string>dbResult.detail()?.message;
             log:printError("Error retreiving data from the database: " + errCause);
