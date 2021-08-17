@@ -17,4 +17,5 @@ ALTER TABLE websub.subscription_history ADD CONSTRAINT UNIQUE (topic, callback);
 
 ALTER TABLE websub.subscription_history ALTER COLUMN lease_seconds TYPE bigint;
 
+ALTER TABLE websub.subscription_history ALTER COLUMN created_at TYPE bigint;
 ---------------------------------------------------------------------------------------------------
