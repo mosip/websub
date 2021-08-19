@@ -34,16 +34,16 @@ jobs:
          
       - name: Install ballerina
         run: |
-         wget -q --show-progress https://dist.ballerina.io/downloads/swan-lake-beta2/ballerina-linux-installer-x64-swan-lake-beta2.deb
-         sudo dpkg -i ballerina-linux-installer-x64-1.2.13.deb
+         wget -q --show-progress https://dist.ballerina.io/downloads/swan-lake-beta2/ballerina-linux-installer-x64-swan-lake-beta2.deb -O ballerina-linux-installer-x64.deb
+         sudo dpkg -i ballerina-linux-installer-x64.deb
       
       - name: Hub-service build and image creation
         run: |
-         ballerina build ./hub --cloud=docker
+         ballerina build ./hub 
 
       - name: Consolidator service build and image creation
         run: |
-         ballerina build ./consolidator --cloud=docker   
+         ballerina build ./consolidator
          
       - name: Build hub image
         run: |
