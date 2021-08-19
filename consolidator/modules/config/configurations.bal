@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import consolidatorService.util;
+import consolidator.util;
 
 # IP and Port of the Kafka bootstrap node
 public configurable string KAFKA_BOOTSTRAP_NODE = "localhost:9092";

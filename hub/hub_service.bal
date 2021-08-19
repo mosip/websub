@@ -17,10 +17,10 @@
 import ballerina/websubhub;
 import ballerina/log;
 import ballerina/http;
-import kafkaHub.security;
-import kafkaHub.persistence as persist;
-import kafkaHub.config;
-import kafkaHub.util;
+import hub.security;
+import hub.persistence as persist;
+import hub.config;
+import hub.util;
 
 websubhub:Service hubService = @websubhub:ServiceConfig { 
 }

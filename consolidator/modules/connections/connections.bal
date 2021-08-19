@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerinax/kafka;
-import consolidatorService.config;
+import consolidator.config;
 
 // Producer which persist the current consolidated in-memory state of the system
 kafka:ProducerConfiguration statePersistConfig = {
