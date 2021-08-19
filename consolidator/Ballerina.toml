@@ -1,5 +1,5 @@
 [package]
-org = "io.mosip"
+org = "mosip"
 name = "consolidator"
 version = "1.2.0"
 
