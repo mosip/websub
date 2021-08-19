@@ -37,21 +37,21 @@ jobs:
          wget -q --show-progress https://dist.ballerina.io/downloads/swan-lake-beta2/ballerina-linux-installer-x64-swan-lake-beta2.deb -O ballerina-linux-installer-x64.deb
          sudo dpkg -i ballerina-linux-installer-x64.deb
       
-      - name: Hub-service build and image creation
+      - name: Hub-service build
         run: |
          bal build ./hub 
 
-      - name: Consolidator service build and image creation
+      - name: Consolidator service build
         run: |
          bal build ./consolidator
          
       - name: Build hub image
         run: |
-          docker build . --file ./hub/Dockerfile --tag ${{ env.SERVICE_NAME }}
+          docker build ./hub --file ./hub/Dockerfile --tag ${{ env.SERVICE_NAME }}
       
       - name: Build consolidator image
         run: |
-          docker build . --file ./consolidator/Dockerfile --tag ${{ env.CONSOLIDATOR_SERVICE_NAME }}    
+          docker build ./consolidator --file ./consolidator/Dockerfile --tag ${{ env.CONSOLIDATOR_SERVICE_NAME }}    
 
       - name: Log into registry
         run: echo "${{ secrets.release_docker_hub }}" | docker login -u ${{ secrets.actor_docker_hub }} --password-stdin

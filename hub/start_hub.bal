@@ -32,14 +32,7 @@ public function main() returns error? {
     _ = @strand { thread: "any" } start syncSubscribersCache();
     
     // Start the Hub
-    websubhub:Listener hubListener = check new (config:HUB_PORT, 
-        secureSocket = {
-            key: {
-                certFile: "./resources/server.crt",
-                keyFile: "./resources/server.key"
-            }
-        }
-    );
+    websubhub:Listener hubListener = check new (config:HUB_PORT);
     check hubListener.attach(hubService, "hub");
     check hubListener.'start();
 }
@@ -169,10 +162,7 @@ function startMissingSubscribers(websubhub:VerifiedSubscription[] persistedSubsc
                     backOffFactor: 2.0,
                     maxWaitInterval: 20
                 },
-                timeout: config:MESSAGE_DELIVERY_TIMEOUT,
-                secureSocket: {
-                    cert: "./resources/server.crt"
-                }
+                timeout: config:MESSAGE_DELIVERY_TIMEOUT
             });
             _ = @strand { thread: "any" } start pollForNewUpdates(hubClientEp, consumerEp, topicName, groupName);
         }
