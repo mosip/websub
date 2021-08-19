@@ -18,10 +18,10 @@ import ballerinax/kafka;
 import ballerina/websubhub;
 import ballerina/lang.value;
 import ballerina/log;
-import consolidatorService.config;
-import consolidatorService.util;
-import consolidatorService.connections as conn;
-import consolidatorService.persistence as persist;
+import consolidator.config;
+import consolidator.util;
+import consolidator.connections as conn;
+import consolidator.persistence as persist;
 
 isolated function startConsolidator() returns error? {
     do {

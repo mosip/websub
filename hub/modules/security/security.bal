@@ -16,7 +16,7 @@
 
 import ballerina/http;
 import ballerina/regex;
-import kafkaHub.config;
+import hub.config;
 
 const string SUFFIX_GENERAL = "_GENERAL";
 const string SUFFIX_ALL_INDIVIDUAL = "_ALL_INDIVIDUAL";

@@ -16,8 +16,8 @@
 
 import ballerinax/kafka;
 import ballerina/websubhub;
-import kafkaHub.config;
-import kafkaHub.util;
+import hub.config;
+import hub.util;
 
 // Producer which persist the current in-memory state of the Hub 
 kafka:ProducerConfiguration statePersistConfig = {

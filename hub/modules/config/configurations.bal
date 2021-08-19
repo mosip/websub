@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import kafkaHub.util;
+import hub.util;
 
 # Flag to check whether to enable/disable security
 public configurable boolean SECURITY_ON = true;

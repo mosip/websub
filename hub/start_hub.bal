@@ -18,10 +18,10 @@ import ballerina/log;
 import ballerina/websubhub;
 import ballerinax/kafka;
 import ballerina/lang.value;
-import kafkaHub.util;
-import kafkaHub.connections as conn;
+import hub.util;
+import hub.connections as conn;
 import ballerina/mime;
-import kafkaHub.config;
+import hub.config;
 
 isolated map<websubhub:TopicRegistration> registeredTopicsCache = {};
 isolated map<websubhub:VerifiedSubscription> subscribersCache = {};
