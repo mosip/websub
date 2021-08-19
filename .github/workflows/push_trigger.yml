@@ -39,11 +39,11 @@ jobs:
       
       - name: Hub-service build and image creation
         run: |
-         ballerina build ./hub 
+         bal build ./hub 
 
       - name: Consolidator service build and image creation
         run: |
-         ballerina build ./consolidator
+         bal build ./consolidator
          
       - name: Build hub image
         run: |
