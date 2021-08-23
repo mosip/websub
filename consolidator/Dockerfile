@@ -5,4 +5,4 @@ RUN wget -q --show-progress https://dist.ballerina.io/downloads/swan-lake-beta2/
 RUN dpkg -i ballerina-linux-installer-x64.deb
 #TODO Link to be parameterized instead of hardcoding
 CMD wget -q --show-progress "${consolidator_config_file_url_env}" -O Config.toml;\
-    bal run ./consolidator.jar --b7a.config.file=Config.toml ;\
+    bal run ./consolidator.jar ;\
