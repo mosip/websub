@@ -18,10 +18,10 @@ import ballerinax/kafka;
 import ballerina/websubhub;
 import ballerina/lang.value;
 import ballerina/log;
-import consolidator.config;
-import consolidator.util;
-import consolidator.connections as conn;
-import consolidator.persistence as persist;
+import consolidatorService.config;
+import consolidatorService.util;
+import consolidatorService.connections as conn;
+import consolidatorService.persistence as persist;
 
 isolated function startConsolidator() returns error? {
     do {
@@ -30,6 +30,7 @@ isolated function startConsolidator() returns error? {
             if records.length() > 0 {
                 kafka:ConsumerRecord lastRecord = records.pop();
                 string lastPersistedData = check string:fromBytes(lastRecord.value);
+                log:printInfo("websub event received in consolidator",payload=lastPersistedData);
                 error? result = processPersistedData(lastPersistedData);
                 if result is error {
                     log:printError("Error occurred while processing received event ", 'error = result);
