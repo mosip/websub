@@ -18,9 +18,9 @@ import ballerinax/kafka;
 import ballerina/websubhub;
 import ballerina/lang.value;
 import ballerina/log;
-import consolidator.config;
-import consolidator.util;
-import consolidator.connections as conn;
+import consolidatorService.config;
+import consolidatorService.util;
+import consolidatorService.connections as conn;
 
 isolated map<websubhub:TopicRegistration> registeredTopicsCache = {};
 isolated map<websubhub:VerifiedSubscription> subscribersCache = {};

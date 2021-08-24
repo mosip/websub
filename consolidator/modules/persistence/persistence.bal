@@ -15,8 +15,8 @@
 // under the License.
 
 import ballerina/websubhub;
-import consolidator.config;
-import consolidator.connections as conn;
+import consolidatorService.config;
+import consolidatorService.connections as conn;
 
 public isolated function persistTopicRegistrations(map<websubhub:TopicRegistration> registeredTopicsCache) returns error? {
     websubhub:TopicRegistration[] availableTopics = [];
