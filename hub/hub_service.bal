@@ -17,14 +17,12 @@
 import ballerina/websubhub;
 import ballerina/log;
 import ballerina/http;
-import hub.security;
-import hub.persistence as persist;
-import hub.config;
-import hub.util;
+import kafkaHub.security;
+import kafkaHub.persistence as persist;
+import kafkaHub.config;
+import kafkaHub.util;
 
-websubhub:Service hubService = @websubhub:ServiceConfig { 
-}
-service object {
+websubhub:Service hubService = service object {
 
     # Registers a `topic` in the hub.
     # 
@@ -34,9 +32,11 @@ service object {
     #            if topic registration failed or `error` if there is any unexpected error
     isolated remote function onRegisterTopic(websubhub:TopicRegistration message, http:Headers headers)
                                 returns websubhub:TopicRegistrationSuccess|websubhub:TopicRegistrationError|error {
-        if config:SECURITY_ON {
+        log:printInfo("topic registration");
+	if config:SECURITY_ON {
             check security:authorizePublisher(headers, message.topic);
         }
+        log:printInfo("Running topic registration ", payload = message);
         check self.registerTopic(message);
         return websubhub:TOPIC_REGISTRATION_SUCCESS;
     }
@@ -47,6 +47,7 @@ service object {
             if registeredTopicsCache.hasKey(topicName) {
                 return error websubhub:TopicRegistrationError("Topic has already registered with the Hub");
             }
+            log:printInfo("Registering topic ");
             error? persistingResult = persist:addRegsiteredTopic(message.cloneReadOnly());
             if persistingResult is error {
                 log:printError("Error occurred while persisting the topic-registration ", err = persistingResult.message());
@@ -65,6 +66,7 @@ service object {
         if config:SECURITY_ON {
             check security:authorizePublisher(headers, message.topic);
         }
+        log:printInfo("Running topic de-registration ", payload = message);
         check self.deregisterTopic(message);
         return websubhub:TOPIC_DEREGISTRATION_SUCCESS;
     }
@@ -75,6 +77,7 @@ service object {
             if !registeredTopicsCache.hasKey(topicName) {
                 return error websubhub:TopicDeregistrationError("Topic has not been registered in the Hub");
             }
+            log:printInfo("Deregistering topic");
             error? persistingResult = persist:removeRegsiteredTopic(message.cloneReadOnly());
             if persistingResult is error {
                 log:printError("Error occurred while persisting the topic-deregistration ", err = persistingResult.message());
@@ -93,7 +96,8 @@ service object {
         if config:SECURITY_ON {
             check security:authorizeSubscriber(headers, message.hubTopic);
         }
-        return websubhub:SUBSCRIPTION_ACCEPTED;
+        log:printInfo("subscription request received", payload = message);
+	return websubhub:SUBSCRIPTION_ACCEPTED;
     }
 
     # Validates a incomming subscription request.
@@ -199,6 +203,7 @@ service object {
         if config:SECURITY_ON {
             check security:authorizePublisher(headers, message.hubTopic);
         }
+        log:printInfo("Running content update ", payload = message);
         check self.updateMessage(message);
         return websubhub:ACKNOWLEDGEMENT;
     }
@@ -210,6 +215,7 @@ service object {
             topicAvailable = registeredTopicsCache.hasKey(topicName);
         }
         if topicAvailable {
+            log:printInfo("Updating topic ");
             error? errorResponse = persist:addUpdateMessage(topicName, msg);
             if errorResponse is websubhub:UpdateMessageError {
                 return errorResponse;
@@ -222,4 +228,5 @@ service object {
         }
     }
 };
+
 
