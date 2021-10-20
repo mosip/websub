@@ -80,7 +80,7 @@ isolated function buildRolePrefix(string topic, string prefix) returns string {
     if index is int {
         return prefix + topic.substring(index + 1, topic.length());
     } else {
-        return prefix + t opic;
+        return prefix + topic;
     }
 }
 
