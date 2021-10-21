@@ -33,7 +33,7 @@ final http:Client clientEP = check new(config:MOSIP_AUTH_BASE_URL);
 public isolated function authorizeSubscriber(http:Headers headers, string topic) returns error? {
     string token = check getToken(headers);
     json response = check getValidatedTokenResponse(token);
-    string roles = (check response?.roles).toString();
+    string roles = (check response?.response.role).toString();
     string[] rolesArr = regex:split(roles, ",");
     string userId = (check response?.userId).toString();
     string? partnerID = buildPartnerId(topic);
@@ -52,14 +52,12 @@ public isolated function authorizeSubscriber(http:Headers headers, string topic)
 public isolated function authorizePublisher(http:Headers headers, string topic) returns error? {
     string token = check getToken(headers);
     json response = check getValidatedTokenResponse(token);
-    log:printInfo("response from iam", payload = response.toString());
+   
     string roles = (check response?.response.role).toString();
     log:printInfo("roles", payload = roles);
     string[] rolesArr = regex:split(roles, ",");
     string? partnerID = buildPartnerId(topic);
     string rolePrefix = buildRolePrefix(topic, "PUBLISH_");
-    log:printInfo("rolePrefix", payload = rolePrefix);
-    log:printInfo("rolePrefixwithsuffix", payload = rolePrefix.concat(SUFFIX_GENERAL));
     boolean authorized = isPublisherAuthorized(partnerID, rolePrefix, rolesArr);
     if (!authorized) {
         return error("Publisher is not authorized");
