@@ -53,7 +53,7 @@ public isolated function authorizePublisher(http:Headers headers, string topic) 
     string token = check getToken(headers);
     json response = check getValidatedTokenResponse(token);
     log:printInfo("response from iam", payload = response.toString());
-    string roles = (check response?.role).toString();
+    string roles = (check response?.response.role).toString();
     log:printInfo("roles", payload = roles);
     string[] rolesArr = regex:split(roles, ",");
     string? partnerID = buildPartnerId(topic);
