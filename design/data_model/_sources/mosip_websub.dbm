@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.2-alpha" last-position="0,0" last-zoom="0.65"
+<dbmodel pgmodeler-ver="0.9.3" use-changelog="false" last-position="0,0" last-zoom="0.65" max-obj-count="12"
 	 default-schema="public" default-owner="postgres">
 <role name="sysadmin"
       superuser="true"
@@ -46,14 +46,14 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<comment><![CDATA[The data related to Registration process flows and transaction will be maintained in this database. This database also maintains data that is needed to perform deduplication.]]></comment>
 </database>
 
-<schema name="public" rect-visible="true" fill-color="#e1e1e1" sql-disabled="true">
+<schema name="public" layer="0" rect-visible="true" fill-color="#e1e1e1" sql-disabled="true">
 </schema>
 
-<schema name="websub" rect-visible="true" fill-color="#83af1f">
+<schema name="websub" layer="0" rect-visible="true" fill-color="#83af1f">
 	<role name="sysadmin"/>
 </schema>
 
-<table name="topic" alias="topic">
+<table name="topic" layer="0" alias="topic" collapse-mode="2" max-obj-count="8" z-value="0">
 	<schema name="websub"/>
 	<role name="sysadmin"/>
 	<comment><![CDATA[Topic: Stores list of topics used in websub modules, this topics are used by producers and subscribers for message transfer.]]></comment>
@@ -91,16 +91,20 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</constraint>
 </table>
 
-<table name="subscription" alias="sub">
+<table name="subscription" layer="0" alias="sub" collapse-mode="2" max-obj-count="14" z-value="0">
 	<schema name="websub"/>
 	<role name="sysadmin"/>
 	<comment><![CDATA[Subscription: Stores list of subscriptions in the websub module, These subscription used to consume the message in websub module]]></comment>
-	<position x="520" y="80"/>
-	<column name="topic" not-null="true">
+	<position x="80" y="400"/>
+	<column name="id" not-null="true">
+		<type name="character varying" length="36"/>
+		<comment><![CDATA[id : Primary key for this table]]></comment>
+	</column>
+	<column name="topic">
 		<type name="character varying" length="256"/>
 		<comment><![CDATA[Topic: Topic for which subscription is done]]></comment>
 	</column>
-	<column name="callback" not-null="true">
+	<column name="callback">
 		<type name="character varying" length="256"/>
 		<comment><![CDATA[Call Back URL: Call back url used by the subscribers]]></comment>
 	</column>
@@ -115,10 +119,6 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="created_at">
 		<type name="bigint" length="6"/>
 		<comment><![CDATA[Created At: Subscription created date time.]]></comment>
-	</column>
-	<column name="is_active" not-null="true">
-		<type name="boolean" length="0"/>
-		<comment><![CDATA[IS_Active : Flag to mark whether the record is Active or In-active]]></comment>
 	</column>
 	<column name="cr_by" not-null="true">
 		<type name="character varying" length="256"/>
@@ -144,10 +144,161 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="timestamp" length="0"/>
 		<comment><![CDATA[Deleted DateTimestamp : Date and Timestamp when the record is soft deleted with is_deleted=TRUE]]></comment>
 	</column>
-	<constraint name="pk_sub_id" type="pk-constr" table="websub.subscription">
-		<columns names="topic,callback" ref-type="src-columns"/>
+	<constraint name="subscription_pk" type="pk-constr" table="websub.subscription">
+		<columns names="id" ref-type="src-columns"/>
 	</constraint>
 </table>
+
+<table name="message_store" layer="0" collapse-mode="2" max-obj-count="15" z-value="0">
+	<schema name="websub"/>
+	<role name="sysadmin"/>
+	<position x="600" y="40"/>
+	<column name="id" not-null="true">
+		<type name="character varying" length="36"/>
+	</column>
+	<column name="message" not-null="true">
+		<type name="character varying" length="1024"/>
+	</column>
+	<column name="topic" not-null="true">
+		<type name="character varying" length="256"/>
+	</column>
+	<column name="publisher">
+		<type name="character varying" length="256"/>
+	</column>
+	<column name="pub_dtimes" not-null="true">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="hub_instance_id">
+		<type name="character varying" length="36"/>
+	</column>
+	<column name="msg_topic_hash">
+		<type name="character varying" length="64"/>
+	</column>
+	<column name="cr_by" not-null="true">
+		<type name="character varying" length="256"/>
+	</column>
+	<column name="cr_dtimes" not-null="true">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="upd_by">
+		<type name="character varying" length="256"/>
+	</column>
+	<column name="upd_dtimes">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="is_deleted">
+		<type name="boolean" length="0"/>
+	</column>
+	<column name="del_dtimes">
+		<type name="timestamp" length="0"/>
+	</column>
+	<constraint name="message_store_pk" type="pk-constr" table="websub.message_store">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="message_delivery_success" layer="0" collapse-mode="2" max-obj-count="10" z-value="0">
+	<schema name="websub"/>
+	<role name="sysadmin"/>
+	<position x="540" y="520"/>
+	<column name="msg_id" not-null="true">
+		<type name="character varying" length="36"/>
+	</column>
+	<column name="subscription_id" not-null="true">
+		<type name="character varying" length="36"/>
+	</column>
+	<column name="delivery_success_dtimes" not-null="true">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="cr_by" not-null="true">
+		<type name="character varying" length="256"/>
+	</column>
+	<column name="cr_dtimes" not-null="true">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="upd_by">
+		<type name="character varying" length="256"/>
+	</column>
+	<column name="upd_dtimes">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="is_deleted">
+		<type name="boolean" length="0"/>
+	</column>
+	<column name="del_dtimes">
+		<type name="timestamp" length="0"/>
+	</column>
+	<constraint name="message_delivery_success_pk" type="pk-constr" table="websub.message_delivery_success">
+		<columns names="msg_id,subscription_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="message_delivery_failed" layer="0" collapse-mode="2" max-obj-count="14" z-value="0">
+	<schema name="websub"/>
+	<role name="sysadmin"/>
+	<position x="1080" y="260"/>
+	<column name="msg_id" not-null="true">
+		<type name="character varying" length="36"/>
+	</column>
+	<column name="subscription_id" not-null="true">
+		<type name="character varying" length="36"/>
+	</column>
+	<column name="delivery_failed_dtimes" not-null="true">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="last_fetch_dtimes">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="delivery_failure_reason">
+		<type name="character varying" length="128"/>
+	</column>
+	<column name="delivery_failure_error">
+		<type name="character varying" length="128"/>
+	</column>
+	<column name="cr_by" not-null="true">
+		<type name="character varying" length="256"/>
+	</column>
+	<column name="cr_dtimes" not-null="true">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="upd_by">
+		<type name="character varying" length="256"/>
+	</column>
+	<column name="upd_dtimes">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="is_deleted">
+		<type name="boolean" length="0"/>
+	</column>
+	<column name="del_dtimes">
+		<type name="timestamp" length="0"/>
+	</column>
+	<constraint name="message_delivery_failed_pk" type="pk-constr" table="websub.message_delivery_failed">
+		<columns names="msg_id,subscription_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<constraint name="fk_msg_tpc" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="websub.topic" table="websub.message_store">
+	<columns names="topic" ref-type="src-columns"/>
+	<columns names="topic" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="fk_mds_sub" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="websub.subscription" table="websub.message_delivery_success">
+	<columns names="subscription_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<relationship name="rel_message_store_topic" type="relfk" layer="0"
+	 src-table="websub.message_store"
+	 dst-table="websub.topic" reference-fk="fk_msg_tpc"
+	 src-required="false" dst-required="true"/>
+
+<relationship name="rel_message_delivery_success_subscription" type="relfk" layer="0"
+	 src-table="websub.message_delivery_success"
+	 dst-table="websub.subscription" reference-fk="fk_mds_sub"
+	 src-required="false" dst-required="true"/>
 
 <permission>
 	<object name="mosip_regprc" type="database"/>
