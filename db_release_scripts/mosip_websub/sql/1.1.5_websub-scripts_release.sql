@@ -21,6 +21,11 @@
 
 ALTER TABLE websub.subscription ADD COLUMN id character varying(36);
 
+UPDATE websub.subscription SET id = '';
+
+ALTER TABLE  websub.subscription ALTER column id SET NOT NULL;
+
+
 --ALTER TABLE websub.subscription ADD constraint subscription_pk PRIMARY KEY (id);
 
 ALTER TABLE websub.subscription DROP COLUMN is_active;
