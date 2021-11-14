@@ -207,6 +207,7 @@ isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:Hu
     foreach var kafkaRecord in records {
         var message = deSerializeKafkaRecord(kafkaRecord);
         if (message is websubhub:ContentDistributionMessage) {
+            log:printInfo("notifying subscribers",consumer = kafkaRecord,message=message);
             var response = clientEp->notifyContentDistribution(message);
             if (response is error) {
                 return response;
