@@ -32,11 +32,9 @@ websubhub:Service hubService = service object {
     #            if topic registration failed or `error` if there is any unexpected error
     isolated remote function onRegisterTopic(websubhub:TopicRegistration message, http:Headers headers)
                                 returns websubhub:TopicRegistrationSuccess|websubhub:TopicRegistrationError|error {
-        log:printInfo("topic registration");
 	if config:SECURITY_ON {
             check security:authorizePublisher(headers, message.topic);
         }
-        log:printInfo("Running topic registration ", payload = message);
         check self.registerTopic(message);
         return websubhub:TOPIC_REGISTRATION_SUCCESS;
     }
@@ -47,7 +45,7 @@ websubhub:Service hubService = service object {
             if registeredTopicsCache.hasKey(topicName) {
                 return error websubhub:TopicRegistrationError("Topic has already registered with the Hub");
             }
-            log:printInfo("Registering topic ");
+            log:printInfo("Registering topic",topic = topicName);
             error? persistingResult = persist:addRegsiteredTopic(message.cloneReadOnly());
             if persistingResult is error {
                 log:printError("Error occurred while persisting the topic-registration ", err = persistingResult.message());
@@ -66,7 +64,6 @@ websubhub:Service hubService = service object {
         if config:SECURITY_ON {
             check security:authorizePublisher(headers, message.topic);
         }
-        log:printInfo("Running topic de-registration ", payload = message);
         check self.deregisterTopic(message);
         return websubhub:TOPIC_DEREGISTRATION_SUCCESS;
     }
@@ -77,7 +74,7 @@ websubhub:Service hubService = service object {
             if !registeredTopicsCache.hasKey(topicName) {
                 return error websubhub:TopicDeregistrationError("Topic has not been registered in the Hub");
             }
-            log:printInfo("Deregistering topic");
+            log:printInfo("Running topic de-registration", payload = message);
             error? persistingResult = persist:removeRegsiteredTopic(message.cloneReadOnly());
             if persistingResult is error {
                 log:printError("Error occurred while persisting the topic-deregistration ", err = persistingResult.message());
@@ -96,7 +93,7 @@ websubhub:Service hubService = service object {
         if config:SECURITY_ON {
             check security:authorizeSubscriber(headers, message.hubTopic);
         }
-        log:printInfo("subscription request received", payload = message);
+        log:printInfo("Subscription request received", payload = message);
 	return websubhub:SUBSCRIPTION_ACCEPTED;
     }
 
@@ -122,6 +119,7 @@ websubhub:Service hubService = service object {
             if subscriberAvailable {
                 return error websubhub:SubscriptionDeniedError("Subscriber has already registered with the Hub");
             }
+            log:printInfo("Validation done a incomming subscription request", payload = message);
         }
     }
 
@@ -131,6 +129,7 @@ websubhub:Service hubService = service object {
     # + return - `error` if there is any unexpected error or else `()`
     isolated remote function onSubscriptionIntentVerified(websubhub:VerifiedSubscription message) returns error? {
         string groupName = util:generateGroupName(message.hubTopic, message.hubCallback);
+        log:printInfo("Proessing a Intent verfied subscription done for request", payload = message);
         lock {
             error? persistingResult = persist:addSubscription(message.cloneReadOnly());
             if persistingResult is error {
@@ -150,6 +149,7 @@ websubhub:Service hubService = service object {
         if config:SECURITY_ON {
             check security:authorizeSubscriber(headers, message.hubTopic);
         }
+        log:printInfo("Unsubscription request received", payload = message);
         return websubhub:UNSUBSCRIPTION_ACCEPTED;
     }
 
@@ -176,7 +176,8 @@ websubhub:Service hubService = service object {
                 return error websubhub:UnsubscriptionDeniedError("Could not find a valid subscriber for Topic [" 
                                 + message.hubTopic + "] and Callback [" + message.hubCallback + "]");
             }
-        }       
+        }
+        log:printInfo("Validation done a incomming Unsubscription request", payload = message);
     }
 
     # Processes a verified unsubscription request.
@@ -184,6 +185,7 @@ websubhub:Service hubService = service object {
     # + message - Details of the unsubscription
     isolated remote function onUnsubscriptionIntentVerified(websubhub:VerifiedUnsubscription message) {
         string groupName = util:generateGroupName(message.hubTopic, message.hubCallback);
+         log:printInfo("Proessing a Intent verfied Unsubscription done for request", payload = message);
         lock {
             var persistingResult = persist:removeSubscription(message.cloneReadOnly());
             if (persistingResult is error) {
@@ -203,7 +205,6 @@ websubhub:Service hubService = service object {
         if config:SECURITY_ON {
             check security:authorizePublisher(headers, message.hubTopic);
         }
-        log:printInfo("Running content update ", payload = message);
         check self.updateMessage(message);
         return websubhub:ACKNOWLEDGEMENT;
     }
@@ -215,7 +216,7 @@ websubhub:Service hubService = service object {
             topicAvailable = registeredTopicsCache.hasKey(topicName);
         }
         if topicAvailable {
-            log:printInfo("Updating topic ");
+             log:printInfo("Running content update", topic = msg.hubTopic);
             error? errorResponse = persist:addUpdateMessage(topicName, msg);
             if errorResponse is websubhub:UpdateMessageError {
                 return errorResponse;
