@@ -57,3 +57,12 @@ public isolated function createMessageConsumer(websubhub:VerifiedSubscription me
     };
     return check new (config:KAFKA_BOOTSTRAP_NODE, consumerConfiguration);  
 }
+
+// Consumer which reads the health check
+kafka:ConsumerConfiguration healthConsumerConfig = {
+    groupId: "health--check-topics-group-" + config:CONSTRUCTED_SERVER_ID,
+    offsetReset: "earliest",
+    topics: [ config:HEALTH_CHECK_TOPIC ]
+};
+public final kafka:Consumer healthCheckConsumer = check new (config:KAFKA_BOOTSTRAP_NODE, healthConsumerConfig);
+

@@ -7,3 +7,8 @@ public type DiskSpaceMetaData record {|
     int total;
     int free;
 |};
+
+public type KafkaMetaData record {|
+    string producerStatus;
+    string consumerStatus;
+|};
