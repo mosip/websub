@@ -6,4 +6,5 @@ public type HealthCheckResp record {|
 public type DiskSpaceMetaData record {|
     int total;
     int free;
+    int threshold;
 |};
