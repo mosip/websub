@@ -67,5 +67,3 @@ public configurable string MOSIP_AUTH_VALIDATE_TOKEN_URL = "https://host/oauth2/
 public final string CONSTRUCTED_SERVER_ID = string `${SERVER_ID}-${util:generateRandomString()}`;
 
 public final string CURRENT_WORKING_DIR = "user.dir";
-
-public final string HEALTH_CHECK_TOPIC = "health-check";
