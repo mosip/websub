@@ -33,6 +33,7 @@ public function main() returns error? {
     
     // Start the Hub
     websubhub:Listener hubListener = check new (config:HUB_PORT);
+    check hubListener.attach(healthCheckService, "/health");
     check hubListener.attach(hubService, "hub");
     check hubListener.'start();
 }
