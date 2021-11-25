@@ -34,7 +34,7 @@ public function main() returns error? {
     
     // Start the Hub
    http:Listener httpListener = check new (config:HUB_PORT);
-    check httpListener.attach(healthCheckService, "health");
+    check httpListener.attach(healthCheckService, "hub/actuator/health");
     websubhub:Listener hubListener = check new (httpListener);
     check hubListener.attach(hubService, "hub");
     check hubListener.'start();
