@@ -27,46 +27,46 @@ import kafkaHub.connections as conn;
 import ballerinax/kafka;
 
 http:Service healthCheckService = service object {
-    
-    isolated resource function get .() returns healthcheck:HealthCheckResp {
+
+    resource function get .() returns healthcheck:HealthCheckResp {
         //diskspace
         handle handleStr = java:fromString(config:CURRENT_WORKING_DIR);
         handle fileObj = newFile(java:fromString(getCurrent(handleStr).toString()));
         int usableSpace = getUsableSpace(fileObj);
         int totalSpace = getTotalSpace(fileObj);
-        healthcheck:DiskSpaceMetaData diskSpaceMetaData = {free: usableSpace,total: totalSpace};
-        healthcheck:HealthCheckResp diskSpace={status: "UP",details: {diskSpaceMetaData}};
-        
+        healthcheck:DiskSpaceMetaData diskSpaceMetaData = {free: usableSpace, total: totalSpace};
+        healthcheck:HealthCheckResp diskSpace = {status: "UP", details: {diskSpaceMetaData}};
+
         //kafka
-        string kafkaStatus="DOWN";
-        kafka:TopicPartition[]|kafka:Error producerResult =  conn:statePersistProducer->getTopicPartitions(config:REGISTERED_WEBSUB_TOPICS_TOPIC);
-        if(producerResult is kafka:TopicPartition[]){
+        string kafkaStatus = "DOWN";
+        kafka:TopicPartition[]|kafka:Error producerResult = conn:statePersistProducer->getTopicPartitions(config:REGISTERED_WEBSUB_TOPICS_TOPIC);
+        if (producerResult is kafka:TopicPartition[]) {
             kafkaStatus = "UP";
         }
-        healthcheck:HealthCheckResp kafkaHealth={status: kafkaStatus,details: {}};
+        healthcheck:HealthCheckResp kafkaHealth = {status: kafkaStatus, details: {}};
         //add to main map
         map<healthcheck:HealthCheckResp> details = {
-        "diskSpace": diskSpace,
-        "kafka":kafkaHealth
+            "diskSpace": diskSpace,
+            "kafka": kafkaHealth
         };
-      
+
         //main object
-        healthcheck:HealthCheckResp healthCheckResp = {status: "UP",details: {details}};
+        healthcheck:HealthCheckResp healthCheckResp = {status: "UP", details: {details}};
         return healthCheckResp;
     }
 };
 
-isolated function newFile(handle c) returns handle = @java:Constructor {
+function newFile(handle c) returns handle = @java:Constructor {
     'class: "java.io.File",
     paramTypes: ["java.lang.String"]
 } external;
 
-isolated function getCurrent(handle prop) returns handle = @java:Method {
+function getCurrent(handle prop) returns handle = @java:Method {
     name: "getProperty",
     'class: "java.lang.System"
 } external;
 
-isolated function getUsableSpace(handle fileObj) returns int = @java:Method {
+function getUsableSpace(handle fileObj) returns int = @java:Method {
     'class: "java.io.File"
 } external;
 
