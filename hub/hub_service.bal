@@ -30,12 +30,17 @@ http:Service healthCheckService = service object {
 
     resource function get .() returns healthcheck:HealthCheckResp {
         //diskspace
+        string diskSpaceStatus = "DOWN";
         handle handleStr = java:fromString(config:CURRENT_WORKING_DIR);
         handle fileObj = newFile(java:fromString(getCurrent(handleStr).toString()));
         int usableSpace = getUsableSpace(fileObj);
         int totalSpace = getTotalSpace(fileObj);
-        healthcheck:DiskSpaceMetaData diskSpaceMetaData = {free: usableSpace, total: totalSpace};
-        healthcheck:HealthCheckResp diskSpace = {status: "UP", details: {diskSpaceMetaData}};
+        int threshold = config:DISK_SPACE_THRESHOLD;
+        healthcheck:DiskSpaceMetaData diskSpaceMetaData = {free: usableSpace, total: totalSpace, threshold:threshold};
+        if(usableSpace>=threshold){
+           diskSpaceStatus = "UP";
+        }
+        healthcheck:HealthCheckResp diskSpace = {status: diskSpaceStatus, details: {diskSpaceMetaData}};
 
         //kafka
         string kafkaStatus = "DOWN";
