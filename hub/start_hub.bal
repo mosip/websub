@@ -16,6 +16,7 @@
 
 import ballerina/log;
 import ballerina/websubhub;
+import ballerina/http;
 import ballerinax/kafka;
 import ballerina/lang.value;
 import kafkaHub.util;
@@ -32,8 +33,9 @@ public function main() returns error? {
     _ = @strand { thread: "any" } start syncSubscribersCache();
     
     // Start the Hub
-    websubhub:Listener hubListener = check new (config:HUB_PORT);
-    check hubListener.attach(healthCheckService, "/health");
+   http:Listener httpListener = check new (config:HUB_PORT);
+    check httpListener.attach(healthCheckService, "health");
+    websubhub:Listener hubListener = check new (httpListener);
     check hubListener.attach(hubService, "hub");
     check hubListener.'start();
 }
