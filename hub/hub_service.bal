@@ -38,23 +38,12 @@ http:Service healthCheckService = service object {
         healthcheck:HealthCheckResp diskSpace={status: "UP",details: {diskSpaceMetaData}};
         
         //kafka
-        string producerStatus ="DOWN"; 
-        string consumerStatus="DOWN"; 
         string kafkaStatus="DOWN";
-        kafka:TopicPartition[]|kafka:Error producerResult =  conn:statePersistProducer->getTopicPartitions(config:HEALTH_CHECK_TOPIC);
+        kafka:TopicPartition[]|kafka:Error producerResult =  conn:statePersistProducer->getTopicPartitions(config:REGISTERED_WEBSUB_TOPICS_TOPIC);
         if(producerResult is kafka:TopicPartition[]){
-            producerStatus = "UP";
+            kafkaStatus = "UP";
         }
-        kafka:TopicPartition[]|kafka:Error result =  conn:healthCheckConsumer->getTopicPartitions(config:HEALTH_CHECK_TOPIC);
-        if(result is kafka:TopicPartition[]){
-            consumerStatus = "UP";
-        }
-        if(producerStatus is "UP" && consumerStatus is "UP"){
-            kafkaStatus="UP";
-        }
-        healthcheck:KafkaMetaData kafkaMetaData = {producerStatus: producerStatus,consumerStatus: consumerStatus};
-        healthcheck:HealthCheckResp kafkaHealth={status: kafkaStatus,details: {kafkaMetaData}};
-        
+        healthcheck:HealthCheckResp kafkaHealth={status: kafkaStatus,details: {}};
         //add to main map
         map<healthcheck:HealthCheckResp> details = {
         "diskSpace": diskSpace,
