@@ -1,6 +1,6 @@
 FROM openjdk:11
 ARG hub_config_url
-ARG ballerina_download_url=https://dist.ballerina.io/downloads/swan-lake-beta2/ballerina-linux-installer-x64-swan-lake-beta2.deb
+ARG ballerina_download_url=https://dist.ballerina.io/downloads/swan-lake-beta3/ballerina-linux-installer-x64-swan-lake-beta3.deb
 ENV hub_config_file_url_env=${hub_config_url}
 COPY ./target/bin/*.jar hub.jar
 EXPOSE 9191

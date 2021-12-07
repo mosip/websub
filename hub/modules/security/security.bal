@@ -16,6 +16,7 @@
 
 import ballerina/http;
 import ballerina/regex;
+import ballerina/log;
 import kafkaHub.config;
 
 const string SUFFIX_GENERAL = "_GENERAL";
@@ -32,7 +33,7 @@ final http:Client clientEP = check new(config:MOSIP_AUTH_BASE_URL);
 public isolated function authorizeSubscriber(http:Headers headers, string topic) returns error? {
     string token = check getToken(headers);
     json response = check getValidatedTokenResponse(token);
-    string roles = (check response?.roles).toString();
+    string roles = (check response?.response.role).toString();
     string[] rolesArr = regex:split(roles, ",");
     string userId = (check response?.userId).toString();
     string? partnerID = buildPartnerId(topic);
@@ -51,7 +52,9 @@ public isolated function authorizeSubscriber(http:Headers headers, string topic)
 public isolated function authorizePublisher(http:Headers headers, string topic) returns error? {
     string token = check getToken(headers);
     json response = check getValidatedTokenResponse(token);
-    string roles = (check response?.roles).toString();
+   
+    string roles = (check response?.response.role).toString();
+    log:printInfo("roles", payload = roles);
     string[] rolesArr = regex:split(roles, ",");
     string? partnerID = buildPartnerId(topic);
     string rolePrefix = buildRolePrefix(topic, "PUBLISH_");
@@ -84,7 +87,7 @@ isolated function buildRolePrefix(string topic, string prefix) returns string {
 
 isolated function buildPartnerId(string topic) returns string? {
     int? index = topic.indexOf("/");
-    if index is int {
+    if index is int { 
         return topic.substring(0, index);
     }
 }

@@ -16,6 +16,7 @@
 
 import ballerina/log;
 import ballerina/websubhub;
+import ballerina/http;
 import ballerinax/kafka;
 import ballerina/lang.value;
 import kafkaHub.util;
@@ -32,7 +33,9 @@ public function main() returns error? {
     _ = @strand { thread: "any" } start syncSubscribersCache();
     
     // Start the Hub
-    websubhub:Listener hubListener = check new (config:HUB_PORT);
+   http:Listener httpListener = check new (config:HUB_PORT);
+    check httpListener.attach(healthCheckService, "hub/actuator/health");
+    websubhub:Listener hubListener = check new (httpListener);
     check hubListener.attach(hubService, "hub");
     check hubListener.'start();
 }
@@ -207,6 +210,7 @@ isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:Hu
     foreach var kafkaRecord in records {
         var message = deSerializeKafkaRecord(kafkaRecord);
         if (message is websubhub:ContentDistributionMessage) {
+            log:printInfo("notifying subscribers",consumer = kafkaRecord,message=message);
             var response = clientEp->notifyContentDistribution(message);
             if (response is error) {
                 return response;
