@@ -67,7 +67,7 @@ Once those servers are up and running the Event Consolidator Service could be st
 
 ***For local with Docker*** 
 
- - Pull websub [image](https://hub.docker.com/r/mosipdev/consolidator-websub-service) from dockerhub.
+ - Pull consolidator [image](https://hub.docker.com/r/mosipdev/consolidator-websub-service) from dockerhub.
  - Run with the env variable ***consolidator_config_file_url_env*** which is the location of the property file.
  
  ***For local with Docker*** 
@@ -79,7 +79,7 @@ NOTE: ballerina should be present in your local system [(Download ballerina)](ht
 
  - Run the following command
 
-     bal build
+    bal build
 
  - Then to run the project execute the below command.
 
@@ -120,11 +120,13 @@ After all prerequisites are finished  [kernel-websubclient-api](https://github.c
 ***
 
 ***Registering Topics***
+
 First Interaction is by registering a topic in hub with help of the client module. 
 ***
 
 
 ***Subscribing to the Hub***
+
 Now we have registered a topic in the hub. Next we could subscribe to the previously registered topic. Intent verification and content validation will be taken care by client itself.
 ***
 
