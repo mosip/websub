@@ -32,8 +32,10 @@ final http:Client clientEP = check new(config:MOSIP_AUTH_BASE_URL);
 # + return - `error` if there is any authorization error or else `()`
 public isolated function authorizeSubscriber(http:Headers headers, string topic) returns error? {
     string token = check getToken(headers);
+    log:printInfo("getting token for Subscriber from request", payload = token,topic = topic);
     json response = check getValidatedTokenResponse(token);
     string roles = (check response?.response.role).toString();
+    log:printInfo("getting roles for Subscriber token from request", roles = roles,topic = topic);
     string[] rolesArr = regex:split(roles, ",");
     string userId = (check response?.userId).toString();
     string? partnerID = buildPartnerId(topic);
@@ -51,10 +53,11 @@ public isolated function authorizeSubscriber(http:Headers headers, string topic)
 # + return - `error` if there is any authorization error or else `()`
 public isolated function authorizePublisher(http:Headers headers, string topic) returns error? {
     string token = check getToken(headers);
+    log:printInfo("getting token for publisher from request", payload = token,topic = topic);
     json response = check getValidatedTokenResponse(token);
-   
+    
     string roles = (check response?.response.role).toString();
-    log:printInfo("roles", payload = roles);
+    log:printInfo("getting roles for publisher token from request", roles = roles,topic = topic);
     string[] rolesArr = regex:split(roles, ",");
     string? partnerID = buildPartnerId(topic);
     string rolePrefix = buildRolePrefix(topic, "PUBLISH_");
@@ -104,12 +107,16 @@ isolated function isPublisherAuthorized(string? partnerID, string rolePrefix, st
     if partnerID is string {
         foreach string role in rolesArr {
             if role == rolePrefix.concat(SUFFIX_ALL_INDIVIDUAL) {
+                log:printInfo("publisher role in roleArr", role = role);
+                log:printInfo("publisher role to match", role = rolePrefix.concat(SUFFIX_ALL_INDIVIDUAL));
                 return true;
             }
         }
     } else {
         foreach string role in rolesArr {
             if role == rolePrefix.concat(SUFFIX_GENERAL) {
+                log:printInfo("publisher role in roleArr", role = role);
+                log:printInfo("publisher role to match", role = rolePrefix.concat(SUFFIX_GENERAL));
                 return true;
             }
         }
@@ -122,12 +129,18 @@ isolated function isSubscriberAuthorized(string? partnerID, string rolePrefix, s
     if partnerID is string {
         foreach string role in rolesArr {
             if role == rolePrefix.concat(SUFFIX_INDIVIDUAL) && partnerID == userId {
+                log:printInfo("subscriber partnerID to match", partnerID = partnerID);
+                log:printInfo("subscriber userId to match", userId = userId);
+                log:printInfo("subscriber role in roleArr", role = role);
+                log:printInfo("subscriber role to match", role = rolePrefix.concat(SUFFIX_INDIVIDUAL));
                 return true;
             }
         }
     } else {
         foreach string role in rolesArr {
             if role == rolePrefix.concat(SUFFIX_GENERAL) {
+                 log:printInfo("subscriber role in roleArr", role = role);
+                log:printInfo("subscriber role to match", role = rolePrefix.concat(SUFFIX_GENERAL));
                 return true;
             }
         }
