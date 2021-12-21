@@ -37,7 +37,7 @@ public isolated function authorizeSubscriber(http:Headers headers, string topic)
     string roles = (check response?.response.role).toString();
     log:printInfo("getting roles for Subscriber token from request", roles = roles, topic = topic);
     string[] rolesArr = regex:split(roles, ",");
-    string userId = (check response?.userId).toString();
+    string userId = (check response?.response.userId).toString();
     if (userId.startsWith(config:PARTNER_USER_ID_PREFIX)) {
         userId = userId.substring(config:PARTNER_USER_ID_PREFIX.length(), userId.length());
     }
