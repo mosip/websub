@@ -278,7 +278,7 @@ websubhub:Service hubService = service object {
             if errorResponse is websubhub:UpdateMessageError {
                 return errorResponse;
             } else if errorResponse is error {
-                log:printError("Error occurred while publishing the content ", errorMessage = errorResponse.message());
+                log:printError("Error occurred while publishing the content ", errorMessage = errorResponse.message(),topic=topicName);
                 return error websubhub:UpdateMessageError(errorResponse.message());
             }
         } else {

@@ -27,13 +27,13 @@ import kafkaHub.config;
 isolated map<websubhub:TopicRegistration> registeredTopicsCache = {};
 isolated map<websubhub:VerifiedSubscription> subscribersCache = {};
 
-public function main() returns error? {    
+public function main() returns error? {
     // Initialize the Hub
-    _ = @strand { thread: "any" } start syncRegsisteredTopicsCache();
-    _ = @strand { thread: "any" } start syncSubscribersCache();
-    
+    _ = @strand {thread: "any"} start syncRegsisteredTopicsCache();
+    _ = @strand {thread: "any"} start syncSubscribersCache();
+
     // Start the Hub
-   http:Listener httpListener = check new (config:HUB_PORT);
+    http:Listener httpListener = check new (config:HUB_PORT);
     check httpListener.attach(healthCheckService, "hub/actuator/health");
     websubhub:Listener hubListener = check new (httpListener);
     check hubListener.attach(hubService, "hub");
@@ -74,7 +74,7 @@ function getPersistedTopics() returns websubhub:TopicRegistration[]|error? {
 
 function deSerializeTopicsMessage(string lastPersistedData) returns websubhub:TopicRegistration[]|error {
     websubhub:TopicRegistration[] currentTopics = [];
-    json[] payload =  <json[]> check value:fromJsonString(lastPersistedData);
+    json[] payload = <json[]>check value:fromJsonString(lastPersistedData);
     foreach var data in payload {
         websubhub:TopicRegistration topic = check data.cloneWithType(websubhub:TopicRegistration);
         currentTopics.push(topic);
@@ -110,7 +110,7 @@ function syncSubscribersCache() {
         if result is kafka:Error {
             log:printError("Error occurred while gracefully closing kafka-consumer", err = result.message());
         }
-    }  
+    }
 }
 
 function getPersistedSubscribers() returns websubhub:VerifiedSubscription[]|error? {
@@ -124,12 +124,12 @@ function getPersistedSubscribers() returns websubhub:VerifiedSubscription[]|erro
             log:printError("Error occurred while retrieving subscriber-data ", err = lastPersistedData.message());
             return lastPersistedData;
         }
-    } 
+    }
 }
 
 function deSerializeSubscribersMessage(string lastPersistedData) returns websubhub:VerifiedSubscription[]|error {
     websubhub:VerifiedSubscription[] currentSubscriptions = [];
-    json[] payload =  <json[]> check value:fromJsonString(lastPersistedData);
+    json[] payload = <json[]>check value:fromJsonString(lastPersistedData);
     foreach var data in payload {
         websubhub:VerifiedSubscription subscription = check data.cloneWithType(websubhub:VerifiedSubscription);
         currentSubscriptions.push(subscription);
@@ -167,7 +167,7 @@ function startMissingSubscribers(websubhub:VerifiedSubscription[] persistedSubsc
                 },
                 timeout: config:MESSAGE_DELIVERY_TIMEOUT
             });
-            _ = @strand { thread: "any" } start pollForNewUpdates(hubClientEp, consumerEp, topicName, groupName);
+            _ = @strand {thread: "any"} start pollForNewUpdates(hubClientEp, consumerEp, topicName, groupName);
         }
     }
 }
@@ -179,7 +179,10 @@ isolated function pollForNewUpdates(websubhub:HubClient clientEp, kafka:Consumer
             if !isValidConsumer(topicName, groupName) {
                 fail error(string `Consumer with group name ${groupName} or topic ${topicName} is invalid`);
             }
-            _ = check notifySubscribers(records, clientEp, consumerEp);
+            error? resp = check notifySubscribers(records, clientEp, consumerEp);
+            if (resp is error) {
+                log:printError("Error occurred while sending notification to subscriber ", errorResponse = resp.message(), topic = topicName, groupName = groupName);
+            }
         }
     } on fail var e {
         lock {
@@ -210,9 +213,10 @@ isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:Hu
     foreach var kafkaRecord in records {
         var message = deSerializeKafkaRecord(kafkaRecord);
         if (message is websubhub:ContentDistributionMessage) {
-            log:printInfo("notifying subscribers",consumer = kafkaRecord,message=message);
+            log:printInfo("notifying subscriber with message", message = message);
             var response = clientEp->notifyContentDistribution(message);
             if (response is error) {
+                log:printError("Error occurred while sending notification to subscriber ", errorResponse = response.message());
                 return response;
             } else {
                 _ = check consumerEp->commit();
@@ -226,7 +230,7 @@ isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:Hu
 isolated function deSerializeKafkaRecord(kafka:ConsumerRecord kafkaRecord) returns websubhub:ContentDistributionMessage|error {
     byte[] content = kafkaRecord.value;
     string message = check string:fromBytes(content);
-    json payload =  check value:fromJsonString(message);
+    json payload = check value:fromJsonString(message);
     websubhub:ContentDistributionMessage distributionMsg = {
         content: payload,
         contentType: mime:APPLICATION_JSON
