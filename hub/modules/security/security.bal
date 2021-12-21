@@ -43,7 +43,6 @@ public isolated function authorizeSubscriber(http:Headers headers, string topic)
     }
     string? partnerID = buildPartnerId(topic);
     string rolePrefix = buildRolePrefix(topic, "SUBSCRIBE_");
-    log:printInfo("user id from token and partnerid from topic to match", userid = userId, partnerid = partnerID);
     boolean authorized = isSubscriberAuthorized(partnerID, rolePrefix, rolesArr, userId);
     if (!authorized) {
         return error("Subscriber is not authorized");
@@ -80,6 +79,7 @@ isolated function getToken(http:Headers headers) returns string|error {
             return regex:split(value, "=")[1];
         }
     }
+    log:printError("Authorization token cannot be found", headers = headers.getHeaderNames());
     return error("Authorization token cannot be found");
 }
 
