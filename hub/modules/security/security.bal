@@ -34,6 +34,7 @@ public isolated function authorizeSubscriber(http:Headers headers, string topic)
     string token = check getToken(headers);
     log:printInfo("getting token for Subscriber from request", payload = token, topic = topic);
     json response = check getValidatedTokenResponse(token);
+      log:printInfo("received response for subscriber from auth service", payload = response, token = token, topic = topic);
     string roles = (check response?.response.role).toString();
     log:printInfo("getting roles for Subscriber token from request", roles = roles, topic = topic);
     string[] rolesArr = regex:split(roles, ",");
@@ -56,9 +57,9 @@ public isolated function authorizeSubscriber(http:Headers headers, string topic)
 # + return - `error` if there is any authorization error or else `()`
 public isolated function authorizePublisher(http:Headers headers, string topic) returns error? {
     string token = check getToken(headers);
-    log:printInfo("getting token for publisher from request", payload = token, topic = topic);
+    log:printInfo("got token for publisher from request", payload = token, topic = topic);
     json response = check getValidatedTokenResponse(token);
-
+    log:printInfo("received response for publisher from auth service", payload = response, token = token, topic = topic);
     string roles = (check response?.response.role).toString();
     log:printInfo("getting roles for publisher token from request", roles = roles, topic = topic);
     string[] rolesArr = regex:split(roles, ",");
@@ -72,6 +73,7 @@ public isolated function authorizePublisher(http:Headers headers, string topic) 
 
 // Token is extracted from the cookies header which has the key `Authorization`
 isolated function getToken(http:Headers headers) returns string|error {
+    log:printInfo("Headers received", headers = headers.getHeaderNames());
     string cookieHeader = check headers.getHeader("Cookie");
     string[] values = regex:split(cookieHeader, "; ");
     foreach string value in values {
@@ -79,7 +81,6 @@ isolated function getToken(http:Headers headers) returns string|error {
             return regex:split(value, "=")[1];
         }
     }
-    log:printError("Authorization token cannot be found", headers = headers.getHeaderNames());
     return error("Authorization token cannot be found");
 }
 
