@@ -133,3 +133,45 @@ Now we have registered a topic in the hub. Next we could subscribe to the previo
 ***Publishing to the Hub***
 
 Content publishing could be considered as the final stage of interaction between a publisher, hub and subscriber. Content will be validated based on hash which will be taken care by client provided.
+
+## Debugging routes for Issues
+
+ ***Few things to check after you start your setup*** 
+
+**Kafka Connection**
+
+  
+
+After starting of hub it will create 4 topics in kafka for saving metadata for functionalities  which will be used for which are following :
+
+ 1. registered-websub-topics
+ 2. consolidated-websub-topics
+ 3. registered-websub-subscribers
+ 4. consolidated-websub-subscribers
+
+Please check this topics are there or noot to verify connection to your kafka using command
+
+    kafka-topics.sh --list --bootstrap-server localhost:9092
+
+
+
+***Few things to check If your subscriber is not able to receive messages*** 
+
+ 
+ - Check if your call has reach websub by checking logs . You can grep
+   for the line  **grep "Running content update" | grep ${topic}**. If this exist websub has received you message and sent to kafka to store, Otherwise check the connectivity with websub by logs on client side about error.
+   
+ - Check if You are able to see exact same topic created like your in kafka
+   using the list command `kafka-topics.sh --list  --bootstrap-server
+   localhost:9092 | grep <topic>.` or If you have kafka ui setup you can check in the Topics tab. If it doesn't exist check logs on websub side about any error connecting with kafka.
+   
+ - Use the console consumer to check your message is  associated to that topic or not, use command `kafka-console-consumer.sh --topic <topic> --from-beginning --bootstrap-server localhost:9092 | grep <timestamp>` or If you have kafka ui setup you can click on the topic to see the messages. If they doesn't exist check logs on websub side about any error connecting with kafka.
+ 
+ - Check if you are properly subscribed after subscription request hub sends a intent verification request to the subscriber callback using GET HTTP method. Please check if there are errors in intent verification on client side.
+ 
+ - Use the console consumer to check if your subscription is there in registered-websub-subscribers. `kafka-console-consumer.sh --topic <topic> --from-beginning --bootstrap-server localhost:9092 | grep <part of callback url>` or If you have kafka ui setup you can click on the topic to see the messages . If doesn't exist please check if there are errors in intent verification on client side check logs on websub side about any error connecting with kafka.
+
+ - If you have check above steps please check for you consumer group using consumer group list command in kafka `kafka-consumer-groups.sh  --list --bootstrap-server localhost:9092 | grep <part of callback url>` 
+
+ - Describe your consumer group using the command  `kafka-consumer-groups.sh --describe --group <group name> --bootstrap-server localhost:9092` Please check for the lag column if there is some lag
+ Your subscriber might return Http Status except 200 while delivering message which hub considers as non delivery and it retry to do that a configurable amount of time after that it stops and remove subscriber from hub cache making it as invalid subscriber and closing the consumer. Hub will not go to the next message until the previous one is delivered because of at least once delivery reliability. Please resolve that and send websub 200 as it will deliver all of your messages with the failed one once it can go ahead.    
