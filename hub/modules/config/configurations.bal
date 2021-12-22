@@ -67,6 +67,9 @@ public configurable string MOSIP_AUTH_VALIDATE_TOKEN_URL = "https://host/oauth2/
 # The token validation URL of IDP
 public configurable int DISK_SPACE_THRESHOLD = 10485760;
 
+# The token validation URL of IDP
+public configurable string PARTNER_USER_ID_PREFIX = "service-account-";
+
 
 public final string CONSTRUCTED_SERVER_ID = string `${SERVER_ID}-${util:generateRandomString()}`;
 
