@@ -18,6 +18,7 @@ import ballerinax/kafka;
 import ballerina/websubhub;
 import ballerina/lang.value;
 import ballerina/log;
+import ballerina/jballerina.java;
 import consolidatorService.config;
 import consolidatorService.util;
 import consolidatorService.connections as conn;
@@ -26,6 +27,11 @@ isolated map<websubhub:TopicRegistration> registeredTopicsCache = {};
 isolated map<websubhub:VerifiedSubscription> subscribersCache = {};
 
 public function main() returns error? {
+
+    // create topics
+    check createTopics();
+
+
     // Initialize consolidator-service state
     check syncRegsisteredTopicsCache();
     _ = check conn:consolidatedTopicsConsumer->close(config:GRACEFUL_CLOSE_PERIOD);
@@ -36,6 +42,24 @@ public function main() returns error? {
     // start the consolidator-service
     check startConsolidator();
 }
+
+function createTopics() returns error? {
+    handle handleStr = java:fromString(config:KAFKA_BOOTSTRAP_NODE);
+    handle newKafkaAdminClient = newKafkaTopicApplication(handleStr);
+    handle handleTopic = java:fromString("urvil-admin-topic");
+    createTopic(newKafkaAdminClient,handleTopic);
+}
+
+function newKafkaTopicApplication(handle c) returns handle = @java:Constructor {
+    'class: "io.mosip.kafkaadminclient.KafkaTopicApplication",
+    paramTypes: ["java.lang.String"]
+} external;
+
+function createTopic(handle kafkaObj,handle topic) = @java:Method {
+    'class: "io.mosip.kafkaadminclient.KafkaTopicApplication",
+    paramTypes: ["java.lang.String"]
+
+} external;
 
 isolated function syncRegsisteredTopicsCache() returns error? {
     do {
