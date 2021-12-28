@@ -151,13 +151,16 @@ function startMissingSubscribers(websubhub:VerifiedSubscription[] persistedSubsc
     foreach var subscriber in persistedSubscribers {
         string topicName = util:sanitizeTopicName(subscriber.hubTopic);
         string groupName = util:generateGroupName(subscriber.hubTopic, subscriber.hubCallback);
+        log:printInfo("Started Missing subscribers operation", groupName=groupName);
         boolean subscriberNotAvailable = true;
         lock {
             subscriberNotAvailable = !subscribersCache.hasKey(groupName);
+            log:printInfo("Started Missing subscribers operation - subscriber available check", subscriberNotAvailable=subscriberNotAvailable,groupName=groupName);
             subscribersCache[groupName] = subscriber.cloneReadOnly();
         }
         if subscriberNotAvailable {
             kafka:Consumer consumerEp = check conn:createMessageConsumer(subscriber);
+            log:printInfo("Started Missing subscribers operation - consumer create ", subscriber=subscriber,groupName=groupName);
             websubhub:HubClient hubClientEp = check new (subscriber, {
                 retryConfig: {
                     interval: config:MESSAGE_DELIVERY_RETRY_INTERVAL,
