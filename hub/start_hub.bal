@@ -179,6 +179,7 @@ isolated function pollForNewUpdates(websubhub:HubClient clientEp, kafka:Consumer
     do {
         while true {
             kafka:ConsumerRecord[] records = check consumerEp->poll(config:POLLING_INTERVAL);
+            log:printInfo("pollForNewUpdates operation - records pull ", records=records,groupName=groupName);
             if !isValidConsumer(topicName, groupName) {
                 fail error(string `Consumer with group name ${groupName} or topic ${topicName} is invalid`);
             }
@@ -204,10 +205,12 @@ isolated function isValidConsumer(string topicName, string groupName) returns bo
     boolean topicAvailable = true;
     lock {
         topicAvailable = registeredTopicsCache.hasKey(topicName);
+        log:printInfo("pollForNewUpdates operation - topicAvailable ", topicAvailable=topicAvailable,groupName=groupName);
     }
     boolean subscriberAvailable = true;
     lock {
         subscriberAvailable = subscribersCache.hasKey(groupName);
+        log:printInfo("pollForNewUpdates operation - subscriberAvailable ", subscriberAvailable=subscriberAvailable,groupName=groupName);
     }
     return topicAvailable && subscriberAvailable;
 }
