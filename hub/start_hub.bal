@@ -222,13 +222,11 @@ isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:Hu
         if (message is websubhub:ContentDistributionMessage) {
             log:printInfo("notifying subscriber with message", message = message);
             websubhub:ContentDistributionSuccess|websubhub:SubscriptionDeletedError|websubhub:Error response = clientEp->notifyContentDistribution(message);
-
+            log:printInfo("response received from notifyContentDistribution");
             if (response is websubhub:SubscriptionDeletedError) {
-                log:printInfo("Error occurred while sending notification to subscriber-response",resp=response.stackTrace());
                 log:printError("Error occurred while sending notification to subscriber ", errorResponse = response.message());
                 return response;
             } else if (response is websubhub:Error) {
-                log:printInfo("Error occurred while sending notification to subscriber-response",resp=response.stackTrace());
                 log:printError("Error occurred while sending notification to subscriber ", errorResponse = response.message());
                 return response;
             }
