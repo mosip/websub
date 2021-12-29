@@ -218,6 +218,7 @@ isolated function isValidConsumer(string topicName, string groupName) returns bo
 isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:HubClient clientEp, kafka:Consumer consumerEp) returns error? {
     foreach var kafkaRecord in records {
         var message = deSerializeKafkaRecord(kafkaRecord);
+        log:printInfo("notifySubscribers operation - message is ContentDistributionMessage",cond=(message is websubhub:ContentDistributionMessage));
         if (message is websubhub:ContentDistributionMessage) {
             log:printInfo("notifying subscriber with message", message = message);
             var response = clientEp->notifyContentDistribution(message);
@@ -242,12 +243,15 @@ isolated function deSerializeKafkaRecord(kafka:ConsumerRecord kafkaRecord) retur
     log:printInfo("deSerializeKafkaRecord operation - content ", content = content, recored = kafkaRecord);
     string|error message = check string:fromBytes(content);
     if (message is string) {
+        log:printInfo("deSerializeKafkaRecord operation - message ", message = message,recored = kafkaRecord);
         json|error payload = check value:fromJsonString(message);
         if (payload is json) {
+            log:printInfo("deSerializeKafkaRecord operation - message ", payload = payload,recored = kafkaRecord);
             websubhub:ContentDistributionMessage distributionMsg = {
                 content: payload,
                 contentType: mime:APPLICATION_JSON
             };
+            log:printInfo("deSerializeKafkaRecord operation - distributionMsg ", distributionMsg = distributionMsg,recored = kafkaRecord);
             return distributionMsg;
         } else {
             log:printError("error converting string message to json", err = payload.message());
