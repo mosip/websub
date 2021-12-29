@@ -224,17 +224,17 @@ isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:Hu
             websubhub:ContentDistributionSuccess|websubhub:SubscriptionDeletedError|websubhub:Error response = clientEp->notifyContentDistribution(message);
             log:printInfo("response received from notifyContentDistribution");
             if (response is websubhub:SubscriptionDeletedError) {
-                log:printError("Error occurred while sending notification to subscriber ", errorResponse = response.message());
+                log:printError("Error occurred while sending notification to subscriber ");
                 return response;
             } else if (response is websubhub:Error) {
-                log:printError("Error occurred while sending notification to subscriber ", errorResponse = response.message());
+                log:printError("Error occurred while sending notification to subscriber ");
                 return response;
             }
             else if (response is websubhub:ContentDistributionSuccess) {
-                log:printInfo("Notification sent to subscriber ",resp=response.body);
+                log:printInfo("Notification sent to subscriber ");
                 kafka:Error? commitRes = check consumerEp->commit();
                 if (commitRes is kafka:Error) {
-                    log:printError("Error occurred while commiting to kafka", err = commitRes.message());
+                    log:printError("Error occurred while commiting to kafka");
                     return commitRes;
                 }else{
                     log:printInfo("commited to kafka successfully");
