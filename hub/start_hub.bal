@@ -220,7 +220,7 @@ isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:Hu
         var message = deSerializeKafkaRecord(kafkaRecord);
         log:printInfo("notifySubscribers operation - message is ContentDistributionMessage", cond = (message is websubhub:ContentDistributionMessage));
         if (message is websubhub:ContentDistributionMessage) {
-            log:printInfo("notifying subscriber with message", message = message);
+            log:printInfo("notifying subscriber with message");
             websubhub:ContentDistributionSuccess|websubhub:SubscriptionDeletedError|websubhub:Error response = clientEp->notifyContentDistribution(message);
             log:printInfo("response received from notifyContentDistribution");
             if (response is websubhub:SubscriptionDeletedError) {
@@ -242,6 +242,7 @@ isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:Hu
                 
             }
         } else {
+            log:printInfo("message is not websubhub:ContentDistributionMessage");
             log:printError("Error occurred while retrieving message data", err = message.message());
         }
     }
