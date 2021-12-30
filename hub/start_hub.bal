@@ -151,16 +151,16 @@ function startMissingSubscribers(websubhub:VerifiedSubscription[] persistedSubsc
     foreach var subscriber in persistedSubscribers {
         string topicName = util:sanitizeTopicName(subscriber.hubTopic);
         string groupName = util:generateGroupName(subscriber.hubTopic, subscriber.hubCallback);
-        log:printInfo("Started Missing subscribers operation", groupName=groupName);
+        log:printInfo("Started Missing subscribers operation", groupName = groupName);
         boolean subscriberNotAvailable = true;
         lock {
             subscriberNotAvailable = !subscribersCache.hasKey(groupName);
-            log:printInfo("Started Missing subscribers operation - subscriber available check", subscriberNotAvailable=subscriberNotAvailable,groupName=groupName);
+            log:printInfo("Started Missing subscribers operation - subscriber available check", subscriberNotAvailable = subscriberNotAvailable, groupName = groupName);
             subscribersCache[groupName] = subscriber.cloneReadOnly();
         }
         if subscriberNotAvailable {
             kafka:Consumer consumerEp = check conn:createMessageConsumer(subscriber);
-            log:printInfo("Started Missing subscribers operation - consumer create ", subscriber=subscriber,groupName=groupName);
+            log:printInfo("Started Missing subscribers operation - consumer create ", subscriber = subscriber, groupName = groupName);
             websubhub:HubClient hubClientEp = check new (subscriber, {
                 retryConfig: {
                     interval: config:MESSAGE_DELIVERY_RETRY_INTERVAL,
@@ -179,7 +179,7 @@ isolated function pollForNewUpdates(websubhub:HubClient clientEp, kafka:Consumer
     do {
         while true {
             kafka:ConsumerRecord[] records = check consumerEp->poll(config:POLLING_INTERVAL);
-            log:printInfo("pollForNewUpdates operation - records pull ", records=records,groupName=groupName);
+            log:printInfo("pollForNewUpdates operation - records pull ", records = records, groupName = groupName);
             if !isValidConsumer(topicName, groupName) {
                 fail error(string `Consumer with group name ${groupName} or topic ${topicName} is invalid`);
             }
@@ -205,12 +205,12 @@ isolated function isValidConsumer(string topicName, string groupName) returns bo
     boolean topicAvailable = true;
     lock {
         topicAvailable = registeredTopicsCache.hasKey(topicName);
-        log:printInfo("pollForNewUpdates operation - topicAvailable ", topicAvailable=topicAvailable,groupName=groupName);
+        log:printInfo("pollForNewUpdates operation - topicAvailable ", topicAvailable = topicAvailable, groupName = groupName);
     }
     boolean subscriberAvailable = true;
     lock {
         subscriberAvailable = subscribersCache.hasKey(groupName);
-        log:printInfo("pollForNewUpdates operation - subscriberAvailable ", subscriberAvailable=subscriberAvailable,groupName=groupName);
+        log:printInfo("pollForNewUpdates operation - subscriberAvailable ", subscriberAvailable = subscriberAvailable, groupName = groupName);
     }
     return topicAvailable && subscriberAvailable;
 }
@@ -218,16 +218,31 @@ isolated function isValidConsumer(string topicName, string groupName) returns bo
 isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:HubClient clientEp, kafka:Consumer consumerEp) returns error? {
     foreach var kafkaRecord in records {
         var message = deSerializeKafkaRecord(kafkaRecord);
+        log:printInfo("notifySubscribers operation - message is ContentDistributionMessage", cond = (message is websubhub:ContentDistributionMessage));
         if (message is websubhub:ContentDistributionMessage) {
-            log:printInfo("notifying subscriber with message", message = message);
-            var response = clientEp->notifyContentDistribution(message);
-            if (response is error) {
-                log:printError("Error occurred while sending notification to subscriber ", errorResponse = response.message());
+            log:printInfo("notifying subscriber with message");
+            websubhub:ContentDistributionSuccess|websubhub:SubscriptionDeletedError|websubhub:Error response = clientEp->notifyContentDistribution(message);
+            log:printInfo("response received from notifyContentDistribution");
+            if (response is websubhub:SubscriptionDeletedError) {
+                log:printError("Error occurred while sending notification to subscriber ");
                 return response;
-            } else {
-                _ = check consumerEp->commit();
+            } else if (response is websubhub:Error) {
+                log:printError("Error occurred while sending notification to subscriber ");
+                return response;
+            }
+            else if (response is websubhub:ContentDistributionSuccess) {
+                log:printInfo("Notification sent to subscriber ");
+                kafka:Error? commitRes = check consumerEp->commit();
+                if (commitRes is kafka:Error) {
+                    log:printError("Error occurred while commiting to kafka");
+                    return commitRes;
+                }else{
+                    log:printInfo("commited to kafka successfully");
+                }
+                
             }
         } else {
+            log:printInfo("message is not websubhub:ContentDistributionMessage");
             log:printError("Error occurred while retrieving message data", err = message.message());
         }
     }
@@ -235,11 +250,26 @@ isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:Hu
 
 isolated function deSerializeKafkaRecord(kafka:ConsumerRecord kafkaRecord) returns websubhub:ContentDistributionMessage|error {
     byte[] content = kafkaRecord.value;
-    string message = check string:fromBytes(content);
-    json payload = check value:fromJsonString(message);
-    websubhub:ContentDistributionMessage distributionMsg = {
-        content: payload,
-        contentType: mime:APPLICATION_JSON
-    };
-    return distributionMsg;
+    log:printInfo("deSerializeKafkaRecord operation - content ", content = content, recored = kafkaRecord);
+    string|error message = check string:fromBytes(content);
+    if (message is string) {
+        log:printInfo("deSerializeKafkaRecord operation - message ", message = message, recored = kafkaRecord);
+        json|error payload = check value:fromJsonString(message);
+        if (payload is json) {
+            log:printInfo("deSerializeKafkaRecord operation - message ", payload = payload, recored = kafkaRecord);
+            websubhub:ContentDistributionMessage distributionMsg = {
+                content: payload,
+                contentType: mime:APPLICATION_JSON
+            };
+            log:printInfo("deSerializeKafkaRecord operation - distributionMsg ", distributionMsg = distributionMsg, recored = kafkaRecord);
+            return distributionMsg;
+        } else {
+            log:printError("error converting string message to json", err = payload.message());
+            return payload;
+        }
+    } else {
+        log:printError("error converting byte content to string", err = message.message());
+        return message;
+    }
+
 }

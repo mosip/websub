@@ -40,7 +40,6 @@ jobs:
       - name: Hub-service build
         run: |
          bal build ./hub 
-
       - name: Consolidator service build
         run: |
          bal build ./consolidator
@@ -52,7 +51,6 @@ jobs:
       - name: Build consolidator image
         run: |
           docker build ./consolidator --file ./consolidator/Dockerfile --tag ${{ env.CONSOLIDATOR_SERVICE_NAME }}    
-
       - name: Log into registry
         run: echo "${{ secrets.release_docker_hub }}" | docker login -u ${{ secrets.actor_docker_hub }} --password-stdin
         
