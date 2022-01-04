@@ -32,7 +32,7 @@ public function main() returns error? {
     // Initialize the Hub
     _ = @strand {thread: "any"} start syncRegsisteredTopicsCache();
     _ = @strand {thread: "any"} start syncSubscribersCache();
-    _ = @strand {thread: "any"} start initRegisterTopics();
+   
 
     // Start the Hub
     http:Listener httpListener = check new (config:HUB_PORT);
@@ -41,12 +41,6 @@ public function main() returns error? {
     check hubListener.attach(hubService, "hub");
     check hubListener.'start();
 }
-
-function initRegisterTopics() {
-    string initTopics = config:INIT_TOPICS;
-    string[] topics = regex:split(initTopics,";");
-}
-
 
 function syncRegsisteredTopicsCache() {
     do {

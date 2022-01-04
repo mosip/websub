@@ -36,9 +36,9 @@ http:Service healthCheckService = service object {
         int usableSpace = getUsableSpace(fileObj);
         int totalSpace = getTotalSpace(fileObj);
         int threshold = config:DISK_SPACE_THRESHOLD;
-        healthcheck:DiskSpaceMetaData diskSpaceMetaData = {free: usableSpace, total: totalSpace, threshold:threshold};
-        if(usableSpace>=threshold){
-           diskSpaceStatus = "UP";
+        healthcheck:DiskSpaceMetaData diskSpaceMetaData = {free: usableSpace, total: totalSpace, threshold: threshold};
+        if (usableSpace >= threshold) {
+            diskSpaceStatus = "UP";
         }
         healthcheck:HealthCheckResp diskSpace = {status: diskSpaceStatus, details: {diskSpaceMetaData}};
 
@@ -161,23 +161,17 @@ websubhub:Service hubService = service object {
     isolated remote function onSubscriptionValidation(websubhub:Subscription message)
                 returns websubhub:SubscriptionDeniedError? {
         string topicName = util:sanitizeTopicName(message.hubTopic);
-        boolean topicAvailable = false;
+        self.createTopicIFNotExist(topicName);
+        string groupName = util:generateGroupName(message.hubTopic, message.hubCallback);
+        boolean subscriberAvailable = false;
         lock {
-            topicAvailable = registeredTopicsCache.hasKey(topicName);
+            subscriberAvailable = subscribersCache.hasKey(groupName);
         }
-        if !topicAvailable {
-            return error websubhub:SubscriptionDeniedError("Topic [" + message.hubTopic + "] is not registered with the Hub");
-        } else {
-            string groupName = util:generateGroupName(message.hubTopic, message.hubCallback);
-            boolean subscriberAvailable = false;
-            lock {
-                subscriberAvailable = subscribersCache.hasKey(groupName);
-            }
-            if subscriberAvailable {
-                return error websubhub:SubscriptionDeniedError("Subscriber has already registered with the Hub");
-            }
-            log:printInfo("Validation done a incomming subscription request", payload = message);
+        if subscriberAvailable {
+            return error websubhub:SubscriptionDeniedError("Subscriber has already registered with the Hub");
         }
+        log:printInfo("Validation done a incomming subscription request", payload = message);
+
     }
 
     # Processes a verified subscription request.
@@ -267,24 +261,44 @@ websubhub:Service hubService = service object {
     }
 
     isolated function updateMessage(websubhub:UpdateMessage msg) returns websubhub:UpdateMessageError? {
+       
         string topicName = util:sanitizeTopicName(msg.hubTopic);
+        self.createTopicIFNotExist(topicName);
+        log:printInfo("Running content update", topic = msg.hubTopic);
+        error? errorResponse = persist:addUpdateMessage(topicName, msg);
+        if errorResponse is websubhub:UpdateMessageError {
+            return errorResponse;
+        } else if errorResponse is error {
+            log:printError("Error occurred while publishing the content ", errorMessage = errorResponse.message(), topic = topicName);
+            return error websubhub:UpdateMessageError(errorResponse.message());
+        }
+
+    }
+
+    isolated function createTopicIFNotExist(string topicName) {
         boolean topicAvailable = false;
         lock {
             topicAvailable = registeredTopicsCache.hasKey(topicName);
         }
-        if topicAvailable {
-            log:printInfo("Running content update", topic = msg.hubTopic);
-            error? errorResponse = persist:addUpdateMessage(topicName, msg);
-            if errorResponse is websubhub:UpdateMessageError {
-                return errorResponse;
-            } else if errorResponse is error {
-                log:printError("Error occurred while publishing the content ", errorMessage = errorResponse.message(),topic=topicName);
-                return error websubhub:UpdateMessageError(errorResponse.message());
+
+        if !topicAvailable {
+            log:printInfo("Topic not found - Auto registering topic", topic = topicName);
+            websubhub:TopicRegistration topicRegistrationMsg = {
+                topic: topicName,
+                hubMode: "register"
+            };
+            websubhub:TopicRegistrationError? registerTopicResult = self.registerTopic(topicRegistrationMsg);
+            if registerTopicResult is websubhub:TopicRegistrationError {
+                log:printError("Auto registering topic - Successfully registered failed with error", err = registerTopicResult.message());
+
+            } else {
+                log:printInfo("Auto registering topic - Successfully registered topic", topic = topicName);
             }
-        } else {
-            return error websubhub:UpdateMessageError("Topic [" + msg.hubTopic + "] is not registered with the Hub");
+
         }
     }
+
 };
+
 
 
