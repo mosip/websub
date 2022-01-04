@@ -70,6 +70,9 @@ public configurable int DISK_SPACE_THRESHOLD = 10485760;
 # The token validation URL of IDP
 public configurable string PARTNER_USER_ID_PREFIX = "service-account-";
 
+# The token validation URL of IDP
+public configurable string INIT_TOPICS = "";
+
 
 public final string CONSTRUCTED_SERVER_ID = string `${SERVER_ID}-${util:generateRandomString()}`;
 
