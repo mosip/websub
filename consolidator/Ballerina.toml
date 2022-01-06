@@ -5,3 +5,6 @@ version = "1.2.0"
 
 [build-options]
 observabilityIncluded = true
+
+[[platform.java11.dependency]] 
+path = "./javalibs/kafka-admin-client-0.0.1-SNAPSHOT.jar"
