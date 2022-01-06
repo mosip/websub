@@ -18,6 +18,7 @@ import ballerinax/kafka;
 import ballerina/websubhub;
 import ballerina/lang.value;
 import ballerina/log;
+import ballerina/jballerina.java;
 import consolidatorService.config;
 import consolidatorService.util;
 import consolidatorService.connections as conn;
@@ -26,6 +27,7 @@ isolated map<websubhub:TopicRegistration> registeredTopicsCache = {};
 isolated map<websubhub:VerifiedSubscription> subscribersCache = {};
 
 public function main() returns error? {
+    createTopics();
     // Initialize consolidator-service state
     check syncRegsisteredTopicsCache();
     _ = check conn:consolidatedTopicsConsumer->close(config:GRACEFUL_CLOSE_PERIOD);
@@ -36,6 +38,28 @@ public function main() returns error? {
     // start the consolidator-service
     check startConsolidator();
 }
+
+function createTopics(){
+log:printInfo("createTopics",bootStrapServer=config:KAFKA_BOOTSTRAP_NODE);
+ handle bootStrapServer = java:fromString(config:KAFKA_BOOTSTRAP_NODE);
+ log:printInfo("createTopics-bootStrapServer",bootStrapServer=bootStrapServer.toBalString());
+ handle newMosipKafkaAdminClientResult = newMosipKafkaAdminClient(bootStrapServer);
+ log:printInfo("createTopics-newMosipKafkaAdminClientResult",newMosipKafkaAdminClientResult=newMosipKafkaAdminClientResult.toBalString());
+ createTopic(newMosipKafkaAdminClientResult,java:fromString("admin-topic-check"));
+}
+
+
+function newMosipKafkaAdminClient(handle bootstrapServers) returns handle = @java:Constructor {
+   'class: "io.mosip.kafkaadminclient.MosipKafkaAdminClient",
+   paramTypes: ["java.lang.String"]
+} external;
+
+function createTopic(handle adminClinetObject,handle topicName) = @java:Method {
+    name: "createTopic",
+    'class: "io.mosip.kafkaadminclient.MosipKafkaAdminClient",
+    paramTypes: ["java.lang.String"]
+} external;
+
 
 isolated function syncRegsisteredTopicsCache() returns error? {
     do {
