@@ -9,6 +9,7 @@ log:printInfo("createTopics",bootStrapServer=config:KAFKA_BOOTSTRAP_NODE);
  handle newMosipKafkaAdminClientResult = newMosipKafkaAdminClient(bootStrapServer);
  log:printInfo("createTopics-newMosipKafkaAdminClientResult",newMosipKafkaAdminClientResult=newMosipKafkaAdminClientResult.toBalString());
  createTopic(newMosipKafkaAdminClientResult,java:fromString("admin-topic-check"));
+ log:printInfo("topic created");
 }
 
 
