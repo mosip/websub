@@ -50,13 +50,13 @@ log:printInfo("createTopics",bootStrapServer=config:KAFKA_BOOTSTRAP_NODE);
 
 
 function newMosipKafkaAdminClient(handle bootstrapServers) returns handle = @java:Constructor {
-   'class: "io.mosip.kafkaadminclient.MosipKafkaAdminClient",
+   'class: "com.example.kafkaadminclient.MosipKafkaAdminClient",
    paramTypes: ["java.lang.String"]
 } external;
 
 function createTopic(handle adminClinetObject,handle topicName) = @java:Method {
     name: "createTopic",
-    'class: "io.mosip.kafkaadminclient.MosipKafkaAdminClient",
+    'class: "com.example.kafkaadminclient.MosipKafkaAdminClient",
     paramTypes: ["java.lang.String"]
 } external;
 
