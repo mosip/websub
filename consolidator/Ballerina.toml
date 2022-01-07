@@ -6,6 +6,8 @@ version = "1.2.0"
 [build-options]
 observabilityIncluded = true
 
-[[platform.java11.dependency]] 
-path = "./javalibs/kafka-admin-client-1.0.0.jar"
+[[platform.java11.dependency]]
 modules = ["inittopic"]
+groupId = "com.example"
+artifactId = "kafka-admin-client"
+version = "1.0.0"
