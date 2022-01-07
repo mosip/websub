@@ -27,7 +27,10 @@ isolated map<websubhub:TopicRegistration> registeredTopicsCache = {};
 isolated map<websubhub:VerifiedSubscription> subscribersCache = {};
 
 public function main() returns error? {
-    initt:createTopics();
+    error? result = initt:createTopics();
+    if result is error {
+    return result;
+    }
     // Initialize consolidator-service state
     check syncRegsisteredTopicsCache();
     _ = check conn:consolidatedTopicsConsumer->close(config:GRACEFUL_CLOSE_PERIOD);

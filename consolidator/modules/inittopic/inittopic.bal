@@ -1,26 +1,28 @@
 import ballerina/jballerina.java;
+import consolidatorService.config;
 import ballerina/log;
-import consolidatorService.config; 
 
-public function createTopics(){
-log:printInfo("createTopics",bootStrapServer=config:KAFKA_BOOTSTRAP_NODE);
- handle bootStrapServer = java:fromString(config:KAFKA_BOOTSTRAP_NODE);
- log:printInfo("createTopics-bootStrapServer",bootStrapServer=bootStrapServer.toBalString());
- handle newMosipKafkaAdminClientResult = newMosipKafkaAdminClient(bootStrapServer);
- log:printInfo("createTopics-newMosipKafkaAdminClientResult",newMosipKafkaAdminClientResult=newMosipKafkaAdminClientResult.toBalString());
- createTopic(newMosipKafkaAdminClientResult,java:fromString("admin-topic-check"));
- log:printInfo("topic created");
+public function createTopics() returns error? {
+    handle bootStrapServer = java:fromString(config:KAFKA_BOOTSTRAP_NODE);
+    handle newMosipKafkaAdminClientResult = newMosipKafkaAdminClient(bootStrapServer);
+    foreach string topic in config:META_TOPICS {
+        log:printInfo("Creating topic with single partition", topic = topic);
+        error? result = trap createTopic(newMosipKafkaAdminClientResult, java:fromString(topic));
+        if result is error {
+            return result;
+        }
+    }
+
 }
 
-
 function newMosipKafkaAdminClient(handle bootstrapServers) returns handle = @java:Constructor {
-   'class: "com.example.kafkaadminclient.MosipKafkaAdminClient",
-   paramTypes: ["java.lang.String"]
+    'class: "io.mosip.kafkaadminclient.MosipKafkaAdminClient",
+    paramTypes: ["java.lang.String"]
 } external;
 
-function createTopic(handle adminClinetObject,handle topicName) = @java:Method {
+function createTopic(handle adminClinetObject, handle topicName) = @java:Method {
     name: "createTopic",
-    'class: "com.example.kafkaadminclient.MosipKafkaAdminClient",
+    'class: "io.mosip.kafkaadminclient.MosipKafkaAdminClient",
     paramTypes: ["java.lang.String"]
 } external;
 
