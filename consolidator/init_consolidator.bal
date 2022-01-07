@@ -19,6 +19,7 @@ import ballerina/websubhub;
 import ballerina/lang.value;
 import ballerina/log;
 import consolidatorService.config;
+import consolidatorService.inittopic as initt;
 import consolidatorService.util;
 import consolidatorService.connections as conn;
 
@@ -26,6 +27,10 @@ isolated map<websubhub:TopicRegistration> registeredTopicsCache = {};
 isolated map<websubhub:VerifiedSubscription> subscribersCache = {};
 
 public function main() returns error? {
+    error? result = initt:createTopics();
+    if result is error {
+    return result;
+    }
     // Initialize consolidator-service state
     check syncRegsisteredTopicsCache();
     _ = check conn:consolidatedTopicsConsumer->close(config:GRACEFUL_CLOSE_PERIOD);
@@ -36,6 +41,8 @@ public function main() returns error? {
     // start the consolidator-service
     check startConsolidator();
 }
+
+
 
 isolated function syncRegsisteredTopicsCache() returns error? {
     do {

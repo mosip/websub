@@ -284,8 +284,7 @@ websubhub:Service hubService = service object {
         if !topicAvailable {
             log:printInfo("Topic not found - Auto registering topic", topic = topicName);
             websubhub:TopicRegistration topicRegistrationMsg = {
-                topic: topicName,
-                hubMode: "register"
+                topic: topicName
             };
             websubhub:TopicRegistrationError? registerTopicResult = self.registerTopic(topicRegistrationMsg);
             if registerTopicResult is websubhub:TopicRegistrationError {

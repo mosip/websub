@@ -33,6 +33,10 @@ public configurable string WEBSUB_SUBSCRIBERS_TOPIC = "registered-websub-subscri
 # Kafka topic which is stores consolidated websub subscribers for this server
 public configurable string CONSOLIDATED_WEBSUB_SUBSCRIBERS_TOPIC = "consolidated-websub-subscribers";
 
+# Kafka topic which is stores consolidated websub subscribers for this server
+public configurable string[] META_TOPICS = [REGISTERED_WEBSUB_TOPICS_TOPIC,CONSOLIDATED_WEBSUB_TOPICS_TOPIC,WEBSUB_SUBSCRIBERS_TOPIC,CONSOLIDATED_WEBSUB_SUBSCRIBERS_TOPIC];
+
+
 # The interval in which Kafka consumers wait for new messages
 public configurable decimal POLLING_INTERVAL = 10;
 
