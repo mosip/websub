@@ -22,7 +22,6 @@ import ballerina/lang.value;
 import kafkaHub.util;
 import kafkaHub.connections as conn;
 import ballerina/mime;
-import ballerina/regex;
 import kafkaHub.config;
 
 isolated map<websubhub:TopicRegistration> registeredTopicsCache = {};
