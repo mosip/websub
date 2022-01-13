@@ -1,7 +1,7 @@
 # Websub Hub
 
 ## Overview
-This websub is based on message brokers. We have used [Kafka](https://kafka.apache.org/) message broker to implement the websubhub APIs. Message brokers are a natural fit for the implementation of websub hubs as they serve a similar purpose.
+For an overview of Websub refer [MOSIP Docs](https://nayakrounak.gitbook.io/mosip-docs/modules/websub).
 
 ## Technical features
 Following are some of the technical features .
