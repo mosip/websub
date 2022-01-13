@@ -12,7 +12,7 @@ For an overview of Websub refer [MOSIP Docs](https://nayakrounak.gitbook.io/mosi
  - Ability to scale seamlessly based on number of the subscribers
 
 ## Implementation
-As mentioned above this implementation is based on Kafka message broker. Therefore, the Kafka message broker will be doing most of the heavy lifting. At a high level following are the key components associated with this implementation.
+As mentioned above this implementation is based on Kafka message broker that does most of the heavy lifting.  At a high level following are the key components associated with this implementation.
 
 ![kafka_hub_image](design/_images/kafka_hub_image.png)
 
