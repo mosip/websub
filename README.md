@@ -4,7 +4,6 @@
 For an overview of Websub refer [MOSIP Docs](https://nayakrounak.gitbook.io/mosip-docs/modules/websub).
 
 ## Technical features
-Following are some of the technical features .
  - Ability to perform operations like register, publish, subscribe and unsubscribe
  - Ability to persist the state so that hub can be recovered even after a restart
  - Resume message delivery in case subscribers become unavailable and available again after some period of time
