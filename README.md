@@ -17,7 +17,7 @@ As mentioned above this implementation is based on Kafka message broker. Therefo
 
 ![kafka_hub_image](design/_images/kafka_hub_image.png)
 
-As you can see the current implementation is relying on two different technologies. An IdP is used to handle any authentication and authorization request. For the other quality of services such as message persistence, subscription management, etc the implementation depends on Kafka message broker.
+An [IdP](https://en.wikipedia.org/wiki/Identity_provider) is used to handle any authentication and authorization request. For the other quality of services such as message persistence, subscription management, etc the implementation depends on Kafka message broker.
 
 ## Security
 As mentioned above apart from standard SSL/TLS, for authentication and authorization the hub depends on an IdP.  OAuth2 is used as the authorization protocol along with JWT tokens.
@@ -54,7 +54,7 @@ For local with Docker:
  - Go into consolidator directory and run following command to built the project.
 NOTE: ballerina should be present in your local system [(Download ballerina)](https://ballerina.io/downloads/)
 
- - Buid:
+ - Build:
     ```
     bal build
     ```
