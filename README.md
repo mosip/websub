@@ -41,7 +41,7 @@ After starting IDP and Auth service following properties need to updated in both
  - MOSIP_AUTH_VALIDATE_TOKEN_URL
 
 ### Starting the Consolidator Service
-Once those servers are up and running the Event Consolidator Service could be started. 
+Once previous servers are up and running the Event Consolidator Service could be started. 
 
 For local with Docker:
 
@@ -63,8 +63,8 @@ NOTE: ballerina should be present in your local system [(Download ballerina)](ht
     bal run target/bin/consolidator.jar
     ```
 
-## Starting the Hub
-Once those servers are up and running the hub can be started using the following commands. Go into hub directory and run following command to built the project.
+### Starting the Hub
+Run the hub using the following commands. Go into hub directory and run following command to built the project.
 
 For local with Docker:
 
@@ -88,13 +88,11 @@ After all prerequisites are completed [kernel-websubclient-api](https://github.c
 ## Process
 
 ### Registering Topics
-First Interaction is by registering a topic in hub with help of the client module. 
+Registering a topic in hub with help of the client module. 
 
-Subscribing to the Hub:
+### Subscribing to the Hub:
+Subscribe to the previously registered topic. Intent verification and content validation will be taken care by client itself.
 
-Now we have registered a topic in the hub. Next we could subscribe to the previously registered topic. Intent verification and content validation will be taken care by client itself.
 
-
-Publishing to the Hub:
-
-Content publishing could be considered as the final stage of interaction between a publisher, hub and subscriber. Content will be validated based on hash which will be taken care by client provided.
+### Publishing to the Hub:
+Content publishing is a repeatative interaction between a publisher, hub and subscriber. Content will be validated based on hash which will be taken care by client provided.
