@@ -88,11 +88,11 @@ After all prerequisites are completed [kernel-websubclient-api](https://github.c
 ## Process
 
 ### Registering Topics
-First Interaction is by registering a topic in hub with help of the client module. 
+Registering a topic in hub with help of the client module. 
 
 ### Subscribing to the Hub:
-Now we have registered a topic in the hub. Next we could subscribe to the previously registered topic. Intent verification and content validation will be taken care by client itself.
+Subscribe to the previously registered topic. Intent verification and content validation will be taken care by client itself.
 
 
 ### Publishing to the Hub:
-Content publishing could be considered as the final stage of interaction between a publisher, hub and subscriber. Content will be validated based on hash which will be taken care by client provided.
+Content publishing is a repeatative interaction between a publisher, hub and subscriber. Content will be validated based on hash which will be taken care by client provided.
