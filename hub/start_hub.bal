@@ -31,7 +31,6 @@ public function main() returns error? {
     // Initialize the Hub
     _ = @strand {thread: "any"} start syncRegsisteredTopicsCache();
     _ = @strand {thread: "any"} start syncSubscribersCache();
-   
 
     // Start the Hub
     http:Listener httpListener = check new (config:HUB_PORT);
@@ -159,7 +158,7 @@ function startMissingSubscribers(websubhub:VerifiedSubscription[] persistedSubsc
             subscribersCache[groupName] = subscriber.cloneReadOnly();
         }
         if subscriberNotAvailable {
-            log:printInfo("Started Missing subscribers operation - new subscriber added to cache",topic=subscriber.hubTopic,callback = subscriber.hubCallback);
+            log:printInfo("Started Missing subscribers operation - new subscriber added to cache", topic = subscriber.hubTopic, callback = subscriber.hubCallback);
             kafka:Consumer consumerEp = check conn:createMessageConsumer(subscriber);
             websubhub:HubClient hubClientEp = check new (subscriber, {
                 retryConfig: {
@@ -170,23 +169,23 @@ function startMissingSubscribers(websubhub:VerifiedSubscription[] persistedSubsc
                 },
                 timeout: config:MESSAGE_DELIVERY_TIMEOUT
             });
-            _ = @strand {thread: "any"} start pollForNewUpdates(hubClientEp, consumerEp, topicName, groupName,subscriber.hubCallback);
+            _ = @strand {thread: "any"} start pollForNewUpdates(hubClientEp, consumerEp, topicName, groupName, subscriber.hubCallback);
         }
     }
 }
 
-isolated function pollForNewUpdates(websubhub:HubClient clientEp, kafka:Consumer consumerEp, string topicName, string groupName,string callback) {
+isolated function pollForNewUpdates(websubhub:HubClient clientEp, kafka:Consumer consumerEp, string topicName, string groupName, string callback) {
     do {
-         log:printInfo("pollForNewUpdates operation - Thread started ",topic=topicName,callback = callback);
+        log:printInfo("pollForNewUpdates operation - Thread started ", topic = topicName, callback = callback);
         while true {
             kafka:ConsumerRecord[] records = check consumerEp->poll(config:POLLING_INTERVAL);
             log:printDebug("pollForNewUpdates operation - records pull ", length = records.length(), groupName = groupName);
-            if !isValidConsumer(topicName, groupName) {
+            if !isValidConsumer(topicName, groupName, callback) {
                 fail error(string `Consumer with group name ${groupName} or topic ${topicName} or ${callback} is invalid`);
             }
-            error? resp = check notifySubscribers(records, clientEp, consumerEp,topicName,callback);
+            error? resp = check notifySubscribers(records, clientEp, consumerEp, topicName, callback);
             if (resp is error) {
-                log:printError("Error occurred while sending notification to subscriber ", errorResponse = resp.message(), topic = topicName, groupName = groupName,callback=callback);
+                log:printError("Error occurred while sending notification to subscriber ", errorResponse = resp.message(), topic = topicName, groupName = groupName, callback = callback);
             }
         }
     } on fail var e {
@@ -197,52 +196,52 @@ isolated function pollForNewUpdates(websubhub:HubClient clientEp, kafka:Consumer
 
         kafka:Error? result = consumerEp->close(config:GRACEFUL_CLOSE_PERIOD);
         if result is kafka:Error {
-            log:printError("Error occurred while gracefully closing kafka-consumer",topic = topicName,callback=callback,err = result.message());
+            log:printError("Error occurred while gracefully closing kafka-consumer", topic = topicName, callback = callback, err = result.message());
         }
     }
 }
 
-isolated function isValidConsumer(string topicName, string groupName) returns boolean {
+isolated function isValidConsumer(string topicName, string groupName, string callback) returns boolean {
     boolean topicAvailable = true;
     lock {
         topicAvailable = registeredTopicsCache.hasKey(topicName);
-        log:printInfo("pollForNewUpdates operation - topicAvailable ", topicAvailable = topicAvailable, groupName = groupName);
+        log:printDebug("pollForNewUpdates operation - topicAvailable ", topicAvailable = topicAvailable, groupName = groupName, topic = topicName, callback = callback);
     }
     boolean subscriberAvailable = true;
     lock {
         subscriberAvailable = subscribersCache.hasKey(groupName);
-        log:printInfo("pollForNewUpdates operation - subscriberAvailable ", subscriberAvailable = subscriberAvailable, groupName = groupName);
+        log:printDebug("pollForNewUpdates operation - subscriberAvailable ", subscriberAvailable = subscriberAvailable, groupName = groupName, topic = topicName, callback = callback);
     }
     return topicAvailable && subscriberAvailable;
 }
 
-isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:HubClient clientEp, kafka:Consumer consumerEp,string topic,string callback) returns error? {
+isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:HubClient clientEp, kafka:Consumer consumerEp, string topic, string callback) returns error? {
     foreach kafka:ConsumerRecord kafkaRecord in records {
         websubhub:ContentDistributionMessage|error message = deSerializeKafkaRecord(kafkaRecord);
 
         if (message is websubhub:ContentDistributionMessage) {
-            log:printDebug("notifying subscriber with message",message=message.cloneReadOnly(),topic=topic,callback=callback,offset=kafkaRecord.offset);
+            log:printDebug("notifying subscriber with message", message = message.cloneReadOnly(), topic = topic, callback = callback, offset = kafkaRecord.offset);
             websubhub:ContentDistributionSuccess|websubhub:SubscriptionDeletedError|websubhub:Error response = clientEp->notifyContentDistribution(message);
             if (response is websubhub:SubscriptionDeletedError) {
-                log:printDebug("Subscription Deletion Error occurred while sending notification to subscriber ",topic=topic,callback=callback,offset=kafkaRecord.offset);
+                log:printDebug("Subscription Deletion Error occurred while sending notification to subscriber ", topic = topic, callback = callback, offset = kafkaRecord.offset);
                 return response;
             } else if (response is websubhub:Error) {
-                log:printDebug("Error occurred while sending notification to subscriber ",topic=topic,callback=callback,offset=kafkaRecord.offset);
+                log:printDebug("Error occurred while sending notification to subscriber ", topic = topic, callback = callback, offset = kafkaRecord.offset);
                 return response;
             }
             else if (response is websubhub:ContentDistributionSuccess) {
-                log:printDebug("Notification sent to subscriber",topic=topic,callback=callback,offset=kafkaRecord.offset);
+                log:printDebug("Notification sent to subscriber", topic = topic, callback = callback, offset = kafkaRecord.offset);
                 kafka:Error? commitRes = check consumerEp->commit();
                 if (commitRes is kafka:Error) {
-                    log:printError("Error occurred while commiting to kafka",err =commitRes.message(),topic=topic,callback=callback,offset=kafkaRecord.offset);
+                    log:printError("Error occurred while commiting to kafka", err = commitRes.message(), topic = topic, callback = callback, offset = kafkaRecord.offset);
                     return commitRes;
-                }else{
-                    log:printDebug("commited to kafka successfully",topic=topic,callback=callback,offset=kafkaRecord.offset);
+                } else {
+                    log:printDebug("commited to kafka successfully", topic = topic, callback = callback, offset = kafkaRecord.offset);
                 }
-                
+
             }
         } else {
-            log:printError("Error occurred while retrieving message data", err = message.message(),topic=topic,callback=callback,offset=kafkaRecord.offset);
+            log:printError("Error occurred while retrieving message data", err = message.message(), topic = topic, callback = callback, offset = kafkaRecord.offset);
         }
     }
 }
@@ -256,7 +255,7 @@ isolated function deSerializeKafkaRecord(kafka:ConsumerRecord kafkaRecord) retur
             websubhub:ContentDistributionMessage distributionMsg = {
                 content: payload,
                 contentType: mime:APPLICATION_JSON
-            };          
+            };
             return distributionMsg;
         } else {
             log:printError("error converting string message to json", err = payload.message());

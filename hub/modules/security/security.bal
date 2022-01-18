@@ -37,7 +37,7 @@ public isolated function authorizeSubscriber(http:Headers headers, string topic)
     string roles = (check response?.response.role).toString();
     string[] rolesArr = regex:split(roles, ",");
     string userId = (check response?.response.userId).toString();
-    log:printDebug("received response for subscriber from auth service", userId=userId,roles = roles,topic = topic);
+    log:printDebug("received response for subscriber from auth service", userId = userId, roles = roles, topic = topic);
     if (userId.startsWith(config:PARTNER_USER_ID_PREFIX)) {
         userId = userId.substring(config:PARTNER_USER_ID_PREFIX.length(), userId.length());
     }
@@ -60,7 +60,7 @@ public isolated function authorizePublisher(http:Headers headers, string topic) 
     json response = check getValidatedTokenResponse(token);
     string roles = (check response?.response.role).toString();
     string userId = (check response?.response.userId).toString();
-    log:printDebug("received response for publisher from auth service",userId=userId,roles = roles,topic = topic);
+    log:printDebug("received response for publisher from auth service", userId = userId, roles = roles, topic = topic);
     string[] rolesArr = regex:split(roles, ",");
     string? partnerID = buildPartnerId(topic);
     string rolePrefix = buildRolePrefix(topic, "PUBLISH_");
