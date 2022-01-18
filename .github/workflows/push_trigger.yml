@@ -15,7 +15,7 @@ jobs:
     env: 
       NAMESPACE: ${{ secrets. dev_namespace_docker_hub }}
       SERVICE_NAME: websub-service
-      CONSOLIDATOR_SERVICE_NAME: consolidator-websub-service
+    #  CONSOLIDATOR_SERVICE_NAME: consolidator-websub-service
   
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -40,34 +40,34 @@ jobs:
       - name: Hub-service build
         run: |
          bal build ./hub 
-      - name: Consolidator service build
-        run: |
-         bal build ./consolidator
+    #  - name: Consolidator service build
+    #    run: |
+    #     bal build ./consolidator
          
       - name: Build hub image
         run: |
           docker build ./hub --file ./hub/Dockerfile --tag ${{ env.SERVICE_NAME }}
       
-      - name: Build consolidator image
-        run: |
-          docker build ./consolidator --file ./consolidator/Dockerfile --tag ${{ env.CONSOLIDATOR_SERVICE_NAME }}    
+    #  - name: Build consolidator image
+    #    run: |
+    #      docker build ./consolidator --file ./consolidator/Dockerfile --tag ${{ env.CONSOLIDATOR_SERVICE_NAME }}    
       - name: Log into registry
         run: echo "${{ secrets.release_docker_hub }}" | docker login -u ${{ secrets.actor_docker_hub }} --password-stdin
         
       - name: Push images
         run: |
           HUB_IMAGE_ID=$NAMESPACE/$SERVICE_NAME
-          CONSOLIDATOR_IMAGE_ID=$NAMESPACE/$CONSOLIDATOR_SERVICE_NAME
+          #CONSOLIDATOR_IMAGE_ID=$NAMESPACE/$CONSOLIDATOR_SERVICE_NAME
           
           # Change all uppercase to lowercase
           HUB_IMAGE_ID=$(echo $HUB_IMAGE_ID | tr '[A-Z]' '[a-z]')
-          CONSOLIDATOR_IMAGE_ID=$(echo $CONSOLIDATOR_IMAGE_ID | tr '[A-Z]' '[a-z]')
+          # CONSOLIDATOR_IMAGE_ID=$(echo $CONSOLIDATOR_IMAGE_ID | tr '[A-Z]' '[a-z]')
           VERSION=$BRANCH_NAME
           echo "push version $VERSION"
           echo HUB_IMAGE_ID=$HUB_IMAGE_ID
-          echo CONSOLIDATOR_IMAGE_ID=$CONSOLIDATOR_IMAGE_ID
+          # echo CONSOLIDATOR_IMAGE_ID=$CONSOLIDATOR_IMAGE_ID
           echo VERSION=$VERSION
           docker tag $SERVICE_NAME $HUB_IMAGE_ID:$VERSION
           docker push $HUB_IMAGE_ID:$VERSION
-          docker tag $CONSOLIDATOR_SERVICE_NAME $CONSOLIDATOR_IMAGE_ID:$VERSION
-          docker push $CONSOLIDATOR_IMAGE_ID:$VERSION
+          # docker tag $CONSOLIDATOR_SERVICE_NAME $CONSOLIDATOR_IMAGE_ID:$VERSION
+          # docker push $CONSOLIDATOR_IMAGE_ID:$VERSION
