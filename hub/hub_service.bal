@@ -100,12 +100,15 @@ websubhub:Service hubService = service object {
         string topicName = util:sanitizeTopicName(message.topic);
         lock {
             if registeredTopicsCache.hasKey(topicName) {
+                log:printError("Topic has already registered with the Hub", topic = topicName);
                 return error websubhub:TopicRegistrationError("Topic has already registered with the Hub");
             }
-            log:printInfo("Registering topic", topic = topicName);
+            log:printDebug("Registering topic", topic = topicName);
             error? persistingResult = persist:addRegsiteredTopic(message.cloneReadOnly());
             if persistingResult is error {
-                log:printError("Error occurred while persisting the topic-registration ", err = persistingResult.message());
+                log:printError("Error occurred while persisting the topic-registration ", topic = topicName, err = persistingResult.message());
+            } else {
+                log:printInfo("Topic registered", topic = topicName);
             }
         }
     }
@@ -160,18 +163,23 @@ websubhub:Service hubService = service object {
     # + return - `websubhub:SubscriptionDeniedError` if the subscription is denied by the hub or else `()`
     isolated remote function onSubscriptionValidation(websubhub:Subscription message)
                 returns websubhub:SubscriptionDeniedError? {
+        log:printDebug("Validating before sending intent verification", payload = message);
         string topicName = util:sanitizeTopicName(message.hubTopic);
-        self.createTopicIFNotExist(topicName);
+        error? topicRegistrationFailed = self.createTopicIFNotExist(topicName, message.hubCallback);
+        if (topicRegistrationFailed is error) {
+            return error websubhub:SubscriptionDeniedError(topicRegistrationFailed.message());
+        }
         string groupName = util:generateGroupName(message.hubTopic, message.hubCallback);
         boolean subscriberAvailable = false;
         lock {
             subscriberAvailable = subscribersCache.hasKey(groupName);
         }
         if subscriberAvailable {
+            log:printError("Subscriber has already registered with the Hub", topic = topicName, callback = message.hubCallback);
             return error websubhub:SubscriptionDeniedError("Subscriber has already registered with the Hub");
+        } else {
+            log:printInfo("Validation done before sending intent verification", payload = message);
         }
-        log:printInfo("Validation done a incomming subscription request", payload = message);
-
     }
 
     # Processes a verified subscription request.
@@ -179,14 +187,16 @@ websubhub:Service hubService = service object {
     # + message - Details of the subscription
     # + return - `error` if there is any unexpected error or else `()`
     isolated remote function onSubscriptionIntentVerified(websubhub:VerifiedSubscription message) returns error? {
+        log:printDebug("Subscription Intent verfication done", payload = message);
         string groupName = util:generateGroupName(message.hubTopic, message.hubCallback);
-        log:printInfo("Proessing a Intent verfied subscription done for request", payload = message);
+        //TODO: check with websub team to remove this log as there will be multiple instances of hub.
         lock {
             error? persistingResult = persist:addSubscription(message.cloneReadOnly());
             if persistingResult is error {
                 log:printError("Error occurred while persisting the subscription ", err = persistingResult.message());
             }
         }
+        log:printInfo("Subscription Intent verfication done and stored to kafka", payload = message);
     }
 
     # Unsubscribes a `subscriber` from the hub.
@@ -261,12 +271,17 @@ websubhub:Service hubService = service object {
     }
 
     isolated function updateMessage(websubhub:UpdateMessage msg) returns websubhub:UpdateMessageError? {
-       
+
         string topicName = util:sanitizeTopicName(msg.hubTopic);
-        self.createTopicIFNotExist(topicName);
-        log:printInfo("Running content update", topic = msg.hubTopic);
+        error? topicIFNotExist = self.createTopicIFNotExist(topicName,"null");
+        if (topicIFNotExist is error) {
+            return error websubhub:UpdateMessageError(topicIFNotExist.message());
+        }
+        log:printDebug("Received publish message", topic = msg.hubTopic,message=msg.cloneReadOnly());
         error? errorResponse = persist:addUpdateMessage(topicName, msg);
+        // TODO: remove this condition
         if errorResponse is websubhub:UpdateMessageError {
+            log:printError("Error occurred while publishing the content ", errorMessage = errorResponse.message(), topic = topicName);
             return errorResponse;
         } else if errorResponse is error {
             log:printError("Error occurred while publishing the content ", errorMessage = errorResponse.message(), topic = topicName);
@@ -275,29 +290,26 @@ websubhub:Service hubService = service object {
 
     }
 
-    isolated function createTopicIFNotExist(string topicName) {
+    isolated function createTopicIFNotExist(string topicName, string callback) returns error? {
         boolean topicAvailable = false;
         lock {
             topicAvailable = registeredTopicsCache.hasKey(topicName);
         }
 
         if !topicAvailable {
-            log:printInfo("Topic not found - Auto registering topic", topic = topicName);
             websubhub:TopicRegistration topicRegistrationMsg = {
                 topic: topicName
             };
-            websubhub:TopicRegistrationError? registerTopicResult = self.registerTopic(topicRegistrationMsg);
-            if registerTopicResult is websubhub:TopicRegistrationError {
-                log:printError("Auto registering topic - Successfully registered failed with error", err = registerTopicResult.message());
-
+            log:printInfo("Topic not found - Auto registering topic", topic = topicName, calback = callback);
+            error? persistingResult = persist:addRegsiteredTopic(topicRegistrationMsg.cloneReadOnly());
+            if persistingResult is error {
+                log:printError("Error occurred while persisting the topic-auto-registration ", topic = topicName, callback = callback, err = persistingResult.message());
+                return persistingResult;
             } else {
-                log:printInfo("Auto registering topic - Successfully registered topic", topic = topicName);
+                log:printInfo("Topic auto registered", topic = topicName, callback = callback);
             }
-
         }
     }
 
 };
-
-
 
