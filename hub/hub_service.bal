@@ -273,11 +273,11 @@ websubhub:Service hubService = service object {
     isolated function updateMessage(websubhub:UpdateMessage msg) returns websubhub:UpdateMessageError? {
 
         string topicName = util:sanitizeTopicName(msg.hubTopic);
-        error? topicIFNotExist = self.createTopicIFNotExist(topicName,"null");
+        error? topicIFNotExist = self.createTopicIFNotExist(topicName, "null");
         if (topicIFNotExist is error) {
             return error websubhub:UpdateMessageError(topicIFNotExist.message());
         }
-        log:printDebug("Received publish message", topic = msg.hubTopic,message=msg.cloneReadOnly());
+        log:printDebug("Received publish message", topic = msg.hubTopic, message = msg.cloneReadOnly());
         error? errorResponse = persist:addUpdateMessage(topicName, msg);
         // TODO: remove this condition
         if errorResponse is websubhub:UpdateMessageError {
