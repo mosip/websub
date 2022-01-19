@@ -1,4 +1,4 @@
-# Websub Hub
+# Websub
 
 ## Overview
 For an overview of Websub refer [MOSIP Docs](https://nayakrounak.gitbook.io/mosip-docs/modules/websub).
