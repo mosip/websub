@@ -5,7 +5,7 @@
 
 	<groupId>io.mosip</groupId>
 	<artifactId>kafka-admin-client</artifactId>
-	<version>1.0.0</version>
+	<version>1.2.0</version>
 	<packaging>jar</packaging>
 
 	<name>kafka-admin-client</name>
@@ -55,14 +55,22 @@
 	</dependencies>
 	<build>
 		<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.2.0</version>
-					<configuration>
-           				<doclint>none</doclint>
-       				</configuration>
-				</plugin>
+			<plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-javadoc-plugin</artifactId>
+                  <version>3.2.0</version>
+                  <executions>
+                        <execution>
+                          <id>attach-javadocs</id>
+                          <goals>
+                                <goal>jar</goal>
+                          </goals>
+                        </execution>
+                  </executions>
+                  <configuration>
+                          <doclint>none</doclint>
+                  </configuration>
+               		 </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -86,7 +94,27 @@
                         </execution>
                   </executions>
                 </plugin>
-			
+              <plugin>
+			<plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-gpg-plugin</artifactId>
+                  <version>1.5</version>
+                  <executions>
+                        <execution>
+                          <id>sign-artifacts</id>
+                          <phase>verify</phase>
+                          <goals>
+                                <goal>sign</goal>
+                          </goals>
+		          <configuration>
+                		<gpgArguments>
+                    			<arg>--pinentry-mode</arg>
+                    			<arg>loopback</arg>
+                		</gpgArguments>
+            		 </configuration>
+                        </execution>
+                  </executions>
+                </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
