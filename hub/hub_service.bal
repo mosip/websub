@@ -79,7 +79,17 @@ isolated function getTotalSpace(handle fileObj) returns int = @java:Method {
     'class: "java.io.File"
 } external;
 
-websubhub:Service hubService = service object {
+websubhub:Service hubService = @websubhub:ServiceConfig { 
+    webHookConfig: {
+        retryConfig: {
+            interval: config:INTENT_VERIFICATION_RETRY_INTERVAL,
+            count: config:INTENT_VERIFICATION_COUNT,
+            backOffFactor: config:INTENT_VERIFICATION_BACKOFF_FACTOR,
+            maxWaitInterval: config:INTENT_VERIFICATION_MAX_INTERVAL
+        }
+    }
+}
+service object {
 
     # Registers a `topic` in the hub.
     #
@@ -189,12 +199,9 @@ websubhub:Service hubService = service object {
     isolated remote function onSubscriptionIntentVerified(websubhub:VerifiedSubscription message) returns error? {
         log:printDebug("Subscription Intent verfication done", payload = message);
         string groupName = util:generateGroupName(message.hubTopic, message.hubCallback);
-        //TODO: check with websub team to remove this log as there will be multiple instances of hub.
-        lock {
-            error? persistingResult = persist:addSubscription(message.cloneReadOnly());
-            if persistingResult is error {
-                log:printError("Error occurred while persisting the subscription ", err = persistingResult.message());
-            }
+        error? persistingResult = persist:addSubscription(message.cloneReadOnly());
+        if persistingResult is error {
+            log:printError("Error occurred while persisting the subscription ", err = persistingResult.message());
         }
         log:printInfo("Subscription Intent verfication done and stored to kafka", payload = message);
     }
@@ -247,12 +254,10 @@ websubhub:Service hubService = service object {
     isolated remote function onUnsubscriptionIntentVerified(websubhub:VerifiedUnsubscription message) {
         string groupName = util:generateGroupName(message.hubTopic, message.hubCallback);
         log:printInfo("Proessing a Intent verfied Unsubscription done for request", payload = message);
-        lock {
-            var persistingResult = persist:removeSubscription(message.cloneReadOnly());
-            if (persistingResult is error) {
-                log:printError("Error occurred while persisting the unsubscription ", err = persistingResult.message());
-            }
-        }
+        var persistingResult = persist:removeSubscription(message.cloneReadOnly());
+        if (persistingResult is error) {
+            log:printError("Error occurred while persisting the unsubscription ", err = persistingResult.message());
+        } 
     }
 
     # Publishes content to the hub.
