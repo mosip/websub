@@ -59,11 +59,11 @@ jobs:
       - name: Push images
         run: |
           HUB_IMAGE_ID=$NAMESPACE/$SERVICE_NAME
-          #CONSOLIDATOR_IMAGE_ID=$NAMESPACE/$CONSOLIDATOR_SERVICE_NAME
+          CONSOLIDATOR_IMAGE_ID=$NAMESPACE/$CONSOLIDATOR_SERVICE_NAME
           
           # Change all uppercase to lowercase
           HUB_IMAGE_ID=$(echo $HUB_IMAGE_ID | tr '[A-Z]' '[a-z]')
-          # CONSOLIDATOR_IMAGE_ID=$(echo $CONSOLIDATOR_IMAGE_ID | tr '[A-Z]' '[a-z]')
+          CONSOLIDATOR_IMAGE_ID=$(echo $CONSOLIDATOR_IMAGE_ID | tr '[A-Z]' '[a-z]')
           if [[ $BRANCH_NAME == master ]]; then
             VERSION=latest
           else
@@ -71,12 +71,12 @@ jobs:
           fi
           echo "push version $VERSION"
           echo HUB_IMAGE_ID=$HUB_IMAGE_ID
-          # echo CONSOLIDATOR_IMAGE_ID=$CONSOLIDATOR_IMAGE_ID
+          echo CONSOLIDATOR_IMAGE_ID=$CONSOLIDATOR_IMAGE_ID
           echo VERSION=$VERSION
           docker tag $SERVICE_NAME $HUB_IMAGE_ID:$VERSION
           docker push $HUB_IMAGE_ID:$VERSION
-          # docker tag $CONSOLIDATOR_SERVICE_NAME $CONSOLIDATOR_IMAGE_ID:$VERSION
-          # docker push $CONSOLIDATOR_IMAGE_ID:$VERSION
+          docker tag $CONSOLIDATOR_SERVICE_NAME $CONSOLIDATOR_IMAGE_ID:$VERSION
+          docker push $CONSOLIDATOR_IMAGE_ID:$VERSION
           
   publish_to_nexus:
     if: "!contains(github.ref, 'master')"
