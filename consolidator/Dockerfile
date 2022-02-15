@@ -1,6 +1,6 @@
 FROM openjdk:11
 ARG consolidator_config_url
-ARG ballerina_download_url=https://dist.ballerina.io/downloads/swan-lake-beta2/ballerina-linux-installer-x64-swan-lake-beta2.deb
+ARG ballerina_download_url=https://dist.ballerina.io/downloads/2201.0.0/ballerina-2201.0.0-swan-lake-linux-x64.deb
 ENV consolidator_config_file_url_env=${consolidator_config_url}
 COPY ./target/bin/*.jar consolidator.jar
 RUN wget -q --show-progress ${ballerina_download_url} -O ballerina-linux-installer-x64.deb

@@ -3,3 +3,5 @@ target/
 ballerina-internal.log
 ballerina-internal.log.lck
 .vscode/
+hub/Dependencies.toml
+consolidator/Dependencies.toml
