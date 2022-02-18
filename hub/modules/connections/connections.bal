@@ -53,7 +53,8 @@ public isolated function createMessageConsumer(websubhub:VerifiedSubscription me
     kafka:ConsumerConfiguration consumerConfiguration = {
         groupId: groupName,
         topics: [topicName],
-        autoCommit: false
+        autoCommit: false,
+        maxPollRecords: config:KAFKA_CONSUMER_MAX_POLL_RECORDS
     };
     return check new (config:KAFKA_BOOTSTRAP_NODE, consumerConfiguration);  
 }

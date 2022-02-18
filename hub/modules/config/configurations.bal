@@ -85,3 +85,6 @@ public configurable float INTENT_VERIFICATION_BACKOFF_FACTOR = 2.0;
 
 # The maximum retry count
 public configurable decimal INTENT_VERIFICATION_MAX_INTERVAL = 20;
+
+# The maximum retry count
+public configurable int KAFKA_CONSUMER_MAX_POLL_RECORDS = 50;
