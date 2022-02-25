@@ -10,9 +10,13 @@ import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.KafkaFuture;
-
+import org.apache.kafka.common.errors.TopicExistsException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MosipKafkaAdminClient {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(MosipKafkaAdminClient.class);
 
 	private Properties properties;
 
@@ -24,7 +28,7 @@ public class MosipKafkaAdminClient {
 
 	public void createTopic(String topicName) {
 		try (Admin admin = Admin.create(properties)) {
-			NewTopic newTopic = new NewTopic(topicName, Optional.of(1),Optional.empty());
+			NewTopic newTopic = new NewTopic(topicName, Optional.of(1), Optional.empty());
 			CreateTopicsResult result = admin.createTopics(Collections.singleton(newTopic));
 			// get the async result for the new topic creation
 			KafkaFuture<Void> future = result.values().get(topicName);
@@ -32,7 +36,11 @@ public class MosipKafkaAdminClient {
 			try {
 				future.get();
 			} catch (InterruptedException | ExecutionException e) {
-				throw new RuntimeException(e);
+				if (e.getCause() instanceof TopicExistsException) {
+					LOGGER.warn(e.getMessage());
+				} else {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 	}
