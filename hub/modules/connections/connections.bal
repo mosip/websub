@@ -54,7 +54,9 @@ public isolated function createMessageConsumer(websubhub:VerifiedSubscription me
         groupId: groupName,
         topics: [topicName],
         autoCommit: false,
-        maxPollRecords: config:KAFKA_CONSUMER_MAX_POLL_RECORDS
+        maxPollRecords: config:KAFKA_CONSUMER_MAX_POLL_RECORDS,
+        fetchMaxBytes: config:KAFKA_CONSUMER_FETCH_MAX_BYTES,
+        maxPartitionFetchBytes: config:KAFKA_CONSUMER_MAX_PARTITION_FETCH_BYTES
     };
     return check new (config:KAFKA_BOOTSTRAP_NODE, consumerConfiguration);  
 }
