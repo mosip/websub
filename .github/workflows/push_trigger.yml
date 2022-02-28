@@ -7,8 +7,7 @@ on:
       - release-1*
       - develop
       - 1.*
-      - websub_scalling
-      - kafkahub
+      - performence
   workflow_dispatch:
   
 jobs:
