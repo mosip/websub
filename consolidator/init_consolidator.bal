@@ -37,9 +37,9 @@ public function main() returns error? {
     check syncSubscribersCache();
     _ = check conn:consolidatedSubscriberConsumer->close(config:GRACEFUL_CLOSE_PERIOD);
     log:printInfo("Starting Event Consolidator Service");
-
     // start the consolidator-service
     check startConsolidator();
+    log:printInfo("Started Event Consolidator Service");
 }
 
 
