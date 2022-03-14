@@ -1,6 +1,6 @@
-# Websub
 [![Ballerina Build and push](https://github.com/mosip/websub/actions/workflows/push_trigger.yml/badge.svg?branch=release-1.2.0)](https://github.com/mosip/websub/actions/workflows/push_trigger.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=release-1.2.0&project=mosip_websub&metric=alert_status)](https://sonarcloud.io/dashboard?branch=release-1.2.0&id=mosip_websub)
+# Websub
 
 ## Overview
 For an overview of Websub refer [MOSIP Docs](https://nayakrounak.gitbook.io/mosip-docs/modules/websub).
@@ -102,67 +102,42 @@ Content publishing is a repeatative interaction between a publisher, hub and sub
 ## Trobleshoot guide
 
 1. Kafka Connection
-
 Hub creates following topics in kafka.
-
 ```
 1. registered-websub-topics
-
 2. consolidated-websub-topics
-
 3. registered-websub-subscribers
-
 4. consolidated-websub-subscribers
 ```
-  
-
 Please verify this topics are present with single partition in kafka using this command.
-
-  
 ```
 kafka-topics.sh --list --bootstrap-server localhost:9092 | grep {topic}
 
 (Alternate : use kafka-ui)
 ```
-
 ![kafka_ui_topics](design/_images/kafka_ui_topics.png) 
-  
-  
-
-2. Subscriber is not able to receiveing messages
-
+1. Subscriber is not able to receiveing messages
    Follow this checklist with debug level enabled for possible cause and solution.  
 
 - Successfull publish call
-
    ```
    grep "Received publish message" | grep ${topic} 
    ```
-
    Upon no entry check the connectivity with websub by logs on client side.
-
 - Sucessfull subscription
-
    ```
    kafka-console-consumer.sh --topic consolidated-websub-subscribers --from-beginning --bootstrap-server localhost:9092
-   
    (Alternate : use kafka-ui)
    ```
    Last index of json array has all active subscribers. In case no subscriber found check for errors in intent verification on client side.
-
 - Request flow
-
    ```
    grep ${callback} | grep ${topic} 
    ```
-
    Check for any errors in the flow.
-
 - Invalid Subscriber
-
    ```
    kafka-consumer-groups.sh --describe --group <group name> --bootstrap-server localhost:9092
-
    (Alternate : use kafka-ui)
    ```
    ![kafka_ui_consumers](design/_images/kafka_ui_consumers.png)
@@ -172,5 +147,3 @@ kafka-topics.sh --list --bootstrap-server localhost:9092 | grep {topic}
    Solution
 
    Please resolve subscribers and resubscribe.
-
-
