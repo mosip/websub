@@ -9,6 +9,7 @@ on:
       - 1.*
       - websub_scalling
       - kafkahub
+      - master
   workflow_dispatch:
   
 jobs:
