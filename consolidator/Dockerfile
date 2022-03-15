@@ -8,4 +8,4 @@ RUN wget -q --show-progress ${ballerina_download_url} -O ballerina-linux-install
 RUN dpkg -i ballerina-linux-installer-x64.deb
 #TODO Link to be parameterized instead of hardcoding
 CMD wget -q --show-progress "${consolidator_config_file_url_env}" -O Config.toml;\
-     java -jar -Xms256m -Xmx${max_heap_size} ./consolidator.jar ;\
+     java -jar -Xms256m -Xmx2048m ./consolidator.jar ;\
