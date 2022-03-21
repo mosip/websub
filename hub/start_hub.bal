@@ -192,7 +192,7 @@ isolated function pollForNewUpdates(websubhub:HubClient clientEp, kafka:Consumer
         lock {
             _ = subscribersCache.remove(groupName);
         }
-        log:printError("Error occurred while sending notification to subscriber", err = e.message());
+        log:printError("Error occurred while sending notification to subscriber ", err = e.message(), topic = topicName, groupName = groupName, callback = callback);
 
         kafka:Error? result = consumerEp->close(config:GRACEFUL_CLOSE_PERIOD);
         if result is kafka:Error {
@@ -223,10 +223,10 @@ isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:Hu
             log:printDebug("notifying subscriber with message", message = message.cloneReadOnly(), topic = topic, callback = callback, offset = kafkaRecord.offset);
             websubhub:ContentDistributionSuccess|websubhub:SubscriptionDeletedError|websubhub:Error response = clientEp->notifyContentDistribution(message);
             if (response is websubhub:SubscriptionDeletedError) {
-                log:printDebug("Subscription Deletion Error occurred while sending notification to subscriber ", topic = topic, callback = callback, offset = kafkaRecord.offset);
+                log:printError("Subscription Deletion Error occurred while sending notification to subscriber ", topic = topic, callback = callback, offset = kafkaRecord.offset,response = response.cloneReadOnly().toString());
                 return response;
             } else if (response is websubhub:Error) {
-                log:printDebug("Error occurred while sending notification to subscriber ", topic = topic, callback = callback, offset = kafkaRecord.offset);
+                log:printError("Error occurred while sending notification to subscriber ", topic = topic, callback = callback, offset = kafkaRecord.offset,response = response.cloneReadOnly().toString());
                 return response;
             }
             else if (response is websubhub:ContentDistributionSuccess) {
