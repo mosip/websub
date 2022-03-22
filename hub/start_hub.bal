@@ -195,7 +195,7 @@ isolated function pollForNewUpdates(websubhub:HubClient clientEp, kafka:Consumer
         lock {
            _ = subscribersCache.removeIfHasKey(subscriberId);
         }
-        log:printError("Error occurred while sending notification to subscriber ", err = e.message(), topic = topicName, groupName = groupName, callback = callback);
+        log:printError("Error occurred while sending notification to subscriber ", err = e.message(), topic = topicName, subscriberId = subscriberId, callback = callback);
 
         kafka:Error? result = consumerEp->close(config:GRACEFUL_CLOSE_PERIOD);
         if result is kafka:Error {
