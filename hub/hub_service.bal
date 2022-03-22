@@ -179,10 +179,10 @@ service object {
         if (topicRegistrationFailed is error) {
             return error websubhub:SubscriptionDeniedError(topicRegistrationFailed.message());
         }
-        string groupName = util:generateGroupName(message.hubTopic, message.hubCallback);
+        string subscriberId = util:generateSubscriberId(message.hubTopic, message.hubCallback);
         boolean subscriberAvailable = false;
         lock {
-            subscriberAvailable = subscribersCache.hasKey(groupName);
+            subscriberAvailable = subscribersCache.hasKey(subscriberId);
         }
         if subscriberAvailable {
             log:printError("Subscriber has already registered with the Hub", topic = topicName, callback = message.hubCallback);
@@ -198,7 +198,8 @@ service object {
     # + return - `error` if there is any unexpected error or else `()`
     isolated remote function onSubscriptionIntentVerified(websubhub:VerifiedSubscription message) returns error? {
         log:printDebug("Subscription Intent verfication done", payload = message);
-        string groupName = util:generateGroupName(message.hubTopic, message.hubCallback);
+         string consumerGroup = util:generateGroupName(message.hubTopic, message.hubCallback);
+        message["consumerGroup"] = consumerGroup;
         error? persistingResult = persist:addSubscription(message.cloneReadOnly());
         if persistingResult is error {
             log:printError("Error occurred while persisting the subscription ", err = persistingResult.message());
@@ -236,9 +237,9 @@ service object {
         if !topicAvailable {
             return error websubhub:UnsubscriptionDeniedError("Topic [" + message.hubTopic + "] is not registered with the Hub");
         } else {
-            string groupName = util:generateGroupName(message.hubTopic, message.hubCallback);
+           string subscriberId = util:generateSubscriberId(message.hubTopic, message.hubCallback);
             lock {
-                subscriberAvailable = subscribersCache.hasKey(groupName);
+               subscriberAvailable = subscribersCache.hasKey(subscriberId);
             }
             if !subscriberAvailable {
                 return error websubhub:UnsubscriptionDeniedError("Could not find a valid subscriber for Topic ["
@@ -252,7 +253,6 @@ service object {
     #
     # + message - Details of the unsubscription
     isolated remote function onUnsubscriptionIntentVerified(websubhub:VerifiedUnsubscription message) {
-        string groupName = util:generateGroupName(message.hubTopic, message.hubCallback);
         log:printInfo("Proessing a Intent verfied Unsubscription done for request", payload = message);
         var persistingResult = persist:removeSubscription(message.cloneReadOnly());
         if (persistingResult is error) {
