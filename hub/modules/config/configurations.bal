@@ -88,3 +88,9 @@ public configurable decimal INTENT_VERIFICATION_MAX_INTERVAL = 20;
 
 # The maximum retry count
 public configurable int KAFKA_CONSUMER_MAX_POLL_RECORDS = 50;
+
+# The maximum retry count
+public configurable int KAFKA_CONSUMER_FETCH_MAX_BYTES = 3145728;
+
+# The maximum retry count
+public configurable int KAFKA_CONSUMER_MAX_PARTITION_FETCH_BYTES = 524288;
