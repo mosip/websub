@@ -15,9 +15,7 @@
 // under the License.
 
 import ballerinax/kafka;
-import ballerina/websubhub;
 import kafkaHub.config;
-import kafkaHub.util;
 
 // Producer which persist the current in-memory state of the Hub 
 kafka:ProducerConfiguration statePersistConfig = {
@@ -47,13 +45,14 @@ public final kafka:Consumer registeredTopicsConsumer = check new (config:KAFKA_B
 # 
 # + message - The subscription details
 # + return - `kafka:Consumer` if succcessful or else `error`
-public isolated function createMessageConsumer(websubhub:VerifiedSubscription message) returns kafka:Consumer|error {
-    string topicName = util:sanitizeTopicName(message.hubTopic);
-    string groupName = util:generateGroupName(message.hubTopic, message.hubCallback);
+public isolated function createMessageConsumer(string topicName, string groupName) returns kafka:Consumer|error {
     kafka:ConsumerConfiguration consumerConfiguration = {
         groupId: groupName,
         topics: [topicName],
-        autoCommit: false
+        autoCommit: false,
+        maxPollRecords: config:KAFKA_CONSUMER_MAX_POLL_RECORDS,
+        fetchMaxBytes: config:KAFKA_CONSUMER_FETCH_MAX_BYTES,
+        maxPartitionFetchBytes: config:KAFKA_CONSUMER_MAX_PARTITION_FETCH_BYTES
     };
     return check new (config:KAFKA_BOOTSTRAP_NODE, consumerConfiguration);  
 }

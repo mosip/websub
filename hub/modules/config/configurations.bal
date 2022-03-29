@@ -73,3 +73,24 @@ public configurable string PARTNER_USER_ID_PREFIX = "service-account-";
 public final string CONSTRUCTED_SERVER_ID = string `${SERVER_ID}-${util:generateRandomString()}`;
 
 public final string CURRENT_WORKING_DIR = "user.dir";
+
+# The period between retry requests
+public configurable decimal INTENT_VERIFICATION_RETRY_INTERVAL = 3;
+
+# The maximum retry count
+public configurable int INTENT_VERIFICATION_COUNT = 3;
+
+# The period between retry requests
+public configurable float INTENT_VERIFICATION_BACKOFF_FACTOR = 2.0;
+
+# The maximum retry count
+public configurable decimal INTENT_VERIFICATION_MAX_INTERVAL = 20;
+
+# The maximum retry count
+public configurable int KAFKA_CONSUMER_MAX_POLL_RECORDS = 50;
+
+# The maximum retry count
+public configurable int KAFKA_CONSUMER_FETCH_MAX_BYTES = 3145728;
+
+# The maximum retry count
+public configurable int KAFKA_CONSUMER_MAX_PARTITION_FETCH_BYTES = 524288;

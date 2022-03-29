@@ -79,7 +79,17 @@ isolated function getTotalSpace(handle fileObj) returns int = @java:Method {
     'class: "java.io.File"
 } external;
 
-websubhub:Service hubService = service object {
+websubhub:Service hubService = @websubhub:ServiceConfig { 
+    webHookConfig: {
+        retryConfig: {
+            interval: config:INTENT_VERIFICATION_RETRY_INTERVAL,
+            count: config:INTENT_VERIFICATION_COUNT,
+            backOffFactor: config:INTENT_VERIFICATION_BACKOFF_FACTOR,
+            maxWaitInterval: config:INTENT_VERIFICATION_MAX_INTERVAL
+        }
+    }
+}
+service object {
 
     # Registers a `topic` in the hub.
     #
@@ -169,10 +179,10 @@ websubhub:Service hubService = service object {
         if (topicRegistrationFailed is error) {
             return error websubhub:SubscriptionDeniedError(topicRegistrationFailed.message());
         }
-        string groupName = util:generateGroupName(message.hubTopic, message.hubCallback);
+        string subscriberId = util:generateSubscriberId(message.hubTopic, message.hubCallback);
         boolean subscriberAvailable = false;
         lock {
-            subscriberAvailable = subscribersCache.hasKey(groupName);
+            subscriberAvailable = subscribersCache.hasKey(subscriberId);
         }
         if subscriberAvailable {
             log:printError("Subscriber has already registered with the Hub", topic = topicName, callback = message.hubCallback);
@@ -188,13 +198,11 @@ websubhub:Service hubService = service object {
     # + return - `error` if there is any unexpected error or else `()`
     isolated remote function onSubscriptionIntentVerified(websubhub:VerifiedSubscription message) returns error? {
         log:printDebug("Subscription Intent verfication done", payload = message);
-        string groupName = util:generateGroupName(message.hubTopic, message.hubCallback);
-        //TODO: check with websub team to remove this log as there will be multiple instances of hub.
-        lock {
-            error? persistingResult = persist:addSubscription(message.cloneReadOnly());
-            if persistingResult is error {
-                log:printError("Error occurred while persisting the subscription ", err = persistingResult.message());
-            }
+         string consumerGroup = util:generateGroupName(message.hubTopic, message.hubCallback);
+        message["consumerGroup"] = consumerGroup;
+        error? persistingResult = persist:addSubscription(message.cloneReadOnly());
+        if persistingResult is error {
+            log:printError("Error occurred while persisting the subscription ", err = persistingResult.message());
         }
         log:printInfo("Subscription Intent verfication done and stored to kafka", payload = message);
     }
@@ -229,9 +237,9 @@ websubhub:Service hubService = service object {
         if !topicAvailable {
             return error websubhub:UnsubscriptionDeniedError("Topic [" + message.hubTopic + "] is not registered with the Hub");
         } else {
-            string groupName = util:generateGroupName(message.hubTopic, message.hubCallback);
+           string subscriberId = util:generateSubscriberId(message.hubTopic, message.hubCallback);
             lock {
-                subscriberAvailable = subscribersCache.hasKey(groupName);
+               subscriberAvailable = subscribersCache.hasKey(subscriberId);
             }
             if !subscriberAvailable {
                 return error websubhub:UnsubscriptionDeniedError("Could not find a valid subscriber for Topic ["
@@ -245,14 +253,11 @@ websubhub:Service hubService = service object {
     #
     # + message - Details of the unsubscription
     isolated remote function onUnsubscriptionIntentVerified(websubhub:VerifiedUnsubscription message) {
-        string groupName = util:generateGroupName(message.hubTopic, message.hubCallback);
         log:printInfo("Proessing a Intent verfied Unsubscription done for request", payload = message);
-        lock {
-            var persistingResult = persist:removeSubscription(message.cloneReadOnly());
-            if (persistingResult is error) {
-                log:printError("Error occurred while persisting the unsubscription ", err = persistingResult.message());
-            }
-        }
+        var persistingResult = persist:removeSubscription(message.cloneReadOnly());
+        if (persistingResult is error) {
+            log:printError("Error occurred while persisting the unsubscription ", err = persistingResult.message());
+        } 
     }
 
     # Publishes content to the hub.

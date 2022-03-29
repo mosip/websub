@@ -68,6 +68,7 @@ isolated function getPersistedTopics() returns websubhub:TopicRegistration[]|err
             return lastPersistedData;
         }
     }
+    return;
 }
 
 isolated function deSerializeTopicsMessage(string lastPersistedData) returns websubhub:TopicRegistration[]|error {
@@ -113,6 +114,7 @@ isolated function getPersistedSubscribers() returns websubhub:VerifiedSubscripti
             return lastPersistedData;
         }
     }
+    return;
 }
 
 isolated function deSerializeSubscribersMessage(string lastPersistedData) returns websubhub:VerifiedSubscription[]|error {
@@ -127,7 +129,7 @@ isolated function deSerializeSubscribersMessage(string lastPersistedData) return
 
 isolated function refreshSubscribersCache(websubhub:VerifiedSubscription[] persistedSubscribers) {
     foreach var subscriber in persistedSubscribers {
-        string groupName = util:generateGroupName(subscriber.hubTopic, subscriber.hubCallback);
+        string groupName = util:generateSubscriberId(subscriber.hubTopic, subscriber.hubCallback);
         lock {
             subscribersCache[groupName] = subscriber.cloneReadOnly();
         }

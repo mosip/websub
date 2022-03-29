@@ -7,8 +7,6 @@ on:
       - release-1*
       - develop
       - 1.*
-      - websub_scalling
-      - kafkahub
   workflow_dispatch:
   
 jobs:
@@ -36,7 +34,7 @@ jobs:
          
       - name: Install ballerina
         run: |
-         wget -q --show-progress https://dist.ballerina.io/downloads/swan-lake-beta2/ballerina-linux-installer-x64-swan-lake-beta2.deb -O ballerina-linux-installer-x64.deb
+         wget -q --show-progress https://dist.ballerina.io/downloads/2201.0.0/ballerina-2201.0.0-swan-lake-linux-x64.deb -O ballerina-linux-installer-x64.deb
          sudo dpkg -i ballerina-linux-installer-x64.deb
       - name: Setup branch and GPG public key
         run: |
@@ -46,14 +44,20 @@ jobs:
           sudo apt-get --yes install gnupg2
           gpg2 --import ./.github/keys/mosipgpgkey_pub.gpg
           gpg2 --quiet --batch --passphrase=${{secrets.gpg_secret}}  --allow-secret-key-import --import ./.github/keys/mosipgpgkey_sec.gpg
+<<<<<<< HEAD
+=======
 
+>>>>>>> 1.1.5.3
       - uses: actions/cache@v1
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-${{ env.BRANCH_NAME }}
+<<<<<<< HEAD
+=======
 
+>>>>>>> 1.1.5.3
       - name: Install xmllint
         run: |
           sudo apt-get update
