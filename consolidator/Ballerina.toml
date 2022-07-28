@@ -3,6 +3,7 @@ org = "mosip"
 name = "consolidatorService"
 version = "1.2.0"
 
+
 [build-options]
 observabilityIncluded = true
 
@@ -10,4 +11,4 @@ observabilityIncluded = true
 modules = ["inittopic"]
 groupId = "io.mosip"
 artifactId = "kafka-admin-client"
-version = "1.2.0"
+version = "1.2.0.1"

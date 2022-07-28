@@ -9,7 +9,12 @@ public function createTopics() returns error? {
         log:printInfo("Creating topic with single partition", topic = topic);
         error? result = trap createTopic(newMosipKafkaAdminClientResult, java:fromString(topic));
         if result is error {
-            return result;
+            error cause = <error>result.detail().get("cause");
+            if (cause.message() == "org.apache.kafka.common.errors.TopicExistsException") {
+                log:printWarn(cause.toString());
+            } else {
+                return result;
+            }
         }
     }
 
@@ -20,7 +25,7 @@ function newMosipKafkaAdminClient(handle bootstrapServers) returns handle = @jav
     paramTypes: ["java.lang.String"]
 } external;
 
-function createTopic(handle adminClinetObject, handle topicName) = @java:Method {
+function createTopic(handle adminClinetObject, handle topicName) returns error? = @java:Method {
     name: "createTopic",
     'class: "io.mosip.kafkaadminclient.MosipKafkaAdminClient",
     paramTypes: ["java.lang.String"]
