@@ -245,7 +245,8 @@ isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:Hu
                 log:printError("Error occurred while sending notification to subscriber ", topic = topic, callback = callback, offset = kafkaRecord.offset,response = response.cloneReadOnly().toString());
                 return response;
             }
-            else if (response is websubhub:ContentDistributionSuccess) {
+            else 
+             {
                 log:printDebug("Notification sent to subscriber", topic = topic, callback = callback, offset = kafkaRecord.offset);
                 kafka:Error? commitRes = check consumerEp->commit();
                 if (commitRes is kafka:Error) {
