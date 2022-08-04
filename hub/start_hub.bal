@@ -23,11 +23,24 @@ import kafkaHub.util;
 import kafkaHub.connections as conn;
 import ballerina/mime;
 import kafkaHub.config;
+import kafkaHub.inittopic as initt;
 
 isolated map<websubhub:TopicRegistration> registeredTopicsCache = {};
 isolated map<websubhub:VerifiedSubscription> subscribersCache = {};
 
 public function main() returns error? {
+
+    boolean|error? result = initt:isTopicsPresentKafka();
+    if result is error {
+    return result;
+    }
+    if result is boolean{
+        if !result{
+            return error("metadata topics are not present in kafka");
+        }else{
+            log:printInfo("found all metadata topics in kafka");
+        }
+    }
     // Initialize the Hub
     _ = @strand {thread: "any"} start syncRegsisteredTopicsCache();
     _ = @strand {thread: "any"} start syncSubscribersCache();

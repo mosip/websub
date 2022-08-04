@@ -94,3 +94,6 @@ public configurable int KAFKA_CONSUMER_FETCH_MAX_BYTES = 3145728;
 
 # The maximum retry count
 public configurable int KAFKA_CONSUMER_MAX_PARTITION_FETCH_BYTES = 524288;
+
+# Kafka topic which is stores consolidated websub subscribers for this server
+public configurable string META_TOPICS = "registered-websub-topics,consolidated-websub-topics,registered-websub-subscribers,consolidated-websub-subscribers";
