@@ -22,6 +22,8 @@ import consolidatorService.config;
 import consolidatorService.inittopic as initt;
 import consolidatorService.util;
 import consolidatorService.connections as conn;
+import ballerina/http;
+import ballerina/lang.runtime;
 
 isolated map<websubhub:TopicRegistration> registeredTopicsCache = {};
 isolated map<websubhub:VerifiedSubscription> subscribersCache = {};
@@ -31,6 +33,11 @@ public function main() returns error? {
     if result is error {
     return result;
     }
+    // Start the Hub
+    http:Listener httpListener = check new (config:CONSOLIDATOR_PORT);
+    check httpListener.attach(healthCheckService, config:CONSOLIDATOR_HEALTH_ENDPOINT);
+    check httpListener.'start();
+    runtime:registerListener(httpListener);
     // Initialize consolidator-service state
     check syncRegsisteredTopicsCache();
     _ = check conn:consolidatedTopicsConsumer->close(config:GRACEFUL_CLOSE_PERIOD);

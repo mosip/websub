@@ -44,3 +44,14 @@ public configurable decimal POLLING_INTERVAL = 10;
 public configurable decimal GRACEFUL_CLOSE_PERIOD = 5;
 
 public final string CONSTRUCTED_CONSUMER_ID = util:generateRandomString();
+
+public final string CURRENT_WORKING_DIR = "user.dir";
+
+# The token validation URL of IDP
+public configurable int DISK_SPACE_THRESHOLD = 10485760;
+
+# The port that is used to start the consolidator
+public configurable int CONSOLIDATOR_PORT = 9192;
+
+# consolidator health endpoint
+public configurable string CONSOLIDATOR_HEALTH_ENDPOINT = "/consolidator/actuator/health";

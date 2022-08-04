@@ -47,7 +47,7 @@ public configurable decimal POLLING_INTERVAL = 10;
 public configurable decimal GRACEFUL_CLOSE_PERIOD = 5;
 
 # The port that is used to start the hub
-public configurable int HUB_PORT = 9000;
+public configurable int HUB_PORT = 9191;
 
 # The period between retry requests
 public configurable decimal MESSAGE_DELIVERY_RETRY_INTERVAL = 3;
@@ -97,3 +97,9 @@ public configurable int KAFKA_CONSUMER_MAX_PARTITION_FETCH_BYTES = 524288;
 
 # Kafka topic which is stores consolidated websub subscribers for this server
 public configurable string META_TOPICS = "registered-websub-topics,consolidated-websub-topics,registered-websub-subscribers,consolidated-websub-subscribers";
+
+# consolidator base url
+public configurable string CONSOLIDATOR_BASE_URL = "http://localhost:9192";
+
+# consolidator health endpoint
+public configurable string CONSOLIDATOR_HEALTH_ENDPOINT = "/consolidator/actuator/health";
