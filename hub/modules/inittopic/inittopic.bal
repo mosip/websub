@@ -5,9 +5,9 @@ import ballerina/log;
 public function isTopicsPresentKafka() returns boolean|error? {
     handle bootStrapServer = java:fromString(config:KAFKA_BOOTSTRAP_NODE);
     handle newMosipKafkaAdminClientResult = newMosipKafkaAdminClient(bootStrapServer);
-        log:printInfo("Checking if metadata Topics are present");
-        boolean|error? result = trap isTopicsPresent(newMosipKafkaAdminClientResult, java:fromString(config:META_TOPICS));
-        return result;
+    log:printInfo("Checking if metadata Topics are present");
+    boolean|error? result = trap isTopicsPresent(newMosipKafkaAdminClientResult, java:fromString(config:META_TOPICS));
+    return result;
 }
 
 function newMosipKafkaAdminClient(handle bootstrapServers) returns handle = @java:Constructor {
