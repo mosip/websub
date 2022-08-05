@@ -45,7 +45,7 @@ http:Service healthCheckService = service object {
 
         //kafka
         string kafkaStatus = "DOWN";
-       handle|error? producerResult = kafkahealthcheck:getAllTopicsKafka();
+       handle|error? producerResult = kafkahealthcheck:describeTopicKafka(config:CONSOLIDATED_WEBSUB_SUBSCRIBERS_TOPIC);
         if (producerResult is handle) {
             kafkaStatus = "UP";
         }

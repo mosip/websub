@@ -2,11 +2,10 @@ import ballerina/jballerina.java;
 import consolidatorService.config;
 import ballerina/log;
 
-public function getAllTopicsKafka() returns handle|error? {
+public function describeTopicKafka(string topic) returns handle|error? {
     handle bootStrapServer = java:fromString(config:KAFKA_BOOTSTRAP_NODE);
     handle newMosipKafkaAdminClientResult = newMosipKafkaAdminClient(bootStrapServer);
-    log:printInfo("Checking if metadata Topics are present");
-    handle|error? result = trap getAllTopics(newMosipKafkaAdminClientResult);
+    handle|error? result = trap describeTopic(newMosipKafkaAdminClientResult, java:fromString(topic));
     return result;
 }
 
@@ -15,8 +14,9 @@ function newMosipKafkaAdminClient(handle bootstrapServers) returns handle = @jav
     paramTypes: ["java.lang.String"]
 } external;
 
-function getAllTopics(handle adminClinetObject) returns handle|error? = @java:Method {
-    name: "getAllTopics",
-    'class: "io.mosip.kafkaadminclient.MosipKafkaAdminClient"
+function describeTopic(handle adminClinetObject, handle topic) returns handle|error? = @java:Method {
+    name: "describeTopic",
+    'class: "io.mosip.kafkaadminclient.MosipKafkaAdminClient",
+    paramTypes: ["java.lang.String"]
 } external;
 

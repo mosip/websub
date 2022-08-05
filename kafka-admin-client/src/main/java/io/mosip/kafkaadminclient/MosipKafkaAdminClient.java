@@ -3,6 +3,7 @@ package io.mosip.kafkaadminclient;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -11,8 +12,10 @@ import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
+import org.apache.kafka.clients.admin.DescribeTopicsResult;
 import org.apache.kafka.clients.admin.ListTopicsOptions;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.admin.TopicDescription;
 import org.apache.kafka.common.KafkaFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +53,14 @@ public class MosipKafkaAdminClient {
 			ListTopicsOptions listTopicsOptions = new ListTopicsOptions();
 			listTopicsOptions.listInternal(true);
 			return admin.listTopics(listTopicsOptions).names().get();
+		}
+	}
+
+
+	public Map<String, TopicDescription> describeTopic(String topic) throws Exception {
+		try (Admin admin = Admin.create(properties)) {
+			DescribeTopicsResult result = admin.describeTopics(Collections.singleton(topic));
+			return result.all().get();
 		}
 	}
 }

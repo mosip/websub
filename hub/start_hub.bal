@@ -23,14 +23,14 @@ import kafkaHub.util;
 import kafkaHub.connections as conn;
 import ballerina/mime;
 import kafkaHub.config;
-import kafkaHub.inittopic as initt;
+import kafkaHub.internal_topic_helper as internalTopicHelper;
 
 isolated map<websubhub:TopicRegistration> registeredTopicsCache = {};
 isolated map<websubhub:VerifiedSubscription> subscribersCache = {};
 
 public function main() returns error? {
 
-    boolean|error? result = initt:isTopicsPresentKafka();
+    boolean|error? result = internalTopicHelper:isTopicsPresentKafka();
     if result is error {
     return result;
     }
