@@ -47,7 +47,7 @@ public final string CONSTRUCTED_CONSUMER_ID = util:generateRandomString();
 
 public final string CURRENT_WORKING_DIR = "user.dir";
 
-# The token validation URL of IDP
+# The disk space threshold for healthcheck
 public configurable int DISK_SPACE_THRESHOLD = 10485760;
 
 # The port that is used to start the consolidator
