@@ -99,7 +99,7 @@ public configurable int KAFKA_CONSUMER_MAX_PARTITION_FETCH_BYTES = 524288;
 public configurable string META_TOPICS = "registered-websub-topics,consolidated-websub-topics,registered-websub-subscribers,consolidated-websub-subscribers";
 
 # consolidator base url
-public configurable string CONSOLIDATOR_BASE_URL = "http://localhost:9192";
+public configurable string CONSOLIDATOR_BASE_URL = "http://websub-consolidator";
 
 # consolidator health endpoint
 public configurable string CONSOLIDATOR_HEALTH_ENDPOINT = "/consolidator/actuator/health";
