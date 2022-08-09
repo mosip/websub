@@ -23,8 +23,8 @@ import consolidatorService.util;
 import consolidatorService.connections as conn;
 import consolidatorService.persistence as persist;
 import ballerina/http;
-import consolidatorService.healthcheck;
-import consolidatorService.kafkahealthcheck;
+import consolidatorService.health_check as healthcheck;
+import consolidatorService.kafka_health_check as kafkahealthcheck;
 import ballerina/jballerina.java;
 
 http:Service healthCheckService = service object {

@@ -19,7 +19,7 @@ import ballerina/websubhub;
 import ballerina/lang.value;
 import ballerina/log;
 import consolidatorService.config;
-import consolidatorService.inittopic as initt;
+import consolidatorService.init_topic as initt;
 import consolidatorService.util;
 import consolidatorService.connections as conn;
 import ballerina/http;
