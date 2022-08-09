@@ -21,7 +21,7 @@ import kafkaHub.security;
 import kafkaHub.persistence as persist;
 import kafkaHub.config;
 import kafkaHub.util;
-import kafkaHub.healthcheck;
+import kafkaHub.health_check as healthcheck;
 import ballerina/jballerina.java;
 
 http:Service healthCheckService = service object {

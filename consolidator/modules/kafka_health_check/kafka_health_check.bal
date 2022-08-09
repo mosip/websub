@@ -1,6 +1,5 @@
 import ballerina/jballerina.java;
 import consolidatorService.config;
-import ballerina/log;
 
 public function describeTopicKafka(string topic) returns handle|error? {
     handle bootStrapServer = java:fromString(config:KAFKA_BOOTSTRAP_NODE);
