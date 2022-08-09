@@ -23,11 +23,24 @@ import kafkaHub.util;
 import kafkaHub.connections as conn;
 import ballerina/mime;
 import kafkaHub.config;
+import kafkaHub.internal_topic_helper as internalTopicHelper;
 
 isolated map<websubhub:TopicRegistration> registeredTopicsCache = {};
 isolated map<websubhub:VerifiedSubscription> subscribersCache = {};
 
 public function main() returns error? {
+
+    boolean|error? result = internalTopicHelper:isTopicsPresentKafka();
+    if result is error {
+    return result;
+    }
+    if result is boolean{
+        if !result{
+            return error("metadata topics are not present in kafka");
+        }else{
+            log:printInfo("found all metadata topics in kafka");
+        }
+    }
     // Initialize the Hub
     _ = @strand {thread: "any"} start syncRegsisteredTopicsCache();
     _ = @strand {thread: "any"} start syncSubscribersCache();
@@ -232,7 +245,8 @@ isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:Hu
                 log:printError("Error occurred while sending notification to subscriber ", topic = topic, callback = callback, offset = kafkaRecord.offset,response = response.cloneReadOnly().toString());
                 return response;
             }
-            else if (response is websubhub:ContentDistributionSuccess) {
+            else 
+             {
                 log:printDebug("Notification sent to subscriber", topic = topic, callback = callback, offset = kafkaRecord.offset);
                 kafka:Error? commitRes = check consumerEp->commit();
                 if (commitRes is kafka:Error) {
