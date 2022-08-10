@@ -48,7 +48,7 @@ http:Service healthCheckService = service object {
        }else{
        healthcheck:HealthCheckResp|error consolidatorHealth =  clientEndpoint -> get(config:CONSOLIDATOR_HEALTH_ENDPOINT);
        if(consolidatorHealth is healthcheck:HealthCheckResp){
-        consolidatorStatus = "UP";
+        consolidatorStatus = consolidatorHealth.status;
        }
        }
        healthcheck:HealthCheckResp consolidatorSHealth = {status: consolidatorStatus, details: {}};
