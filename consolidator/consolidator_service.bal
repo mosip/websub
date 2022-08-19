@@ -29,7 +29,7 @@ import ballerina/jballerina.java;
 
 http:Service healthCheckService = service object {
 
-    resource function get .() returns healthcheck:HealthCheckResp {
+    resource function get .() returns http:Ok|http:ServiceUnavailable {
         //diskspace
         string diskSpaceStatus = "DOWN";
         handle handleStr = java:fromString(config:CURRENT_WORKING_DIR);
@@ -59,11 +59,15 @@ http:Service healthCheckService = service object {
         string resultStatus = "DOWN";
         if(diskSpaceStatus == "UP" && kafkaStatus == "UP"){
             resultStatus = "UP";
+            healthcheck:HealthCheckResp healthCheckResp = {status: resultStatus, details: {details}};
+            http:Ok res = {body: healthCheckResp};
+            return res;
         }
 
         //main object
         healthcheck:HealthCheckResp healthCheckResp = {status: resultStatus, details: {details}};
-        return healthCheckResp;
+        http:ServiceUnavailable res = {body: healthCheckResp};
+        return res;
     }
 };
 
