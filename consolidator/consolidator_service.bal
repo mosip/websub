@@ -22,6 +22,72 @@ import consolidatorService.config;
 import consolidatorService.util;
 import consolidatorService.connections as conn;
 import consolidatorService.persistence as persist;
+import ballerina/http;
+import consolidatorService.health_check as healthcheck;
+import consolidatorService.kafka_health_check as kafkahealthcheck;
+import ballerina/jballerina.java;
+
+http:Service healthCheckService = service object {
+
+    resource function get .() returns http:Ok|http:ServiceUnavailable {
+        //diskspace
+        string diskSpaceStatus = "DOWN";
+        handle handleStr = java:fromString(config:CURRENT_WORKING_DIR);
+        handle fileObj = newFile(java:fromString(getCurrent(handleStr).toString()));
+        int usableSpace = getUsableSpace(fileObj);
+        int totalSpace = getTotalSpace(fileObj);
+        int threshold = config:DISK_SPACE_THRESHOLD;
+        healthcheck:DiskSpaceMetaData diskSpaceMetaData = {free: usableSpace, total: totalSpace, threshold: threshold};
+        if (usableSpace >= threshold) {
+            diskSpaceStatus = "UP";
+        }
+        healthcheck:HealthCheckResp diskSpace = {status: diskSpaceStatus, details: {diskSpaceMetaData}};
+
+        //kafka
+        string kafkaStatus = "DOWN";
+       handle|error? producerResult = kafkahealthcheck:describeTopicKafka(config:CONSOLIDATED_WEBSUB_SUBSCRIBERS_TOPIC);
+        if (producerResult is handle) {
+            kafkaStatus = "UP";
+        }
+        healthcheck:HealthCheckResp kafkaHealth = {status: kafkaStatus, details: {}};
+        //add to main map
+        map<healthcheck:HealthCheckResp> details = {
+            "diskSpace": diskSpace,
+            "kafka": kafkaHealth
+        };
+
+        string resultStatus = "DOWN";
+        if(diskSpaceStatus == "UP" && kafkaStatus == "UP"){
+            resultStatus = "UP";
+            healthcheck:HealthCheckResp healthCheckResp = {status: resultStatus, details: {details}};
+            http:Ok res = {body: healthCheckResp};
+            return res;
+        }
+
+        //main object
+        healthcheck:HealthCheckResp healthCheckResp = {status: resultStatus, details: {details}};
+        http:ServiceUnavailable res = {body: healthCheckResp};
+        return res;
+    }
+};
+
+function newFile(handle c) returns handle = @java:Constructor {
+    'class: "java.io.File",
+    paramTypes: ["java.lang.String"]
+} external;
+
+function getCurrent(handle prop) returns handle = @java:Method {
+    name: "getProperty",
+    'class: "java.lang.System"
+} external;
+
+function getUsableSpace(handle fileObj) returns int = @java:Method {
+    'class: "java.io.File"
+} external;
+
+isolated function getTotalSpace(handle fileObj) returns int = @java:Method {
+    'class: "java.io.File"
+} external;
 
 isolated function startConsolidator() returns error? {
     do {
