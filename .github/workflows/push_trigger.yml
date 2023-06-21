@@ -61,6 +61,8 @@ jobs:
 
       - name: Hub-service build
         run: |
+         cd kafka-admin-client && mvn -B clean install --file pom.xml -s $GITHUB_WORKSPACE/settings.xml
+         cd ..
          bal build ./hub 
       - name: Consolidator service build
         run: |
