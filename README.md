@@ -172,5 +172,3 @@ kafka-topics.sh --list --bootstrap-server localhost:9092 | grep {topic}
    Solution
 
    Please resolve subscribers and resubscribe.
-
-
