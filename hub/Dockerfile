@@ -1,4 +1,13 @@
 FROM openjdk:11
+
+ARG SOURCE
+ARG COMMIT_HASH
+ARG COMMIT_ID
+ARG BUILD_TIME
+LABEL source=${SOURCE}
+LABEL commit_hash=${COMMIT_HASH}
+LABEL commit_id=${COMMIT_ID}
+LABEL build_time=${BUILD_TIME}
 ARG hub_config_url
 ARG max_heap_size=2048m
 ARG ballerina_download_url=https://dist.ballerina.io/downloads/2201.0.0/ballerina-2201.0.0-swan-lake-linux-x64.deb
