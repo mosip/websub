@@ -16,7 +16,9 @@ jobs:
       NAMESPACE: ${{ secrets. dev_namespace_docker_hub }}
       SERVICE_NAME: websub-service
       CONSOLIDATOR_SERVICE_NAME: consolidator-websub-service
-      SERVICE_LOCATION: hub
+      HUB_SERVICE_LOCATION: hub
+      CONSOLIDATOR_SERVICE_LOCATION: consolidator
+      
   
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -73,12 +75,12 @@ jobs:
          
       - name: Build hub image
         run: |
-          cd "./${{env.SERVICE_LOCATION}}"
+          cd "./${{env.HUB_SERVICE_LOCATION}}"
           # docker build ./hub --file ./hub/Dockerfile --tag ${{ env.SERVICE_NAME }}
           docker build . --build-arg SOURCE=mosip --build-arg COMMIT_HASH=$(git rev-parse HEAD) --build-arg COMMIT_ID=$(git rev-parse --short HEAD) --build-arg BUILD_TIME=${{steps.date.outputs.date}} --file Dockerfile --tag ${{ env.SERVICE_NAME }}
       - name: Build consolidator image
         run: |
-          cd "./${{env.SERVICE_LOCATION}}"
+          cd "./${{env.CONSOLIDATOR_SERVICE_LOCATION}}"
           # docker build ./consolidator --file ./consolidator/Dockerfile --tag ${{ env.CONSOLIDATOR_SERVICE_NAME }} 
           docker build . --build-arg SOURCE=mosip --build-arg COMMIT_HASH=$(git rev-parse HEAD) --build-arg COMMIT_ID=$(git rev-parse --short HEAD) --build-arg BUILD_TIME=${{steps.date.outputs.date}} --file Dockerfile --tag ${{ env.SERVICE_NAME }}
 
