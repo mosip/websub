@@ -16,6 +16,7 @@ jobs:
       NAMESPACE: ${{ secrets. dev_namespace_docker_hub }}
       SERVICE_NAME: websub-service
       CONSOLIDATOR_SERVICE_NAME: consolidator-websub-service
+      SERVICE_LOCATION: hub
   
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
