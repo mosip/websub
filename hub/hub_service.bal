@@ -28,7 +28,7 @@ import ballerinax/kafka;
 
 http:Service healthCheckService = service object {
 
-    resource function get .() returns healthcheck:HealthCheckResp {
+    resource function get .() returns http:Ok|http:ServiceUnavailable {
         //diskspace
         string diskSpaceStatus = "DOWN";
         handle handleStr = java:fromString(config:CURRENT_WORKING_DIR);
@@ -42,22 +42,33 @@ http:Service healthCheckService = service object {
         }
         healthcheck:HealthCheckResp diskSpace = {status: diskSpaceStatus, details: {diskSpaceMetaData}};
 
-        //kafka
-        string kafkaStatus = "DOWN";
-        kafka:TopicPartition[]|kafka:Error producerResult = conn:statePersistProducer->getTopicPartitions(config:REGISTERED_WEBSUB_TOPICS_TOPIC);
-        if (producerResult is kafka:TopicPartition[]) {
-            kafkaStatus = "UP";
+        //consolidator
+        string consolidatorStatus = "DOWN";
+        http:Client|http:ClientError clientEndpoint =  new (config:CONSOLIDATOR_BASE_URL);
+        if(clientEndpoint is http:ClientError){
+         log:printError(clientEndpoint.message());
+        }else{
+        healthcheck:HealthCheckResp|error consolidatorHealth =  clientEndpoint -> get(config:CONSOLIDATOR_HEALTH_ENDPOINT);
+        if(consolidatorHealth is healthcheck:HealthCheckResp){
+         consolidatorStatus = consolidatorHealth.status;
         }
-        healthcheck:HealthCheckResp kafkaHealth = {status: kafkaStatus, details: {}};
+        }
+        healthcheck:HealthCheckResp consolidatorSHealth = {status: consolidatorStatus, details: {}};
         //add to main map
         map<healthcheck:HealthCheckResp> details = {
             "diskSpace": diskSpace,
-            "kafka": kafkaHealth
+            "consolidator": consolidatorSHealth
         };
-
-        //main object
-        healthcheck:HealthCheckResp healthCheckResp = {status: "UP", details: {details}};
-        return healthCheckResp;
+        string resultStatus = "DOWN";
+        if(diskSpaceStatus == "UP" && consolidatorStatus == "UP"){
+            resultStatus = "UP";
+            healthcheck:HealthCheckResp healthCheckResp = {status: resultStatus, details: {details}};
+            http:Ok res = {body: healthCheckResp};
+            return res;
+        }
+        healthcheck:HealthCheckResp healthCheckResp = {status: resultStatus, details: {details}};
+        http:ServiceUnavailable res = {body: healthCheckResp};
+        return res;
     }
 };
 
