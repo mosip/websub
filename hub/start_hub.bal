@@ -24,6 +24,7 @@ import kafkaHub.connections as conn;
 import ballerina/mime;
 import kafkaHub.config;
 import kafkaHub.internal_topic_helper as internalTopicHelper;
+import ballerina/crypto;
 
 isolated map<websubhub:TopicRegistration> registeredTopicsCache = {};
 isolated map<websubhub:VerifiedSubscription> subscribersCache = {};
@@ -176,6 +177,15 @@ function startMissingSubscribers(websubhub:VerifiedSubscription[] persistedSubsc
             log:printInfo("Started Missing subscribers operation - new subscriber added to cache", topic = subscriber.hubTopic, callback = subscriber.hubCallback);
            string consumerGroup = check value:ensureType(subscriber["consumerGroup"]);
             kafka:Consumer consumerEp = check conn:createMessageConsumer(topicName, consumerGroup);
+           
+            if (subscriber.hubSecret is string) {
+                string hubSecret = <string>subscriber.hubSecret;
+                byte[] cipherText = hubSecret.toBytes();
+                string encryptionKey = config:HUB_SECRET_ENCRYPTION_KEY;
+                byte[] plainText = check crypto:decryptAesEcb(cipherText, encryptionKey.toBytes());
+                subscriber.hubSecret = check string:fromBytes(plainText);
+            }
+
             websubhub:HubClient hubClientEp = check new (subscriber, {
                 retryConfig: {
                     interval: config:MESSAGE_DELIVERY_RETRY_INTERVAL,
