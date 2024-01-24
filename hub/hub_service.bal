@@ -23,6 +23,7 @@ import kafkaHub.config;
 import kafkaHub.util;
 import kafkaHub.health_check as healthcheck;
 import ballerina/jballerina.java;
+import ballerina/crypto;
 
 http:Service healthCheckService = service object {
 
@@ -209,6 +210,15 @@ service object {
         log:printDebug("Subscription Intent verfication done", payload = message);
          string consumerGroup = util:generateGroupName(message.hubTopic, message.hubCallback);
         message["consumerGroup"] = consumerGroup;
+        
+        if (message.hubSecret is string) {
+            string hubSecret = <string> message.hubSecret;
+            byte[] data = hubSecret.toBytes();
+            string encryptionKey = config:HUB_SECRET_ENCRYPTION_KEY;
+            byte[] cipherText = check crypto:encryptAesEcb(data, encryptionKey.toBytes());
+            message.hubSecret = check string:fromBytes(cipherText);
+        }
+
         error? persistingResult = persist:addSubscription(message.cloneReadOnly());
         if persistingResult is error {
             log:printError("Error occurred while persisting the subscription ", err = persistingResult.message());
