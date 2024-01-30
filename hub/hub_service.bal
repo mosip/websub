@@ -174,9 +174,10 @@ service object {
         if config:SECURITY_ON {
             check security:authorizeSubscriber(headers, message.hubTopic);
         }
-        byte[] hash = crypto:hashSha256((<string> message.hubSecret).toBytes());
-        message.hubSecret = hash.toBase64();
+        string hubSecret = <string> message.hubSecret;
+        message.hubSecret = (crypto:hashSha256(hubSecret.toBytes())).toBase64();
         log:printInfo("Subscription request received", payload = message);
+        message.hubSecret = hubSecret;
         return websubhub:SUBSCRIPTION_ACCEPTED;
     }
 
@@ -201,9 +202,10 @@ service object {
             log:printError("Subscriber has already registered with the Hub", topic = topicName, callback = message.hubCallback);
             return error websubhub:SubscriptionDeniedError("Subscriber has already registered with the Hub");
         } else {
-            byte[] hash = crypto:hashSha256((<string> message.hubSecret).toBytes());
-            message.hubSecret = hash.toBase64();
+            string hubSecret = <string> message.hubSecret;
+            message.hubSecret = (crypto:hashSha256(hubSecret.toBytes())).toBase64();
             log:printInfo("Validation done before sending intent verification", payload = message);
+            message.hubSecret = hubSecret;
         }
     }
 
@@ -227,7 +229,9 @@ service object {
             }
             log:printInfo("Random generated iv value", iv = initialVector);
             byte[] cipherText = check crypto:encryptAesGcm(hubSecret.toBytes(), encryptionKey.toBytes(), initialVector);
+            log:printInfo("Encrypted cipher text value", cipher = cipherText);
             cipherText.push(...initialVector);
+            log:printInfo("Encrypted cipher after appending iv", cipher = cipherText);
             message.hubSecret = cipherText.toBase64();
         }
 
