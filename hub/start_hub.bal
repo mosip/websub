@@ -25,6 +25,7 @@ import ballerina/mime;
 import kafkaHub.config;
 import kafkaHub.internal_topic_helper as internalTopicHelper;
 import ballerina/crypto;
+import ballerina/lang.array;
 
 isolated map<websubhub:TopicRegistration> registeredTopicsCache = {};
 isolated map<websubhub:VerifiedSubscription> subscribersCache = {};
@@ -180,10 +181,16 @@ function startMissingSubscribers(websubhub:VerifiedSubscription[] persistedSubsc
            
             if (subscriber.hubSecret is string) {
                 string hubSecret = <string>subscriber.hubSecret;
-                byte[] cipherText = hubSecret.toBytes();
+                byte[] ivAppendedCipherText = check array:fromBase64(hubSecret);
+                int cipherLength = ivAppendedCipherText.length();
+                byte[] cipher = ivAppendedCipherText.slice(0, cipherLength-16);
+                byte[] iv = ivAppendedCipherText.slice(cipherLength-16, cipherLength);
+                log:printInfo("Extracted iv before decryption", iv = iv);
                 string encryptionKey = config:HUB_SECRET_ENCRYPTION_KEY;
-                byte[] plainText = check crypto:decryptAesEcb(cipherText, encryptionKey.toBytes());
+                log:printInfo("Key used for decryption", key = encryptionKey);
+                byte[] plainText = check crypto:decryptAesGcm(cipher, encryptionKey.toBytes(), iv);
                 subscriber.hubSecret = check string:fromBytes(plainText);
+                log:printInfo("secret after decryption", secret = subscriber.hubSecret);
             }
 
             websubhub:HubClient hubClientEp = check new (subscriber, {
