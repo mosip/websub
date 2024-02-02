@@ -103,3 +103,12 @@ public configurable string CONSOLIDATOR_BASE_URL = "http://websub-consolidator";
 
 # consolidator health endpoint
 public configurable string CONSOLIDATOR_HEALTH_ENDPOINT = "/consolidator/actuator/health";
+
+# Key for encryption and decryption of the hubsecret 
+public configurable string HUB_SECRET_ENCRYPTION_KEY = "g8caskkhrpvrp05l";
+
+# Prefix to the encrypted hubsecret for backward compatibility
+public configurable string ENCRYPTED_SECRET_PREFIX = "cipher{";
+
+# Suffix to the encrypted hubsecret for backward compatibility
+public configurable string ENCRYPTED_SECRET_SUFFIX = "}";
