@@ -95,7 +95,7 @@ isolated function startConsolidator() returns error? {
             kafka:ConsumerRecord[] records = check conn:websubEventConsumer->poll(config:POLLING_INTERVAL);
             foreach kafka:ConsumerRecord currentRecord in records {
                 string lastPersistedData = check string:fromBytes(currentRecord.value);
-                log:printInfo("websub event received in consolidator",payload=lastPersistedData);
+                log:printInfo("Websub event received in consolidator",payload=lastPersistedData);
                 error? result = processPersistedData(lastPersistedData);
                 if result is error {
                     log:printError("Error occurred while processing received event ", 'error = result);
