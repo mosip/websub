@@ -23,8 +23,6 @@ import kafkaHub.config;
 import kafkaHub.util;
 import kafkaHub.healthcheck;
 import ballerina/jballerina.java;
-import kafkaHub.connections as conn;
-import ballerinax/kafka;
 
 http:Service healthCheckService = service object {
 
