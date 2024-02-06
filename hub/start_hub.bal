@@ -43,14 +43,16 @@ public function main() returns error? {
             log:printInfo("found all metadata topics in kafka");
         }
     }
-    // Initialize the Hub
-    _ = @strand {thread: "any"} start syncRegsisteredTopicsCache();
-    _ = @strand {thread: "any"} start syncSubscribersCache();
 
     boolean|error validConfigs = validateConfigs();
     if validConfigs is error {
         return validConfigs;
     }
+    
+    // Initialize the Hub
+    _ = @strand {thread: "any"} start syncRegsisteredTopicsCache();
+    _ = @strand {thread: "any"} start syncSubscribersCache();
+
     // Start the Hub
     http:Listener httpListener = check new (config:HUB_PORT);
     check httpListener.attach(healthCheckService, "hub/actuator/health");
