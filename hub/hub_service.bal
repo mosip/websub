@@ -220,11 +220,12 @@ service object {
         if (message.hubSecret is string) {
             string hubSecret = <string> message.hubSecret;
             string encryptionKey = config:HUB_SECRET_ENCRYPTION_KEY;
+            byte[] encryptionKeyInBytes = (config:HUB_SECRET_ENCRYPTION_KEY_FORMAT).equalsIgnoreCaseAscii("base64-encoded-bytes") ? (check array:fromBase64(encryptionKey)) : encryptionKey.toBytes();
             byte[16] initialVector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
             foreach int i in 0...15 {
                 initialVector[i] = <byte>(check random:createIntInRange(0, 255));
             }
-            byte[] cipherText = check crypto:encryptAesGcm(hubSecret.toBytes(), encryptionKey.toBytes(), initialVector);
+            byte[] cipherText = check crypto:encryptAesGcm(hubSecret.toBytes(), encryptionKeyInBytes, initialVector);
             cipherText.push(...initialVector);
             message.hubSecret = config:ENCRYPTED_SECRET_PREFIX + cipherText.toBase64() + config:ENCRYPTED_SECRET_SUFFIX;
         }
