@@ -43,6 +43,12 @@ public function main() returns error? {
             log:printInfo("found all metadata topics in kafka");
         }
     }
+
+    boolean|error validConfigs = validateConfigs();
+    if validConfigs is error {
+        return validConfigs;
+    }
+
     // Initialize the Hub
     _ = @strand {thread: "any"} start syncRegsisteredTopicsCache();
     _ = @strand {thread: "any"} start syncSubscribersCache();
@@ -53,6 +59,18 @@ public function main() returns error? {
     websubhub:Listener hubListener = check new (httpListener);
     check hubListener.attach(hubService, "hub");
     check hubListener.'start();
+}
+
+
+function validateConfigs() returns boolean|error {
+    if (config:HUB_SECRET_ENCRYPTION_KEY_FORMAT.equalsIgnoreCaseAscii("base64-encoded-bytes")){
+       byte[]|error decodedEncryptionKey = array:fromBase64(config:HUB_SECRET_ENCRYPTION_KEY);
+       if (decodedEncryptionKey is byte[] && decodedEncryptionKey.length() == 32) {
+            return true;
+       } 
+       return error("Found error in decoding the encryption key. Please set valid base64 encoded bytes as encryption key to proceed.");
+    }
+    return true;
 }
 
 function syncRegsisteredTopicsCache() {

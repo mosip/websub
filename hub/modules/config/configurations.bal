@@ -107,6 +107,11 @@ public configurable string CONSOLIDATOR_HEALTH_ENDPOINT = "/consolidator/actuato
 # Key for encryption and decryption of the hubsecret 
 public configurable string HUB_SECRET_ENCRYPTION_KEY = "g8caskkhrpvrp05l";
 
+# Below config will allow base64-encoded-bytes / alpha-numeric.
+# Recommended to use base64-encoded-bytes since alpha-numeric is considered less secure. 
+# This is just given to ensure the backward compatiblity
+public configurable string HUB_SECRET_ENCRYPTION_KEY_FORMAT = "alpha-numeric";
+
 # Prefix to the encrypted hubsecret for backward compatibility
 public configurable string ENCRYPTED_SECRET_PREFIX = "cipher{";
 
