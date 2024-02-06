@@ -47,12 +47,28 @@ public function main() returns error? {
     _ = @strand {thread: "any"} start syncRegsisteredTopicsCache();
     _ = @strand {thread: "any"} start syncSubscribersCache();
 
+    boolean|error validConfigs = validateConfigs();
+    if validConfigs is error {
+        return validConfigs;
+    }
     // Start the Hub
     http:Listener httpListener = check new (config:HUB_PORT);
     check httpListener.attach(healthCheckService, "hub/actuator/health");
     websubhub:Listener hubListener = check new (httpListener);
     check hubListener.attach(hubService, "hub");
     check hubListener.'start();
+}
+
+function validateConfigs() returns boolean|error {
+    if (config:HUB_SECRET_ENCRYPTION_KEY_FORMAT.equalsIgnoreCaseAscii("base64-encoded-bytes")){
+       byte[] decodedEncryptionKey = check array:fromBase64(config:HUB_SECRET_ENCRYPTION_KEY);
+       log:printInfo("Length of decoded encryption key", keyLength = decodedEncryptionKey.length());
+       if (decodedEncryptionKey.length() == 32) {
+            return true;
+       } 
+       return error("Found error in decoding the encryption key. Please set valid base64 encoded bytes as encryption key to proceed.");
+    }
+    return true;
 }
 
 function syncRegsisteredTopicsCache() {

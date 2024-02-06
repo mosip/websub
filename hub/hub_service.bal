@@ -25,6 +25,7 @@ import kafkaHub.health_check as healthcheck;
 import ballerina/jballerina.java;
 import ballerina/crypto;
 import ballerina/random;
+import ballerina/lang.array;
 
 http:Service healthCheckService = service object {
 
@@ -220,19 +221,15 @@ service object {
         
         if (message.hubSecret is string) {
             string hubSecret = <string> message.hubSecret;
-            log:printInfo("Secret before Encryption", secret = hubSecret);
             string encryptionKey = config:HUB_SECRET_ENCRYPTION_KEY;
-            log:printInfo("Encryption of the hubsecret with configured key", encryptionKey = encryptionKey);
+            byte[] encryptionKeyInBytes = (config:HUB_SECRET_ENCRYPTION_KEY_FORMAT).equalsIgnoreCaseAscii("base64-encoded-bytes") ? (check array:fromBase64(encryptionKey)) : encryptionKey.toBytes();
             byte[16] initialVector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
             foreach int i in 0...15 {
                 initialVector[i] = <byte>(check random:createIntInRange(0, 255));
             }
-            log:printInfo("Random generated iv value", iv = initialVector);
-            byte[] cipherText = check crypto:encryptAesGcm(hubSecret.toBytes(), encryptionKey.toBytes(), initialVector);
-            log:printInfo("Encrypted cipher text value", cipher = cipherText);
+            byte[] cipherText = check crypto:encryptAesGcm(hubSecret.toBytes(), encryptionKeyInBytes, initialVector);
             cipherText.push(...initialVector);
-            log:printInfo("Encrypted cipher after appending iv", cipher = cipherText);
-            message.hubSecret = cipherText.toBase64();
+            message.hubSecret = config:ENCRYPTED_SECRET_PREFIX + cipherText.toBase64() + config:ENCRYPTED_SECRET_SUFFIX;
         }
 
         error? persistingResult = persist:addSubscription(message.cloneReadOnly());
