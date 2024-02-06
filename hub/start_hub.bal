@@ -24,6 +24,8 @@ import kafkaHub.connections as conn;
 import ballerina/mime;
 import kafkaHub.config;
 import kafkaHub.internal_topic_helper as internalTopicHelper;
+import ballerina/lang.array;
+import ballerina/crypto;
 
 isolated map<websubhub:TopicRegistration> registeredTopicsCache = {};
 isolated map<websubhub:VerifiedSubscription> subscribersCache = {};
@@ -41,6 +43,12 @@ public function main() returns error? {
             log:printInfo("found all metadata topics in kafka");
         }
     }
+
+    boolean|error validConfigs = validateConfigs();
+    if validConfigs is error {
+        return validConfigs;
+    }
+
     // Initialize the Hub
     _ = @strand {thread: "any"} start syncRegsisteredTopicsCache();
     _ = @strand {thread: "any"} start syncSubscribersCache();
@@ -51,6 +59,18 @@ public function main() returns error? {
     websubhub:Listener hubListener = check new (httpListener);
     check hubListener.attach(hubService, "hub");
     check hubListener.'start();
+}
+
+
+function validateConfigs() returns boolean|error {
+    if (config:HUB_SECRET_ENCRYPTION_KEY_FORMAT.equalsIgnoreCaseAscii("base64-encoded-bytes")){
+       byte[]|error decodedEncryptionKey = array:fromBase64(config:HUB_SECRET_ENCRYPTION_KEY);
+       if (decodedEncryptionKey is byte[] && decodedEncryptionKey.length() == 32) {
+            return true;
+       } 
+       return error("Found error in decoding the encryption key. Please set valid base64 encoded bytes as encryption key to proceed.");
+    }
+    return true;
 }
 
 function syncRegsisteredTopicsCache() {
@@ -176,6 +196,18 @@ function startMissingSubscribers(websubhub:VerifiedSubscription[] persistedSubsc
             log:printInfo("Started Missing subscribers operation - new subscriber added to cache", topic = subscriber.hubTopic, callback = subscriber.hubCallback);
            string consumerGroup = check value:ensureType(subscriber["consumerGroup"]);
             kafka:Consumer consumerEp = check conn:createMessageConsumer(topicName, consumerGroup);
+            if (subscriber.hubSecret is string && (<string>subscriber.hubSecret).startsWith(config:ENCRYPTED_SECRET_PREFIX) && (<string>subscriber.hubSecret).endsWith(config:ENCRYPTED_SECRET_SUFFIX)) {
+                string hubSecretWithPattern = <string> subscriber.hubSecret;
+                string hubSecret = hubSecretWithPattern.substring((config:ENCRYPTED_SECRET_PREFIX).length(), hubSecretWithPattern.length() - (config:ENCRYPTED_SECRET_SUFFIX).length());
+                byte[] ivAppendedCipherText = check array:fromBase64(hubSecret);
+                int cipherLength = ivAppendedCipherText.length();
+                byte[] cipher = ivAppendedCipherText.slice(0, cipherLength-16);
+                byte[] iv = ivAppendedCipherText.slice(cipherLength-16, cipherLength);
+                string encryptionKey = config:HUB_SECRET_ENCRYPTION_KEY;
+                byte[] plainText = check crypto:decryptAesGcm(cipher, encryptionKey.toBytes(), iv);
+                subscriber.hubSecret = check string:fromBytes(plainText);
+                log:printInfo("Decrypted the hubSecret", topic = subscriber.hubTopic);
+            }
             websubhub:HubClient hubClientEp = check new (subscriber, {
                 retryConfig: {
                     interval: config:MESSAGE_DELIVERY_RETRY_INTERVAL,
