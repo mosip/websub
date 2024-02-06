@@ -25,6 +25,7 @@ import kafkaHub.health_check as healthcheck;
 import ballerina/jballerina.java;
 import ballerina/crypto;
 import ballerina/random;
+import ballerina/lang.array;
 
 http:Service healthCheckService = service object {
 
