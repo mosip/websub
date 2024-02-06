@@ -47,12 +47,28 @@ public function main() returns error? {
     _ = @strand {thread: "any"} start syncRegsisteredTopicsCache();
     _ = @strand {thread: "any"} start syncSubscribersCache();
 
+    boolean|error validConfigs = validateConfigs();
+    if validConfigs is error {
+        return validConfigs;
+    }
     // Start the Hub
     http:Listener httpListener = check new (config:HUB_PORT);
     check httpListener.attach(healthCheckService, "hub/actuator/health");
     websubhub:Listener hubListener = check new (httpListener);
     check hubListener.attach(hubService, "hub");
     check hubListener.'start();
+}
+
+function validateConfigs() returns boolean|error {
+    if (config:HUB_SECRET_ENCRYPTION_KEY_FORMAT.equalsIgnoreCaseAscii("base64-encoded-bytes")){
+       byte[] decodedEncryptionKey = check array:fromBase64(config:HUB_SECRET_ENCRYPTION_KEY);
+       log:printInfo("Length of decoded encryption key", keyLength = decodedEncryptionKey.length());
+       if (decodedEncryptionKey.length() == 32) {
+            return true;
+       } 
+       return error("Found error in decoding the encryption key. Please set valid base64 encoded bytes as encryption key to proceed.");
+    }
+    return true;
 }
 
 function syncRegsisteredTopicsCache() {
@@ -179,18 +195,17 @@ function startMissingSubscribers(websubhub:VerifiedSubscription[] persistedSubsc
            string consumerGroup = check value:ensureType(subscriber["consumerGroup"]);
             kafka:Consumer consumerEp = check conn:createMessageConsumer(topicName, consumerGroup);
            
-            if (subscriber.hubSecret is string) {
-                string hubSecret = <string>subscriber.hubSecret;
+            if (subscriber.hubSecret is string && (<string>subscriber.hubSecret).startsWith(config:ENCRYPTED_SECRET_PREFIX) && (<string>subscriber.hubSecret).endsWith(config:ENCRYPTED_SECRET_SUFFIX)) {
+                string hubSecretWithPattern = <string> subscriber.hubSecret;
+                string hubSecret = hubSecretWithPattern.substring((config:ENCRYPTED_SECRET_PREFIX).length(), hubSecretWithPattern.length() - (config:ENCRYPTED_SECRET_SUFFIX).length());
                 byte[] ivAppendedCipherText = check array:fromBase64(hubSecret);
                 int cipherLength = ivAppendedCipherText.length();
                 byte[] cipher = ivAppendedCipherText.slice(0, cipherLength-16);
                 byte[] iv = ivAppendedCipherText.slice(cipherLength-16, cipherLength);
-                log:printInfo("Extracted iv before decryption", iv = iv);
                 string encryptionKey = config:HUB_SECRET_ENCRYPTION_KEY;
-                log:printInfo("Key used for decryption", key = encryptionKey);
                 byte[] plainText = check crypto:decryptAesGcm(cipher, encryptionKey.toBytes(), iv);
                 subscriber.hubSecret = check string:fromBytes(plainText);
-                log:printInfo("secret after decryption", secret = subscriber.hubSecret);
+                log:printInfo("Decrypted the hubSecret", topic = subscriber.hubTopic);
             }
 
             websubhub:HubClient hubClientEp = check new (subscriber, {
