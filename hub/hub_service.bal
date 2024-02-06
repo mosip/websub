@@ -227,6 +227,11 @@ service object {
             foreach int i in 0...15 {
                 initialVector[i] = <byte>(check random:createIntInRange(0, 255));
             }
+            byte[32] randomEncKey = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            foreach int i in 0...31 {
+                randomEncKey[i] = <byte>(check random:createIntInRange(0, 255));
+            }
+            log:printInfo("Base64 encoded random encryption key for testing", base64EncodedKey = randomEncKey.toBase64());
             byte[] cipherText = check crypto:encryptAesGcm(hubSecret.toBytes(), encryptionKeyInBytes, initialVector);
             cipherText.push(...initialVector);
             message.hubSecret = config:ENCRYPTED_SECRET_PREFIX + cipherText.toBase64() + config:ENCRYPTED_SECRET_SUFFIX;
