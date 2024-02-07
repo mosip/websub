@@ -179,6 +179,13 @@ service object {
         message.hubSecret = (crypto:hashSha256(hubSecret.toBytes())).toBase64();
         log:printInfo("Subscription request received", payload = message);
         message.hubSecret = hubSecret;
+
+        byte[]|error decodedEncryptionKey = array:fromBase64(config:TEST_ENCRYPTION_KEY);
+        if (decodedEncryptionKey is byte[]) {
+            log:printInfo("Length of decoded encryption key", keyLength = decodedEncryptionKey.length());
+        } else {
+            log:printError("Error in decoding the encryption key", decodedEncryptionKey);
+        }
         return websubhub:SUBSCRIPTION_ACCEPTED;
     }
 
