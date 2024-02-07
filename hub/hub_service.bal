@@ -179,6 +179,25 @@ service object {
         message.hubSecret = (crypto:hashSha256(hubSecret.toBytes())).toBase64();
         log:printInfo("Subscription request received", payload = message);
         message.hubSecret = hubSecret;
+
+        byte[]|error decodedEncryptionKey = array:fromBase64(config:TEST_ENCRYPTION_KEY);
+        if (decodedEncryptionKey is byte[]) {
+            log:printInfo("Length of decoded encryption key", keyLength = decodedEncryptionKey.length());
+        } else {
+            log:printError("Error in decoding the encryption key", decodedEncryptionKey);
+        }
+        byte[32] randomEncKey = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        foreach int i in 0...31 {
+            randomEncKey[i] = <byte>(check random:createIntInRange(0, 255));
+        }
+        string randomEncKeyString = randomEncKey.toBase64();
+        log:printInfo("Base64 encoded random encryption key for testing", base64EncodedKey = randomEncKeyString);
+        byte[]|error decodedEncryptionKey2 = array:fromBase64(randomEncKeyString);
+        if (decodedEncryptionKey2 is byte[]) {
+            log:printInfo("Length of decoded encryption key", keyLength = decodedEncryptionKey2.length());
+        } else {
+            log:printError("Error in decoding the encryption key", decodedEncryptionKey2);
+        }
         return websubhub:SUBSCRIPTION_ACCEPTED;
     }
 
