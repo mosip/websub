@@ -186,6 +186,18 @@ service object {
         } else {
             log:printError("Error in decoding the encryption key", decodedEncryptionKey);
         }
+        byte[32] randomEncKey = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        foreach int i in 0...31 {
+            randomEncKey[i] = <byte>(check random:createIntInRange(0, 255));
+        }
+        string randomEncKeyString = randomEncKey.toBase64();
+        log:printInfo("Base64 encoded random encryption key for testing", base64EncodedKey = randomEncKeyString);
+        byte[]|error decodedEncryptionKey2 = array:fromBase64(randomEncKeyString);
+        if (decodedEncryptionKey2 is byte[]) {
+            log:printInfo("Length of decoded encryption key", keyLength = decodedEncryptionKey2.length());
+        } else {
+            log:printError("Error in decoding the encryption key", decodedEncryptionKey2);
+        }
         return websubhub:SUBSCRIPTION_ACCEPTED;
     }
 
