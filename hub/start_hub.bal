@@ -50,7 +50,7 @@ public function main() returns error? {
     }
 
     // Initialize the Hub
-    _ = @strand {thread: "any"} start syncRegsisteredTopicsCache();
+    syncRegsisteredTopicsCache();
     _ = @strand {thread: "any"} start syncSubscribersCache();
 
     // Start the Hub
