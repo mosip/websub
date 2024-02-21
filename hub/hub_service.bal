@@ -23,6 +23,8 @@ import kafkaHub.config;
 import kafkaHub.util;
 import kafkaHub.health_check as healthcheck;
 import ballerina/jballerina.java;
+import ballerina/crypto;
+import ballerina/random;
 
 http:Service healthCheckService = service object {
 
@@ -172,7 +174,10 @@ service object {
         if config:SECURITY_ON {
             check security:authorizeSubscriber(headers, message.hubTopic);
         }
+        string hubSecret = <string> message.hubSecret;
+        message.hubSecret = (crypto:hashSha256(hubSecret.toBytes())).toBase64();
         log:printInfo("Subscription request received", payload = message);
+        message.hubSecret = hubSecret;
         return websubhub:SUBSCRIPTION_ACCEPTED;
     }
 
@@ -197,7 +202,10 @@ service object {
             log:printError("Subscriber has already registered with the Hub", topic = topicName, callback = message.hubCallback);
             return error websubhub:SubscriptionDeniedError("Subscriber has already registered with the Hub");
         } else {
+            string hubSecret = <string> message.hubSecret;
+            message.hubSecret = (crypto:hashSha256(hubSecret.toBytes())).toBase64();
             log:printInfo("Validation done before sending intent verification", payload = message);
+            message.hubSecret = hubSecret;
         }
     }
 
@@ -209,6 +217,18 @@ service object {
         log:printDebug("Subscription Intent verfication done", payload = message);
          string consumerGroup = util:generateGroupName(message.hubTopic, message.hubCallback);
         message["consumerGroup"] = consumerGroup;
+        if (message.hubSecret is string) {
+            string hubSecret = <string> message.hubSecret;
+            string encryptionKey = config:HUB_SECRET_ENCRYPTION_KEY;
+            byte[] encryptionKeyInBytes = (config:HUB_SECRET_ENCRYPTION_KEY_FORMAT).equalsIgnoreCaseAscii("base64-encoded-bytes") ? (check array:fromBase64(encryptionKey)) : encryptionKey.toBytes();
+            byte[16] initialVector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            foreach int i in 0...15 {
+                initialVector[i] = <byte>(check random:createIntInRange(0, 255));
+            }
+            byte[] cipherText = check crypto:encryptAesGcm(hubSecret.toBytes(), encryptionKeyInBytes, initialVector);
+            cipherText.push(...initialVector);
+            message.hubSecret = config:ENCRYPTED_SECRET_PREFIX + cipherText.toBase64() + config:ENCRYPTED_SECRET_SUFFIX;
+        }
         error? persistingResult = persist:addSubscription(message.cloneReadOnly());
         if persistingResult is error {
             log:printError("Error occurred while persisting the subscription ", err = persistingResult.message());
