@@ -29,6 +29,6 @@ RUN wget -q --show-progress ${ballerina_download_url} -O ballerina-linux-install
 && dpkg -i ballerina-linux-installer-x64.deb \
 && chown -R ${container_user}:${container_user} /home/${container_user}
 #TODO Link to be parameterized instead of hardcoding
-USER ${container_user}
+USER ${container_user_uid}:${container_user_gid}
 CMD wget -q --show-progress "${consolidator_config_file_url_env}" -O Config.toml;\
      java -jar -Xms256m -Xmx${max_heap_size} ./consolidator.jar ;
