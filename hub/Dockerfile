@@ -29,4 +29,4 @@ RUN wget -q --show-progress ${ballerina_download_url} -O ballerina-linux-install
     && chown -R ${container_user}:${container_user} /home/${container_user} \
     && usermod -u ${container_user_uid} ${container_user} \
     && groupmod -g ${container_user_gid} ${container_user}
-USER ${container_user}
+USER ${container_user_uid}:${container_user_gid}
