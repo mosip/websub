@@ -125,7 +125,7 @@ jobs:
 
   build-consolidator-dockers:
     needs: build-consolidator
-    uses: mosip/kattu/.github/workflows/docker-build.yml@master
+    uses: abhishek8shankar/kattu/.github/workflows/docker-build.yml@develop
     with:
       SERVICE_LOCATION: 'consolidator'
       SERVICE_NAME: 'consolidator-websub-service'
@@ -193,7 +193,7 @@ jobs:
 
   build-websub-dockers:
     needs: build-websub
-    uses: mosip/kattu/.github/workflows/docker-build.yml@master
+    uses: abhishek8shankar/kattu/.github/workflows/docker-build.yml@develop
     with:
       SERVICE_LOCATION: 'hub'
       SERVICE_NAME: 'websub-service'
