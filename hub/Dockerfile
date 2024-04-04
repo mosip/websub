@@ -12,6 +12,7 @@ LABEL source=${SOURCE}
 LABEL commit_hash=${COMMIT_HASH}
 LABEL commit_id=${COMMIT_ID}
 LABEL build_time=${BUILD_TIME}
+LABEL max_heap_size=${MAX_HEAP_SIZE}
 ARG hub_config_url
 ARG max_heap_size=2048m
 ARG ballerina_download_url=https://dist.ballerina.io/downloads/2201.0.0/ballerina-2201.0.0-swan-lake-linux-x64.deb
