@@ -12,11 +12,14 @@ LABEL source=${SOURCE}
 LABEL commit_hash=${COMMIT_HASH}
 LABEL commit_id=${COMMIT_ID}
 LABEL build_time=${BUILD_TIME}
-LABEL max_heap_size=${MAX_HEAP_SIZE}
 ARG consolidator_config_url
 ARG max_heap_size=2048m
+ARG min_heap_size=256m
 ARG ballerina_download_url=https://dist.ballerina.io/downloads/2201.0.0/ballerina-2201.0.0-swan-lake-linux-x64.deb
 ENV consolidator_config_file_url_env=${consolidator_config_url}
+ENV max_heap_size=${MAX_HEAP_SIZE}
+ENV min_heap_size=${MIN_HEAP_SIZE}
+
 
 WORKDIR /home/${container_user}
 
@@ -30,4 +33,4 @@ RUN groupadd -r -g ${container_user_gid} ${container_user_group} \
 #TODO Link to be parameterized instead of hardcoding
 USER ${container_user_uid}:${container_user_gid}
 CMD wget -q --show-progress "${consolidator_config_file_url_env}" -O Config.toml;\
-     java -jar -Xms256m -Xmx${max_heap_size} ./consolidator.jar ;
+     java -jar -Xms${min_heap_size} -Xmx${max_heap_size} ./consolidator.jar ;
