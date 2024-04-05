@@ -12,11 +12,13 @@ LABEL source=${SOURCE}
 LABEL commit_hash=${COMMIT_HASH}
 LABEL commit_id=${COMMIT_ID}
 LABEL build_time=${BUILD_TIME}
-LABEL max_heap_size=${MAX_HEAP_SIZE}
 ARG hub_config_url
 ARG max_heap_size=2048m
+ARG min_heap_size=256m
 ARG ballerina_download_url=https://dist.ballerina.io/downloads/2201.0.0/ballerina-2201.0.0-swan-lake-linux-x64.deb
 ENV hub_config_file_url_env=${hub_config_url}
+ENV max_heap_size=${MAX_HEAP_SIZE}
+ENV min_heap_size=${MIN_HEAP_SIZE}
 
 WORKDIR /home/${container_user}
 
