@@ -1,25 +1,31 @@
 FROM openjdk:11
 
-ARG SOURCE
-ARG COMMIT_HASH
-ARG COMMIT_ID
-ARG BUILD_TIME
-ARG container_user=mosip
-ARG container_user_group=mosip
-ARG container_user_uid=1001
-ARG container_user_gid=1001
-LABEL source=${SOURCE}
-LABEL commit_hash=${COMMIT_HASH}
-LABEL commit_id=${COMMIT_ID}
-LABEL build_time=${BUILD_TIME}
 ARG consolidator_config_url
 ARG max_heap_size=2048m
 ARG min_heap_size=256m
 ARG ballerina_download_url=https://dist.ballerina.io/downloads/2201.0.0/ballerina-2201.0.0-swan-lake-linux-x64.deb
+
+# can be passed during Docker build as build time environment variable for mosip user level change.
+ARG container_user=mosip
+ARG container_user_group=mosip
+ARG container_user_uid=1001
+ARG container_user_gid=1001
+
+# can be passed during Docker build as build time environment for label related addition to docker.
+ARG SOURCE
+ARG COMMIT_HASH
+ARG COMMIT_ID
+ARG BUILD_TIME
+
 ENV consolidator_config_file_url_env=${consolidator_config_url}
 ENV max_heap_size=${max_heap_size}
 ENV min_heap_size=${min_heap_size}
 
+# can be passed during Docker build as build time environment for label.
+LABEL source=${SOURCE}
+LABEL commit_hash=${COMMIT_HASH}
+LABEL commit_id=${COMMIT_ID}
+LABEL build_time=${BUILD_TIME}
 
 WORKDIR /home/${container_user}
 
