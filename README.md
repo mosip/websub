@@ -1,6 +1,6 @@
 # Websub
-[![Ballerina Build and push](https://github.com/mosip/websub/actions/workflows/push_trigger.yml/badge.svg?branch=release-1.2.0.1)](https://github.com/mosip/websub/actions/workflows/push_trigger.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=release-1.2.0.1&project=mosip_websub&metric=alert_status)](https://sonarcloud.io/dashboard?branch=release-1.2.0.1&id=mosip_websub)
+[![Ballerina Build and push](https://github.com/mosip/websub/actions/workflows/push_trigger.yml/badge.svg?branch=develop)](https://github.com/mosip/websub/actions/workflows/push_trigger.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=develop&project=mosip_websub&metric=alert_status)](https://sonarcloud.io/dashboard?branch=develop&id=mosip_websub)
 
 ## Overview
 For an overview of Websub refer [MOSIP Docs](https://nayakrounak.gitbook.io/mosip-docs/modules/websub).
