@@ -6,7 +6,7 @@ version = "1.2.1-java21-SNAPSHOT"
 [build-options]
 observabilityIncluded = true
 
-[[platform.java21.dependency]]
+[[platform.java17.dependency]]
 modules = ["inittopic"]
 groupId = "io.mosip"
 artifactId = "kafka-admin-client"
