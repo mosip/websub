@@ -123,7 +123,7 @@ service object {
         lock {
             if registeredTopicsCache.hasKey(topicName) {
                 log:printError("Topic has already registered with the Hub", topic = topicName);
-                return error websubhub:TopicRegistrationError("Topic has already registered with the Hub");
+                return error websubhub:TopicRegistrationError("Topic has already registered with the Hub", statusCode = http:STATUS_OK);
             }
             log:printDebug("Registering topic", topic = topicName);
             error? persistingResult = persist:addRegsiteredTopic(message.cloneReadOnly());
@@ -154,7 +154,7 @@ service object {
         string topicName = util:sanitizeTopicName(message.topic);
         lock {
             if !registeredTopicsCache.hasKey(topicName) {
-                return error websubhub:TopicDeregistrationError("Topic has not been registered in the Hub");
+                return error websubhub:TopicDeregistrationError("Topic has not been registered in the Hub", statusCode = http:STATUS_OK);
             }
             log:printInfo("Running topic de-registration", payload = message);
             error? persistingResult = persist:removeRegsiteredTopic(message.cloneReadOnly());
@@ -192,7 +192,7 @@ service object {
         string topicName = util:sanitizeTopicName(message.hubTopic);
         error? topicRegistrationFailed = self.createTopicIFNotExist(topicName, message.hubCallback);
         if (topicRegistrationFailed is error) {
-            return error websubhub:SubscriptionDeniedError(topicRegistrationFailed.message());
+            return error websubhub:SubscriptionDeniedError(topicRegistrationFailed.message(), statusCode = http:STATUS_OK);
         }
         string subscriberId = util:generateSubscriberId(message.hubTopic, message.hubCallback);
         boolean subscriberAvailable = false;
@@ -201,7 +201,7 @@ service object {
         }
         if subscriberAvailable {
             log:printError("Subscriber has already registered with the Hub", topic = topicName, callback = message.hubCallback);
-            return error websubhub:SubscriptionDeniedError("Subscriber has already registered with the Hub");
+            return error websubhub:SubscriptionDeniedError("Subscriber has already registered with the Hub", statusCode = http:STATUS_OK);
         } else {
             string hubSecret = <string> message.hubSecret;
             message.hubSecret = (crypto:hashSha256(hubSecret.toBytes())).toBase64();
@@ -265,7 +265,7 @@ service object {
             topicAvailable = registeredTopicsCache.hasKey(topicName);
         }
         if !topicAvailable {
-            return error websubhub:UnsubscriptionDeniedError("Topic [" + message.hubTopic + "] is not registered with the Hub");
+            return error websubhub:UnsubscriptionDeniedError("Topic [" + message.hubTopic + "] is not registered with the Hub", statusCode = http:STATUS_OK);
         } else {
            string subscriberId = util:generateSubscriberId(message.hubTopic, message.hubCallback);
             lock {
@@ -273,7 +273,7 @@ service object {
             }
             if !subscriberAvailable {
                 return error websubhub:UnsubscriptionDeniedError("Could not find a valid subscriber for Topic ["
-                                + message.hubTopic + "] and Callback [" + message.hubCallback + "]");
+                                + message.hubTopic + "] and Callback [" + message.hubCallback + "]", statusCode = http:STATUS_OK);
             }
         }
         log:printInfo("Validation done a incomming Unsubscription request", payload = message);
@@ -310,7 +310,7 @@ service object {
         string topicName = util:sanitizeTopicName(msg.hubTopic);
         error? topicIFNotExist = self.createTopicIFNotExist(topicName, "null");
         if (topicIFNotExist is error) {
-            return error websubhub:UpdateMessageError(topicIFNotExist.message());
+            return error websubhub:UpdateMessageError(topicIFNotExist.message(), statusCode = http:STATUS_OK);
         }
         log:printDebug("Received publish message", topic = msg.hubTopic, message = msg.cloneReadOnly());
         error? errorResponse = persist:addUpdateMessage(topicName, msg);
@@ -320,7 +320,7 @@ service object {
             return errorResponse;
         } else if errorResponse is error {
             log:printError("Error occurred while publishing the content ", errorMessage = errorResponse.message(), topic = topicName);
-            return error websubhub:UpdateMessageError(errorResponse.message());
+            return error websubhub:UpdateMessageError(errorResponse.message(), statusCode = http:STATUS_OK);
         }
 
     }
