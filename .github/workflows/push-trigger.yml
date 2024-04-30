@@ -9,7 +9,7 @@ on:
       - '!release-branch'
       - release-1*
       - 1.*
-      - develop
+      - develop*
       - MOSIP*
   workflow_dispatch:
     inputs:
@@ -24,12 +24,12 @@ on:
       - release-1*
       - master
       - 1.*
-      - develop
+      - develop*
       - MOSIP*
 
 jobs:
   build-kafka-admin-client:
-    uses: mosip/kattu/.github/workflows/maven-build.yml@master
+    uses: mosip/kattu/.github/workflows/maven-build.yml@master-java21
     with:
       SERVICE_LOCATION: ./kafka-admin-client
       BUILD_ARTIFACT: kafka-admin-client
@@ -43,7 +43,7 @@ jobs:
   publish-to-nexus-kafka-admin-client:
     if: "${{ !contains(github.ref, 'master') && github.event_name != 'pull_request' && github.event_name != 'release' && github.event_name != 'prerelease' && github.event_name != 'publish' }}"
     needs: build-kafka-admin-client
-    uses: mosip/kattu/.github/workflows/maven-publish-to-nexus.yml@master
+    uses: mosip/kattu/.github/workflows/maven-publish-to-nexus.yml@master-java21
     with:
       SERVICE_LOCATION: ./kafka-admin-client
     secrets:
@@ -57,7 +57,7 @@ jobs:
   sonar-analysis-kafka-admin-client:
     needs: build-kafka-admin-client
     if: "${{ github.event_name != 'pull_request' }}"
-    uses: mosip/kattu/.github/workflows/maven-sonar-analysis.yml@master
+    uses: mosip/kattu/.github/workflows/maven-sonar-analysis.yml@master-java21
     with:
       SERVICE_LOCATION: ./kafka-admin-client
       PROJECT_KEY: 'mosip_kafka-admin-client'
@@ -97,7 +97,7 @@ jobs:
           echo "GPG_TTY=$(tty)" >> $GITHUB_ENV
       - name: Install ballerina
         run: |
-          wget -q --show-progress https://dist.ballerina.io/downloads/2201.0.0/ballerina-2201.0.0-swan-lake-linux-x64.deb -O ballerina-linux-installer-x64.deb
+          wget -q --show-progress https://dist.ballerina.io/downloads/2201.8.6/ballerina-2201.8.6-swan-lake-linux-x64.deb -O ballerina-linux-installer-x64.deb
           sudo dpkg -i ballerina-linux-installer-x64.deb
       - name: Hub-service build
         run: |
@@ -125,7 +125,7 @@ jobs:
 
   build-consolidator-dockers:
     needs: build-consolidator
-    uses: mosip/kattu/.github/workflows/docker-build.yml@master
+    uses: mosip/kattu/.github/workflows/docker-build.yml@master-java21
     with:
       SERVICE_LOCATION: 'consolidator'
       SERVICE_NAME: 'consolidator-websub-service'
@@ -193,7 +193,7 @@ jobs:
 
   build-websub-dockers:
     needs: build-websub
-    uses: mosip/kattu/.github/workflows/docker-build.yml@master
+    uses: mosip/kattu/.github/workflows/docker-build.yml@master-java21
     with:
       SERVICE_LOCATION: 'hub'
       SERVICE_NAME: 'websub-service'
