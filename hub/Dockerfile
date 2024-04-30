@@ -1,4 +1,4 @@
-FROM openjdk:21
+FROM eclipse-temurin:21-jre-alpine
 ARG SOURCE
 ARG COMMIT_HASH
 ARG COMMIT_ID
@@ -9,7 +9,7 @@ LABEL commit_id=${COMMIT_ID}
 LABEL build_time=${BUILD_TIME}
 ARG hub_config_url
 ARG max_heap_size=2048m
-ARG ballerina_download_url=https://dist.ballerina.io/downloads/2201.0.0/ballerina-2201.0.0-swan-lake-linux-x64.deb
+ARG ballerina_download_url=https://dist.ballerina.io/downloads/2201.8.6/ballerina-2201.8.6-swan-lake-linux-x64.deb
 ENV hub_config_file_url_env=${hub_config_url}
 COPY ./target/bin/*.jar hub.jar
 EXPOSE 9191
