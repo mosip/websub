@@ -1,14 +1,14 @@
 [package]
 org = "mosip"
 name = "consolidatorService"
-version = "1.2.1-java21-SNAPSHOT"
+version = "1.2.1-java17-SNAPSHOT"
 
 [build-options]
 observabilityIncluded = true
 
-[[platform.java21.dependency]]
+[[platform.java17.dependency]]
 modules = ["inittopic"]
 groupId = "io.mosip"
 artifactId = "kafka-admin-client"
-version = "1.2.1-java21-SNAPSHOT"
-path = "kafka-admin-client/target/kafka-admin-client-1.2.1-java21-SNAPSHOT.jar"
+version = "1.2.1-java17-SNAPSHOT"
+path = "kafka-admin-client/target/kafka-admin-client-1.2.1-java17-SNAPSHOT.jar"

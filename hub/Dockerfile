@@ -1,4 +1,5 @@
-FROM eclipse-temurin:21-jre-alpine
+FROM mosipdev/openjdk-17-jre:latest
+
 ARG SOURCE
 ARG COMMIT_HASH
 ARG COMMIT_ID
@@ -7,6 +8,7 @@ LABEL source=${SOURCE}
 LABEL commit_hash=${COMMIT_HASH}
 LABEL commit_id=${COMMIT_ID}
 LABEL build_time=${BUILD_TIME}
+
 ARG hub_config_url
 ARG max_heap_size=2048m
 ARG ballerina_download_url=https://dist.ballerina.io/downloads/2201.8.6/ballerina-2201.8.6-swan-lake-linux-x64.deb
