@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jre-alpine
+FROM openjdk:17
 ARG SOURCE
 ARG COMMIT_HASH
 ARG COMMIT_ID
@@ -13,7 +13,6 @@ ARG ballerina_download_url=https://dist.ballerina.io/downloads/2201.8.6/ballerin
 ENV hub_config_file_url_env=${hub_config_url}
 COPY ./target/bin/*.jar hub.jar
 EXPOSE 9191
-RUN apk add -q wget dpkg zstd
 RUN wget -q --show-progress ${ballerina_download_url} -O ballerina-linux-installer-x64.deb
 RUN dpkg -i ballerina-linux-installer-x64.deb
 #TODO Link to be parameterized instead of hardcoding
