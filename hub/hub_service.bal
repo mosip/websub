@@ -91,7 +91,7 @@ isolated function getTotalSpace(handle fileObj) returns int = @java:Method {
     'class: "java.io.File"
 } external;
 
-websubhub:Service hubService = @websubhub:ServiceConfig { 
+websubhub:Service hubService = @websubhub:ServiceConfig {
     webHookConfig: {
         retryConfig: {
             interval: config:INTENT_VERIFICATION_RETRY_INTERVAL,
@@ -287,7 +287,7 @@ service object {
         var persistingResult = persist:removeSubscription(message.cloneReadOnly());
         if (persistingResult is error) {
             log:printError("Error occurred while persisting the unsubscription ", err = persistingResult.message());
-        } 
+        }
     }
 
     # Publishes content to the hub.
@@ -347,4 +347,3 @@ service object {
     }
 
 };
-
