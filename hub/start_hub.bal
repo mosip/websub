@@ -197,7 +197,7 @@ function startMissingSubscribers(websubhub:VerifiedSubscription[] persistedSubsc
            string consumerGroup = check value:ensureType(subscriber["consumerGroup"]);
             kafka:Consumer consumerEp = check conn:createMessageConsumer(topicName, consumerGroup);
             if (subscriber.hubSecret is string && (<string>subscriber.hubSecret).startsWith(config:ENCRYPTED_SECRET_PREFIX) && (<string>subscriber.hubSecret).endsWith(config:ENCRYPTED_SECRET_SUFFIX)) {
-                string hubSecretWithPattern = <string> subscriber.hubSecret;,
+                string hubSecretWithPattern = <string> subscriber.hubSecret;
                 log:printInfo("Hubsecret before decryption", hubSecret = hubSecretWithPattern);
                 string hubSecret = hubSecretWithPattern.substring((config:ENCRYPTED_SECRET_PREFIX).length(), hubSecretWithPattern.length() - (config:ENCRYPTED_SECRET_SUFFIX).length());
                 byte[] ivAppendedCipherText = check array:fromBase64(hubSecret);
