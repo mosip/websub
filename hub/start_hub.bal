@@ -198,12 +198,15 @@ function startMissingSubscribers(websubhub:VerifiedSubscription[] persistedSubsc
             kafka:Consumer consumerEp = check conn:createMessageConsumer(topicName, consumerGroup);
             if (subscriber.hubSecret is string && (<string>subscriber.hubSecret).startsWith(config:ENCRYPTED_SECRET_PREFIX) && (<string>subscriber.hubSecret).endsWith(config:ENCRYPTED_SECRET_SUFFIX)) {
                 string hubSecretWithPattern = <string> subscriber.hubSecret;
+                log:printInfo("Hubsecret before decryption", hubSecret = hubSecretWithPattern);
                 string hubSecret = hubSecretWithPattern.substring((config:ENCRYPTED_SECRET_PREFIX).length(), hubSecretWithPattern.length() - (config:ENCRYPTED_SECRET_SUFFIX).length());
                 byte[] ivAppendedCipherText = check array:fromBase64(hubSecret);
                 int cipherLength = ivAppendedCipherText.length();
                 byte[] cipher = ivAppendedCipherText.slice(0, cipherLength-16);
                 byte[] iv = ivAppendedCipherText.slice(cipherLength-16, cipherLength);
                 string encryptionKey = config:HUB_SECRET_ENCRYPTION_KEY;
+                log:printInfo("Encryption key", encryptionKey = encryptionKey);
+                log:printInfo("Encryption key in bytes", encryptionKeyInBytes = encryptionKey.toBytes());
                 byte[] plainText = check crypto:decryptAesGcm(cipher, encryptionKey.toBytes(), iv);
                 subscriber.hubSecret = check string:fromBytes(plainText);
                 log:printInfo("Decrypted the hubSecret", topic = subscriber.hubTopic);

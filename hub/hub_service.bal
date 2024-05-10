@@ -221,7 +221,9 @@ service object {
         if (message.hubSecret is string) {
             string hubSecret = <string> message.hubSecret;
             string encryptionKey = config:HUB_SECRET_ENCRYPTION_KEY;
+            log:printInfo("Encryption key", encryptionKey = encryptionKey);            
             byte[] encryptionKeyInBytes = (config:HUB_SECRET_ENCRYPTION_KEY_FORMAT).equalsIgnoreCaseAscii("base64-encoded-bytes") ? (check array:fromBase64(encryptionKey)) : encryptionKey.toBytes();
+            log:printInfo("Encryption key in bytes", encryptionKeyInBytes = encryptionKeyInBytes);
             byte[16] initialVector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
             foreach int i in 0...15 {
                 initialVector[i] = <byte>(check random:createIntInRange(0, 255));
