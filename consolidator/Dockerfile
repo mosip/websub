@@ -11,7 +11,7 @@ LABEL build_time=${BUILD_TIME}
 
 ARG consolidator_config_url
 ARG max_heap_size=2048m
-ARG ballerina_download_url=https://dist.ballerina.io/downloads/2201.8.6/ballerina-2201.8.6-swan-lake-linux-x64.deb
+ARG ballerina_download_url=https://dist.ballerina.io/downloads/2201.9.0/ballerina-2201.9.0-swan-lake-linux-x64.deb
 ENV consolidator_config_file_url_env=${consolidator_config_url}
 COPY ./target/bin/*.jar consolidator.jar
 EXPOSE 9192
