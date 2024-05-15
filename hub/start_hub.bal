@@ -94,6 +94,7 @@ function syncRegsisteredTopicsCache() {
             log:printError("Error occurred while gracefully closing kafka-consumer", err = result.message());
         }
     }
+    log:printInfo("Exiting syncRegisteredTopicsCache method...");
 }
 
 function getPersistedTopics() returns websubhub:TopicRegistration[]|error? {
@@ -109,6 +110,7 @@ function getPersistedTopics() returns websubhub:TopicRegistration[]|error? {
             return lastPersistedData;
         }
     }
+    log:printInfo("Exiting getPersistedTopics method...");
     return;
 }
 
@@ -120,6 +122,7 @@ function deSerializeTopicsMessage(string lastPersistedData) returns websubhub:To
         websubhub:TopicRegistration topic = check data.cloneWithType(websubhub:TopicRegistration);
         currentTopics.push(topic);
     }
+    log:printInfo("Exiting deSerializeTopicsMessage method...");
     return currentTopics;
 }
 
@@ -134,6 +137,7 @@ function refreshTopicCache(websubhub:TopicRegistration[] persistedTopics) {
             registeredTopicsCache[topicName] = topic.cloneReadOnly();
         }
     }
+    log:printInfo("Exiting refreshTopicCache method...");
 }
 
 function syncSubscribersCache() {
@@ -154,6 +158,7 @@ function syncSubscribersCache() {
             log:printError("Error occurred while gracefully closing kafka-consumer", err = result.message());
         }
     }
+    log:printInfo("Exiting syncSubscribersCache method...");
 }
 
 function getPersistedSubscribers() returns websubhub:VerifiedSubscription[]|error? {
@@ -169,6 +174,7 @@ function getPersistedSubscribers() returns websubhub:VerifiedSubscription[]|erro
             return lastPersistedData;
         }
     }
+    log:printInfo("Exiting getPersistedSubscribers method...");
     return;
 }
 
@@ -180,6 +186,7 @@ function deSerializeSubscribersMessage(string lastPersistedData) returns websubh
         websubhub:VerifiedSubscription subscription = check data.cloneWithType(websubhub:VerifiedSubscription);
         currentSubscriptions.push(subscription);
     }
+    log:printInfo("Exiting deSerializeSubscribersMessage method...");
     return currentSubscriptions;
 }
 
@@ -192,6 +199,7 @@ function refreshSubscribersCache(websubhub:VerifiedSubscription[] persistedSubsc
             _ = subscribersCache.removeIfHasKey(sub);
         }
     }
+    log:printInfo("Exiting refreshSubscribersCache method...");
 }
 
 function startMissingSubscribers(websubhub:VerifiedSubscription[] persistedSubscribers) returns error? {
@@ -217,7 +225,7 @@ function startMissingSubscribers(websubhub:VerifiedSubscription[] persistedSubsc
                 byte[] cipher = ivAppendedCipherText.slice(0, cipherLength-16);
                 byte[] iv = ivAppendedCipherText.slice(cipherLength-16, cipherLength);
                 string encryptionKey = config:HUB_SECRET_ENCRYPTION_KEY;
-                byte[] plainText = check crypto:decryptAesGcm(cipher, encryptionKey.toBytes(), iv);
+                byte[] plainText = check crypto:decryptAesGcm(cipher, encryptionKey.toBytes(), iv, crypto:NONE);
                 subscriber.hubSecret = check string:fromBytes(plainText);
                 log:printInfo("Decrypted the hubSecret", topic = subscriber.hubTopic);
             }
@@ -230,6 +238,7 @@ function startMissingSubscribers(websubhub:VerifiedSubscription[] persistedSubsc
                 },
                 timeout: config:MESSAGE_DELIVERY_TIMEOUT
             });
+            log:printInfo("Calling pollForNewUpdates method...");
             _ = @strand { thread: "any" } start pollForNewUpdates(hubClientEp, consumerEp, topicName, subscriberId, subscriber.hubCallback);
         }
     }
@@ -277,6 +286,7 @@ isolated function isValidConsumer(string topicName, string subscriberId, string 
 }
 
 isolated function notifySubscribers(kafka:BytesConsumerRecord[] records, websubhub:HubClient clientEp, kafka:Consumer consumerEp, string topic, string callback) returns error? {
+    log:printInfo("Entered NotifySubscribers method...");
     foreach kafka:BytesConsumerRecord kafkaRecord in records {
         websubhub:ContentDistributionMessage|error message = deSerializeKafkaRecord(kafkaRecord);
 
