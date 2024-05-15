@@ -98,9 +98,9 @@ function syncRegsisteredTopicsCache() {
 
 function getPersistedTopics() returns websubhub:TopicRegistration[]|error? {
     log:printInfo("Entered getPersistedTopics method...");
-    kafka:ConsumerRecord[] records = check conn:registeredTopicsConsumer->poll(config:POLLING_INTERVAL);
+    kafka:BytesConsumerRecord[] records = check conn:registeredTopicsConsumer->poll(config:POLLING_INTERVAL);
     if records.length() > 0 {
-        kafka:ConsumerRecord lastRecord = records.pop();
+        kafka:BytesConsumerRecord lastRecord = records.pop();
         string|error lastPersistedData = string:fromBytes(lastRecord.value);
         if lastPersistedData is string {
             return deSerializeTopicsMessage(lastPersistedData);
@@ -158,9 +158,9 @@ function syncSubscribersCache() {
 
 function getPersistedSubscribers() returns websubhub:VerifiedSubscription[]|error? {
     log:printInfo("Entered getPersistedSubscribers method...");
-    kafka:ConsumerRecord[] records = check conn:subscribersConsumer->poll(config:POLLING_INTERVAL);
+    kafka:BytesConsumerRecord[] records = check conn:subscribersConsumer->poll(config:POLLING_INTERVAL);
     if records.length() > 0 {
-        kafka:ConsumerRecord lastRecord = records.pop();
+        kafka:BytesConsumerRecord lastRecord = records.pop();
         string|error lastPersistedData = string:fromBytes(lastRecord.value);
         if lastPersistedData is string {
             return deSerializeSubscribersMessage(lastPersistedData);
@@ -239,7 +239,7 @@ isolated function pollForNewUpdates(websubhub:HubClient clientEp, kafka:Consumer
     do {
         log:printInfo("pollForNewUpdates operation - Thread started ", topic = topicName, callback = callback);
         while true {
-            kafka:ConsumerRecord[] records = check consumerEp->poll(config:POLLING_INTERVAL);
+            kafka:BytesConsumerRecord[] records = check consumerEp->poll(config:POLLING_INTERVAL);
             log:printDebug("pollForNewUpdates operation - records pull ", length = records.length(), subscriberId = subscriberId);
              if !isValidConsumer(topicName, subscriberId, callback) {
                 fail error(string `Subscriber with Id ${subscriberId} or topic ${topicName} and ${callback} is invalid`);
@@ -276,8 +276,8 @@ isolated function isValidConsumer(string topicName, string subscriberId, string 
     return topicAvailable && subscriberAvailable;
 }
 
-isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:HubClient clientEp, kafka:Consumer consumerEp, string topic, string callback) returns error? {
-    foreach kafka:ConsumerRecord kafkaRecord in records {
+isolated function notifySubscribers(kafka:BytesConsumerRecord[] records, websubhub:HubClient clientEp, kafka:Consumer consumerEp, string topic, string callback) returns error? {
+    foreach kafka:BytesConsumerRecord kafkaRecord in records {
         websubhub:ContentDistributionMessage|error message = deSerializeKafkaRecord(kafkaRecord);
 
         if (message is websubhub:ContentDistributionMessage) {
@@ -308,7 +308,7 @@ isolated function notifySubscribers(kafka:ConsumerRecord[] records, websubhub:Hu
     }
 }
 
-isolated function deSerializeKafkaRecord(kafka:ConsumerRecord kafkaRecord) returns websubhub:ContentDistributionMessage|error {
+isolated function deSerializeKafkaRecord(kafka:BytesConsumerRecord kafkaRecord) returns websubhub:ContentDistributionMessage|error {
     byte[] content = kafkaRecord.value;
     string|error message = check string:fromBytes(content);
     if (message is string) {

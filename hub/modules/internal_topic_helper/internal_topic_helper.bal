@@ -7,7 +7,6 @@ public function isTopicsPresentKafka() returns boolean|error? {
     handle newMosipKafkaAdminClientResult = newMosipKafkaAdminClient(bootStrapServer);
     log:printInfo("Checking if metadata Topics are present");
     boolean|error? result = trap isTopicsPresent(newMosipKafkaAdminClientResult, java:fromString(config:META_TOPICS));
-    log:printInfo("Metadata Topics are present", present = result);
     return result;
 }
 
