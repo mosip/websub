@@ -226,7 +226,7 @@ service object {
             foreach int i in 0...15 {
                 initialVector[i] = <byte>(check random:createIntInRange(0, 255));
             }
-            byte[] cipherText = check crypto:encryptAesGcm(hubSecret.toBytes(), encryptionKeyInBytes, initialVector);
+            byte[] cipherText = check crypto:encryptAesGcm(hubSecret.toBytes(), encryptionKeyInBytes, initialVector, crypto:NONE);
             cipherText.push(...initialVector);
             message.hubSecret = config:ENCRYPTED_SECRET_PREFIX + cipherText.toBase64() + config:ENCRYPTED_SECRET_SUFFIX;
         }

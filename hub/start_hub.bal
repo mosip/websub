@@ -217,7 +217,7 @@ function startMissingSubscribers(websubhub:VerifiedSubscription[] persistedSubsc
                 byte[] cipher = ivAppendedCipherText.slice(0, cipherLength-16);
                 byte[] iv = ivAppendedCipherText.slice(cipherLength-16, cipherLength);
                 string encryptionKey = config:HUB_SECRET_ENCRYPTION_KEY;
-                byte[] plainText = check crypto:decryptAesGcm(cipher, encryptionKey.toBytes(), iv);
+                byte[] plainText = check crypto:decryptAesGcm(cipher, encryptionKey.toBytes(), iv, crypto:NONE);
                 subscriber.hubSecret = check string:fromBytes(plainText);
                 log:printInfo("Decrypted the hubSecret", topic = subscriber.hubTopic);
             }
