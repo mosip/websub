@@ -61,7 +61,12 @@ public function main() returns error? {
     websubhub:Listener hubListener = check new (httpListener);
     check hubListener.attach(hubService, "hub");
     log:printInfo("Starting the hub...");
-    check hubListener.'start();
+    websubhub:Error? websubError = check hubListener.'start();
+    if websubError is websubhub:Error {
+        log:printInfo("Hub started with error: ", hubStatus = websubError.toString());
+    } else {
+        log:printInfo("Hub started : ", hubStatus = "No error");
+    }    
 }
 
 
