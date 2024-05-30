@@ -27,7 +27,6 @@ import kafkaHub.internal_topic_helper as internalTopicHelper;
 import ballerina/lang.array;
 import ballerina/crypto;
 import ballerina/lang.runtime;
-import ballerina/lang.runtime;
 
 isolated map<websubhub:TopicRegistration> registeredTopicsCache = {};
 isolated map<websubhub:VerifiedSubscription> subscribersCache = {};
@@ -229,6 +228,7 @@ function startMissingSubscribers(websubhub:VerifiedSubscription[] persistedSubsc
 
 isolated function pollForNewUpdates(websubhub:HubClient clientEp, kafka:Consumer consumerEp, string topicName, string subscriberId, string callback) {
     do {
+        log:printInfo("pollForNewUpdates operation - Thread started ", topic = topicName, callback = callback);
         while true {
             kafka:BytesConsumerRecord[] records = check consumerEp->poll(config:POLLING_INTERVAL);
             log:printDebug("pollForNewUpdates operation - records pull ", length = records.length(), subscriberId = subscriberId);
