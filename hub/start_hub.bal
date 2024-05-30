@@ -26,6 +26,7 @@ import kafkaHub.config;
 import kafkaHub.internal_topic_helper as internalTopicHelper;
 import ballerina/lang.array;
 import ballerina/crypto;
+import ballerina/lang.runtime;
 
 isolated map<websubhub:TopicRegistration> registeredTopicsCache = {};
 isolated map<websubhub:VerifiedSubscription> subscribersCache = {};
@@ -62,6 +63,7 @@ public function main() returns error? {
     check hubListener.attach(hubService, "hub");
     log:printInfo("Starting the hub...");
     websubhub:Error? websubError = check hubListener.'start();
+    runtime:registerListener(hubListener);
     if websubError is websubhub:Error {
         log:printInfo("Hub started with error: ", hubStatus = websubError.toString());
     } else {
