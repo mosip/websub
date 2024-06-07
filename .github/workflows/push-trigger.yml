@@ -71,6 +71,7 @@ jobs:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
   build-consolidator:
+    needs: build-kafka-admin-client
     env:
       SERVICE_LOCATION: 'consolidator'
       BUILD_ARTIFACT: 'consolidator'
