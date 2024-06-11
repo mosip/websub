@@ -33,15 +33,14 @@ public class MosipKafkaAdminClient {
 			// get the async result for the new topic creation
 			KafkaFuture<Void> future = result.values().get(topicName);
 			// call get() to block until topic creation has completed or failed
-				future.get();
+			future.get();
 		}
 	}
 
-
 	public boolean isTopicsPresent(String topics) throws Exception {
-	List<String> topicsList = Arrays.asList(topics.split(","));	
-	Set<String> kafkaTopics = getAllTopics();
-	return topicsList.stream().allMatch(kafkaTopics::contains);	
+		List<String> topicsList = Arrays.asList(topics.split(","));
+		Set<String> kafkaTopics = getAllTopics();
+		return topicsList.stream().allMatch(kafkaTopics::contains);
 	}
 
 	public Set<String> getAllTopics() throws Exception {
@@ -51,7 +50,6 @@ public class MosipKafkaAdminClient {
 			return admin.listTopics(listTopicsOptions).names().get();
 		}
 	}
-
 
 	public Map<String, TopicDescription> describeTopic(String topic) throws Exception {
 		try (Admin admin = Admin.create(properties)) {
