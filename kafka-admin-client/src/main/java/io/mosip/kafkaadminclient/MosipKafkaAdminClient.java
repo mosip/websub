@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
@@ -17,8 +15,6 @@ import org.apache.kafka.clients.admin.ListTopicsOptions;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.admin.TopicDescription;
 import org.apache.kafka.common.KafkaFuture;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MosipKafkaAdminClient {
 
@@ -37,15 +33,14 @@ public class MosipKafkaAdminClient {
 			// get the async result for the new topic creation
 			KafkaFuture<Void> future = result.values().get(topicName);
 			// call get() to block until topic creation has completed or failed
-				future.get();
+			future.get();
 		}
 	}
 
-
 	public boolean isTopicsPresent(String topics) throws Exception {
-	List<String> topicsList = Arrays.asList(topics.split(","));	
-	Set<String> kafkaTopics = getAllTopics();
-	return topicsList.stream().allMatch(kafkaTopics::contains);	
+		List<String> topicsList = Arrays.asList(topics.split(","));
+		Set<String> kafkaTopics = getAllTopics();
+		return topicsList.stream().allMatch(kafkaTopics::contains);
 	}
 
 	public Set<String> getAllTopics() throws Exception {
@@ -55,7 +50,6 @@ public class MosipKafkaAdminClient {
 			return admin.listTopics(listTopicsOptions).names().get();
 		}
 	}
-
 
 	public Map<String, TopicDescription> describeTopic(String topic) throws Exception {
 		try (Admin admin = Admin.create(properties)) {
