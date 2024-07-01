@@ -5,7 +5,7 @@
 
 	<groupId>io.mosip</groupId>
 	<artifactId>kafka-admin-client</artifactId>
-	<version>1.2.1-java17-SNAPSHOT</version>
+	<version>1.2.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>kafka-admin-client</name>
