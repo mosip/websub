@@ -136,6 +136,12 @@
 						<goals>
 							<goal>report-aggregate</goal>
 						</goals>
+						<configuration>
+						    <outputDirectory>${project.build.directory}/site/jacoco-aggregate</outputDirectory>
+                                                    <reportFormats>
+                                                        <reportFormat>XML</reportFormat>
+                                                    </reportFormats>
+					        </configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -248,7 +254,7 @@
 			<properties>
 				<sonar.sources>.</sonar.sources>
 				<sonar.inclusions>src/main/java/**,src/main/resources/**</sonar.inclusions>
-				<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco-aggregate/</sonar.coverage.jacoco.xmlReportPaths>
+				<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 				<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 			</properties>
 			<activation>
