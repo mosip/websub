@@ -64,9 +64,9 @@ isolated function syncRegsisteredTopicsCache() returns error? {
 }
 
 isolated function getPersistedTopics() returns websubhub:TopicRegistration[]|error? {
-    kafka:ConsumerRecord[] records = check conn:consolidatedTopicsConsumer->poll(config:POLLING_INTERVAL);
+    kafka:BytesConsumerRecord[] records = check conn:consolidatedTopicsConsumer->poll(config:POLLING_INTERVAL);
     if records.length() > 0 {
-        kafka:ConsumerRecord lastRecord = records.pop();
+        kafka:BytesConsumerRecord lastRecord = records.pop();
         string|error lastPersistedData = string:fromBytes(lastRecord.value);
         if lastPersistedData is string {
             return deSerializeTopicsMessage(lastPersistedData);
@@ -110,9 +110,9 @@ isolated function syncSubscribersCache() returns error? {
 }
 
 isolated function getPersistedSubscribers() returns websubhub:VerifiedSubscription[]|error? {
-    kafka:ConsumerRecord[] records = check conn:consolidatedSubscriberConsumer->poll(config:POLLING_INTERVAL);
+    kafka:BytesConsumerRecord[] records = check conn:consolidatedSubscriberConsumer->poll(config:POLLING_INTERVAL);
     if records.length() > 0 {
-        kafka:ConsumerRecord lastRecord = records.pop();
+        kafka:BytesConsumerRecord lastRecord = records.pop();
         string|error lastPersistedData = string:fromBytes(lastRecord.value);
         if lastPersistedData is string {
             return deSerializeSubscribersMessage(lastPersistedData);
