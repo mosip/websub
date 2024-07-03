@@ -167,7 +167,7 @@ kafka-topics.sh --list --bootstrap-server localhost:9092 | grep {topic}
    ```
    ![kafka_ui_consumers](design/_images/kafka_ui_consumers.png)
 
-   Check lag column. If lag exist subscriber might return Http Status except 200 while delivering message which hub considers as non delivery and it retries for a configurable amount of time after that it removes subscriber from hub cache making it as inactive subscriber and closing the consumer. Hub will not deliver next message as it follows at least once delivery mechanism. 
+   Check lag column. If lag exists, subscriber might return Http Status except 200 while delivering message which hub considers as non delivery and it retries for a configurable amount of time after that it removes subscriber from hub cache making it as inactive subscriber and closing the consumer. Hub will not deliver next message as it follows at least once delivery mechanism. 
    
    Solution
 
