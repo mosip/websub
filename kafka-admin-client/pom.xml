@@ -110,13 +110,10 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>${maven.surefire.plugin.version}</version>
 				<configuration>
-					<skipTests>false</skipTests>
+					<skipTests>${skipTests}</skipTests>
 					<skip>false</skip>
 					<argLine>
-						--add-opens java.base/java.lang=ALL-UNNAMED
-						--add-opens java.base/java.util=ALL-UNNAMED
-						--illegal-access=debug
-						--enable-preview
+						${argLine} --add-opens java.xml/jdk.xml.internal=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --illegal-access=permit
 					</argLine>
 				</configuration>
 			</plugin>
@@ -134,14 +131,8 @@
 						<id>report</id>
 						<phase>prepare-package</phase>
 						<goals>
-							<goal>report-aggregate</goal>
+							<goal>report</goal>
 						</goals>
-						<configuration>
-						    <outputDirectory>${project.build.directory}/site/jacoco-aggregate</outputDirectory>
-                                                    <reportFormats>
-                                                        <reportFormat>XML</reportFormat>
-                                                    </reportFormats>
-					        </configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -254,7 +245,7 @@
 			<properties>
 				<sonar.sources>.</sonar.sources>
 				<sonar.inclusions>src/main/java/**,src/main/resources/**</sonar.inclusions>
-				<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+				<sonar.exclusions>${sonar.coverage.exclusions}</sonar.exclusions>
 				<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 			</properties>
 			<activation>

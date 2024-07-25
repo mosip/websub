@@ -37,7 +37,7 @@ To integrate any kafka(either local or remote) with hub following properties nee
  - KAFKA_BOOTSTRAP_NODE
 
 ### Starting the IDP
-After starting IDP and Auth service following properties need to updated in both websub service.
+After starting IDP and Auth service following properties need to be updated in both websub service.
 
  - MOSIP_AUTH_BASE_URL
  - MOSIP_AUTH_VALIDATE_TOKEN_URL
