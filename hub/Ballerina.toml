@@ -1,12 +1,12 @@
 [package]
 org = "mosip"
 name = "kafkaHub"
-version = "1.2.0-beta.2-SNAPSHOT"
+version = "1.2.1-SNAPSHOT"
 
 [build-options]
 observabilityIncluded = true
 
-[[platform.java11.dependency]]
+[[platform.java17.dependency]]
 modules = ["inittopic"]
 groupId = "io.mosip"
 artifactId = "kafka-admin-client"

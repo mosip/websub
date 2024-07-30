@@ -92,8 +92,8 @@ isolated function getTotalSpace(handle fileObj) returns int = @java:Method {
 isolated function startConsolidator() returns error? {
     do {
         while true {
-            kafka:ConsumerRecord[] records = check conn:websubEventConsumer->poll(config:POLLING_INTERVAL);
-            foreach kafka:ConsumerRecord currentRecord in records {
+            kafka:BytesConsumerRecord[] records = check conn:websubEventConsumer->poll(config:POLLING_INTERVAL);
+            foreach kafka:BytesConsumerRecord currentRecord in records {
                 string lastPersistedData = check string:fromBytes(currentRecord.value);
                 log:printInfo("websub event received in consolidator",payload=lastPersistedData);
                 error? result = processPersistedData(lastPersistedData);
