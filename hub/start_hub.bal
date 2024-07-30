@@ -65,18 +65,6 @@ public function main() returns error? {
     runtime:registerListener(hubListener);
 }
 
-
-function validateConfigs() returns boolean|error {
-    if (config:HUB_SECRET_ENCRYPTION_KEY_FORMAT.equalsIgnoreCaseAscii("base64-encoded-bytes")){
-       byte[]|error decodedEncryptionKey = array:fromBase64(config:HUB_SECRET_ENCRYPTION_KEY);
-       if (decodedEncryptionKey is byte[] && decodedEncryptionKey.length() == 32) {
-            return true;
-       } 
-       return error("Found error in decoding the encryption key. Please set valid base64 encoded bytes as encryption key to proceed.");
-    }
-    return true;
-}
-
 function validateConfigs() returns boolean|error {
     if (config:HUB_SECRET_ENCRYPTION_KEY_FORMAT.equalsIgnoreCaseAscii("base64-encoded-bytes")){
        byte[]|error decodedEncryptionKey = array:fromBase64(config:HUB_SECRET_ENCRYPTION_KEY);
