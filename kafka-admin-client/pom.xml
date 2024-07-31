@@ -38,7 +38,7 @@
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 		<maven.compiler.version>3.8.0</maven.compiler.version>
-		<apache.kafka.version>2.8.0</apache.kafka.version>
+		<apache.kafka.version>3.5.2</apache.kafka.version>
 		<junit.version>4.13.2</junit.version>
 		<mockito.version>3.11.2</mockito.version>
 		<powermock.version>2.0.9</powermock.version>
@@ -230,8 +230,7 @@
 							<target>
 								<!-- Create a shell script to run the JAR file
 								with executable permission -->
-								<chmod file="${project.build.directory}/*.jar"
-									perm="ugo+rx" />
+								<chmod file="${project.build.directory}/*.jar" perm="ugo+rx"/>
 							</target>
 						</configuration>
 					</execution>
