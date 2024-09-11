@@ -51,7 +51,7 @@ public function main() returns error? {
     }
 
     // Initialize the Hub
-    _ = @strand {thread: "any"} start syncRegsisteredTopicsCache();
+    syncRegsisteredTopicsCache();
     _ = @strand {thread: "any"} start syncSubscribersCache();
 
     // Start the Hub
@@ -64,7 +64,6 @@ public function main() returns error? {
     websubhub:Error? websubError = check hubListener.'start();
     runtime:registerListener(hubListener);
 }
-
 
 function validateConfigs() returns boolean|error {
     if (config:HUB_SECRET_ENCRYPTION_KEY_FORMAT.equalsIgnoreCaseAscii("base64-encoded-bytes")){
