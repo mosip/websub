@@ -1,4 +1,4 @@
-FROM mosipdev/openjdk-17-jre:latest
+FROM mosipid/openjdk-17-jre:17.0.11
 
 ARG SOURCE
 ARG COMMIT_HASH
