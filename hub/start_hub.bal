@@ -96,12 +96,15 @@ function syncRegsisteredTopicsCache() {
 }
 
 function initSyncRegisteredTopicsCache()  {
-    websubhub:TopicRegistration[]? persistedTopics = check getPersistedTopics();
-    if persistedTopics is websubhub:TopicRegistration[] {
-        refreshTopicCache(persistedTopics);
-        return; // Cache sync is complete
-    } else {
-        log:printError("Failed to load persisted topics");
+    do{
+        websubhub:TopicRegistration[]? persistedTopics = check getPersistedTopics();
+        if persistedTopics is websubhub:TopicRegistration[] {
+            refreshTopicCache(persistedTopics);
+        } else {
+            log:printError("Failed to load persisted topics");
+        }
+    }on fail var e {
+         log:printError("Error occurred while syncing registered-topics-cache ", err = e.message());
     }
 }
 
