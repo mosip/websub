@@ -88,7 +88,7 @@ jobs:
           settings-path: ${{ github.workspace }} # location for the settings.xml file
 
       - name: Download kafka-admin-client artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.KAFKA_ADMIN_BUILD_ARTIFACT }}
           path: ./
@@ -115,7 +115,7 @@ jobs:
           find . -path '*/target/bin/*' -name '*.jar'  -type f  -exec zip ${{ env.BUILD_ARTIFACT }}.zip {} +
       - name: Upload the springboot jars
         if: ${{ !contains(github.ref, 'master') || !contains(github.ref, 'main') }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.BUILD_ARTIFACT }}
           path: ./${{ env.SERVICE_LOCATION }}/${{ env.BUILD_ARTIFACT }}.zip
@@ -160,7 +160,7 @@ jobs:
           server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
           settings-path: ${{ github.workspace }} # location for the settings.xml file
       - name: Download kafka-admin-client artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.KAFKA_ADMIN_BUILD_ARTIFACT }}
           path: ./
@@ -187,7 +187,7 @@ jobs:
           find . -path '*/target/bin/*' -name '*.jar'  -type f  -exec zip ${{ env.BUILD_ARTIFACT }}.zip {} +
       - name: Upload the springboot jars
         if: ${{ !contains(github.ref, 'master') || !contains(github.ref, 'main') }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.BUILD_ARTIFACT }}
           path: ./${{ env.SERVICE_LOCATION }}/${{ env.BUILD_ARTIFACT }}.zip
