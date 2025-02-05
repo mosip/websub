@@ -51,8 +51,9 @@ public function main() returns error? {
     }
 
     // Initialize the Hub
-    _ = @strand {thread: "any"} start syncRegsisteredTopicsCache();
-    _ = @strand {thread: "any"} start syncSubscribersCache();
+    initSyncRegisteredTopicsCache();
+      _ = @strand {thread: "any"} start syncRegsisteredTopicsCache();
+      _ = @strand {thread: "any"} start syncSubscribersCache();
 
     // Start the Hub
     log:printInfo("Hub initialization done and starting the hub...");
@@ -92,6 +93,19 @@ function syncRegsisteredTopicsCache() {
         if result is kafka:Error {
             log:printError("Error occurred while gracefully closing kafka-consumer", err = result.message());
         }
+    }
+}
+
+function initSyncRegisteredTopicsCache()  {
+    do{
+        websubhub:TopicRegistration[]? persistedTopics = check getPersistedTopics();
+        if persistedTopics is websubhub:TopicRegistration[] {
+            refreshTopicCache(persistedTopics);
+        } else {
+            log:printError("Failed to load persisted topics");
+        }
+    }on fail var e {
+         log:printError("Error occurred while syncing registered-topics-cache ", err = e.message());
     }
 }
 
