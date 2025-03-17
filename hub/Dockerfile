@@ -19,4 +19,4 @@ RUN wget -q --show-progress ${ballerina_download_url} -O ballerina-linux-install
 RUN dpkg -i ballerina-linux-installer-x64.deb
 #TODO Link to be parameterized instead of hardcoding
 CMD wget -q --show-progress "${hub_config_file_url_env}" -O Config.toml;\
-    java -XX:-UseG1GC -XX:-UseParallelGC -XX:-UseShenandoahGC -XX:+ExplicitGCInvokesConcurrent -XX:+UseZGC -XX:+UnlockExperimentalVMOptions -XX:+UseStringDeduplication -XX:+HeapDumpOnOutOfMemoryError -XX:+UseCompressedOops -XX:MaxGCPauseMillis=200 -Dfile.encoding=UTF-8 -jar -Xms256m -Xmx2048m ./hub.jar ;\
+    java -XX:+UseZGC -XX:+ExplicitGCInvokesConcurrent -XX:+HeapDumpOnOutOfMemoryError -XX:MaxGCPauseMillis=200 -Dfile.encoding=UTF-8 -Xms256m -Xmx2048m -jar ./hub.jar
