@@ -1,0 +1,96 @@
+THIRD-PARTY-NOTICES
+
+This project includes third-party packages that are distributed under various open-source licenses. Below is a list of packages and their associated licenses.
+
+================================================================================
+Package: JUnit
+Version: 4.13.2
+License: Eclipse Public License 1.0
+Homepage: https://junit.org
+================================================================================
+
+================================================================================
+Package: Apache Maven Javadoc Plugin
+Version: 3.2.0
+License: Apache License 2.0
+Homepage: https://maven.apache.org/plugins/maven-javadoc-plugin
+================================================================================
+
+================================================================================
+Package: PowerMock API Mockito2
+Version: 2.0.9
+License: Apache License 2.0
+Homepage: https://github.com/powermock/powermock
+================================================================================
+
+================================================================================
+Package: PowerMock JUnit4 Module
+Version: 2.0.9
+License: Apache License 2.0
+Homepage: https://github.com/powermock/powermock
+================================================================================
+
+================================================================================
+Package: Apache Maven Source Plugin
+Version: 2.2.1
+License: Apache License 2.0
+Homepage: https://maven.apache.org/plugins/maven-source-plugin
+================================================================================
+
+================================================================================
+Package: Apache Maven Assembly Plugin
+Version: 3.3.0
+License: Apache License 2.0
+Homepage: https://maven.apache.org/plugins/maven-assembly-plugin
+================================================================================
+
+================================================================================
+Package: Git Commit ID Maven Plugin
+Version: 3.0.1
+License: Apache License 2.0
+Homepage: https://github.com/git-commit-id/git-commit-id-maven-plugin
+================================================================================
+
+================================================================================
+Package: Apache Maven GPG Plugin
+Version: 1.5
+License: Apache License 2.0
+Homepage: https://maven.apache.org/plugins/maven-gpg-plugin
+================================================================================
+
+================================================================================
+Package: Apache Maven Surefire Plugin
+Version: 2.22.0
+License: Apache License 2.0
+Homepage: https://maven.apache.org/plugins/maven-surefire-plugin
+================================================================================
+
+================================================================================
+Package: Apache Maven Compiler Plugin
+Version: 3.8.0
+License: Apache License 2.0
+Homepage: https://maven.apache.org/plugins/maven-compiler-plugin
+================================================================================
+
+================================================================================
+Package: Apache Maven Antrun Plugin
+Version: 3.0.0
+License: Apache License 2.0
+Homepage: https://maven.apache.org/plugins/maven-antrun-plugin
+================================================================================
+
+================================================================================
+Package: Mockito Core
+Version: 3.11.2
+License: MIT License
+Homepage: https://github.com/mockito/mockito
+================================================================================
+
+================================================================================
+Package: Apache Kafka Clients
+Version: 3.5.2
+License: Multi-license (Apache-2.0, BSD-3-Clause, CDDL-1.0, EPL-2.0)
+Homepage: https://kafka.apache.org
+================================================================================
+
+Full license texts and additional details for each of the above packages are available in the license/ directory of this repository. Please refer to those files or the original source of each package for complete legal terms and conditions.
