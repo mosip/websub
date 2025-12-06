@@ -1,0 +1,179 @@
+================================================================================
+COPYRIGHT NOTICES
+================================================================================
+
+This section contains the required copyright notices for all third-party 
+packages used in this project.
+
+--------------------------------------------------------------------------------
+1. JUnit (version 4.13.2)
+--------------------------------------------------------------------------------
+Copyright (c) 2002-2021 JUnit
+All rights reserved.
+
+This program and the accompanying materials are made available under the terms 
+of the Eclipse Public License v1.0 which accompanies this distribution, and is 
+available at http://www.eclipse.org/legal/epl-v10.html
+
+--------------------------------------------------------------------------------
+2. Apache Maven Javadoc Plugin (version 3.2.0)
+--------------------------------------------------------------------------------
+Copyright 2005-2020 The Apache Software Foundation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+--------------------------------------------------------------------------------
+3. PowerMock API Mockito2 (version 2.0.9)
+--------------------------------------------------------------------------------
+Copyright 2007-2017 PowerMock
+
+Licensed under the Apache License, Version 2.0.
+
+--------------------------------------------------------------------------------
+4. PowerMock JUnit4 Module (version 2.0.9)
+--------------------------------------------------------------------------------
+Copyright 2007-2017 PowerMock
+
+Licensed under the Apache License, Version 2.0.
+
+--------------------------------------------------------------------------------
+5. Apache Maven Source Plugin (version 2.2.1)
+--------------------------------------------------------------------------------
+Copyright 2002-2012 The Apache Software Foundation
+
+Licensed under the Apache License, Version 2.0.
+
+--------------------------------------------------------------------------------
+6. Apache Maven Assembly Plugin (version 3.3.0)
+--------------------------------------------------------------------------------
+Copyright 2001-2020 The Apache Software Foundation
+
+Licensed under the Apache License, Version 2.0.
+
+--------------------------------------------------------------------------------
+7. Git Commit ID Maven Plugin (version 3.0.1)
+--------------------------------------------------------------------------------
+Copyright 2012-2020 Konrad Malawski and contributors
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+--------------------------------------------------------------------------------
+8. Apache Maven GPG Plugin (version 1.5)
+--------------------------------------------------------------------------------
+Copyright 2002-2013 The Apache Software Foundation
+
+Licensed under the Apache License, Version 2.0.
+
+--------------------------------------------------------------------------------
+9. Apache Maven Surefire Plugin (version 2.22.0)
+--------------------------------------------------------------------------------
+Copyright 2004-2018 The Apache Software Foundation
+
+Licensed under the Apache License, Version 2.0.
+
+--------------------------------------------------------------------------------
+10. Apache Maven Compiler Plugin (version 3.8.0)
+--------------------------------------------------------------------------------
+Copyright 2001-2018 The Apache Software Foundation
+
+Licensed under the Apache License, Version 2.0.
+
+--------------------------------------------------------------------------------
+11. Apache Maven Antrun Plugin (version 3.0.0)
+--------------------------------------------------------------------------------
+Copyright 2003-2020 The Apache Software Foundation
+
+Licensed under the Apache License, Version 2.0.
+
+--------------------------------------------------------------------------------
+12. Mockito Core (version 3.11.2)
+--------------------------------------------------------------------------------
+Copyright (c) 2007-present Mockito contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+--------------------------------------------------------------------------------
+13. Apache Kafka Clients (version 3.5.2)
+--------------------------------------------------------------------------------
+Copyright 2023 The Apache Software Foundation
+
+Licensed under the Apache License, Version 2.0.
+
+This product includes software developed by third parties and licensed under 
+the following licenses:
+- BSD-3-Clause (zstd-jni)
+- CDDL-1.0 (javax.annotation-api)
+- EPL-2.0 (jakarta.ws.rs-api)
+
+See the Kafka NOTICE file for complete attribution.
+
+--------------------------------------------------------------------------------
+14. Maven Deploy Plugin (version 3.1.1)
+--------------------------------------------------------------------------------
+Copyright 2004-2022 The Apache Software Foundation
+
+Licensed under the Apache License, Version 2.0.
+
+--------------------------------------------------------------------------------
+15. Central Publishing Maven Plugin (version 0.7.0)
+--------------------------------------------------------------------------------
+Copyright (c) 2022-present Sonatype, Inc.
+
+Licensed under the Apache License, Version 2.0.
+
+--------------------------------------------------------------------------------
+16. JaCoCo Maven Plugin (version 0.8.11)
+--------------------------------------------------------------------------------
+Copyright (c) 2009, 2023 Mountainminds GmbH & Co. KG and Contributors
+
+All rights reserved. This program and the accompanying materials are made 
+available under the terms of the Eclipse Public License 2.0 which accompanies 
+this distribution, and is available at
+https://www.eclipse.org/legal/epl-2.0/
+
+SPDX-License-Identifier: EPL-2.0
+
+--------------------------------------------------------------------------------
+17. Sonar Maven Plugin (version 3.7.0.1746)
+--------------------------------------------------------------------------------
+Copyright 2009-2023 SonarSource SA
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+================================================================================
+END OF COPYRIGHT NOTICES
+================================================================================
