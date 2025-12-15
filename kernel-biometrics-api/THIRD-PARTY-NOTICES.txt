@@ -82,7 +82,7 @@ Homepage: https://github.com/mockito/mockito
 ================================================================================
 Package: Apache Kafka Clients
 Version: 3.5.2
-License: Multi-license (Apache-2.0, BSD-3-Clause, CDDL-1.0, EPL-2.0)
+License: Apache License 2.0
 Homepage: https://kafka.apache.org
 ================================================================================
 
