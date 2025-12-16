@@ -46,12 +46,39 @@ Uses:
 - Docker (optional)
 
 ## Required Configuration
-### Kafka
-- `KAFKA_BOOTSTRAP_NODE`
+## 1. Security
+```
+SECURITY_ON = true
+```
 
-### Identity Provider
-- `MOSIP_AUTH_BASE_URL`
-- `MOSIP_AUTH_VALIDATE_TOKEN_URL`
+## 2. Kafka Configuration
+```
+KAFKA_BOOTSTRAP_NODE = "kafka.${kafka.profile}:${kafka.port}"
+REGISTERED_WEBSUB_TOPICS_TOPIC = "registered-websub-topics"
+CONSOLIDATED_WEBSUB_TOPICS_TOPIC = "consolidated-websub-topics"
+WEBSUB_SUBSCRIBERS_TOPIC = "registered-websub-subscribers"
+CONSOLIDATED_WEBSUB_SUBSCRIBERS_TOPIC = "consolidated-websub-subscribers"
+META_TOPICS = "registered-websub-topics,consolidated-websub-topics,registered-websub-subscribers,consolidated-websub-subscribers"
+```
+
+## 3. Hub Runtime
+```
+SERVER_ID = "server-1"
+HUB_PORT = 9191
+```
+
+## 4. Message Delivery & Retry
+```
+MESSAGE_DELIVERY_RETRY_INTERVAL = 3.0
+MESSAGE_DELIVERY_COUNT = 3
+MESSAGE_DELIVERY_TIMEOUT = 60.0
+```
+
+## 5. IDP Authentication
+```
+MOSIP_AUTH_BASE_URL = "${mosip.kernel.authmanager.url}/v1/authmanager"
+MOSIP_AUTH_VALIDATE_TOKEN_URL = "/authorize/admin/validateToken"
+```
 
 ---
 
