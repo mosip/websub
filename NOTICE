@@ -1,0 +1,46 @@
+THIRD-PARTY-NOTICES
+
+Copyright © MOSIP.
+All rights reserved.
+
+This project includes third-party components distributed under licenses
+that require attribution. Only those components with attribution-required
+licenses are listed below.
+
+================================================================================
+License: Eclipse Public License 1.0 (EPL-1.0)
+=============================================
+
+• JUnit
+Version: 4.13.2
+Homepage: [https://junit.org](https://junit.org)
+
+================================================================================
+License: MIT License
+====================
+
+• Mockito Core
+Version: 3.11.2
+Homepage: [https://github.com/mockito/mockito](https://github.com/mockito/mockito)
+
+================================================================================
+License: BSD-3-Clause (Part of multi-license)
+=============================================
+
+• Apache Kafka Clients
+Version: 3.5.2
+Homepage: [https://kafka.apache.org](https://kafka.apache.org)
+
+================================================================================
+License: EPL-2.0 (Part of multi-license)
+========================================
+
+• Apache Kafka Clients
+Version: 3.5.2
+Homepage: [https://kafka.apache.org](https://kafka.apache.org)
+
+---
+
+Full license texts for these components are available in the `license/`
+directory of this repository.
+-----------------------------
